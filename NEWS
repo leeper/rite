@@ -1,0 +1,22 @@
+### CHANGES TO rite 0.2 ###
+
+* rite 0.1 was apparently incompatible, for a number of reasons, with non-Windows operating systems. Thanks to significant feedback from Yihue Xie (Iowa State University), rite 0.2 is now compatible with UNIX-like platforms.
+
+## SIGNIFICANT USER-VISIBLE CHANGES ##
+
+* Report generation tools, previously listed under the Output menu, have been moved to a separate Report Generation menu (only available when `catchOutput=TRUE`). Several additional tools were also added. See documentation.
+* Added greater control over colors of syntax highlighting through a new `color` parameter to `rite`.
+
+## BUG FIXES ##
+
+* Removed references to tkwm.bitmap, which was causing a critical failure on linux. (h/t Yihue Xie)
+* Removed a Windows-specific call to `bringToTop` that was preventing loading on other platforms. (h/t Yihue Xie)
+* Modified syntax highlighting code to prevent errors of the form `Error in structure(.External(.C_dotTcl, ...), class = "tclObj") : [tcl] missing close-bracket.` when rite was initialized. Specifically, modified syntax highlighting procedure to handle function names that include punctuation.(h/t Yihue Xie)
+* Fixed a bug in cut (<Ctrl-x> or from the context menu) that was copying but not deleting selected text.
+* Fixed a typo that prevented the addition of new syntax highlighting when packages were loaded from the script editor.
+* Changed tk2panedwindow (from tcltk2) to ttkpanedwindow (from tcltk).
+
+
+### CHANGES TO rite 0.1 ###
+
+* First version released
