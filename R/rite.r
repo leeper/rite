@@ -424,7 +424,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				invisible(knit_out)
 			}
 		}
-		pdffromfile <- function(filetopdf=NULL, texttopdf=FALSE){
+		pdffromfile <- function(filetopdf=NULL, texttopdf=FALSE, bibtex=TRUE){
 			if(texttopdf){
 				if(!scriptSaved)
 					saveScript()
@@ -450,7 +450,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkselect(nb2, 1)
 				tkfocus(txt_edit)
 				tkinsert(err_out, "insert", paste(latex1,collapse="\n"))
-				if(is.null(attributes(latex1)$status)){
+				if(is.null(attributes(latex1)$status) && bibtex==TRUE){
 					latex2 <- system(paste("bibtex",filetopdf), intern=TRUE)
 					tkinsert(err_out, "insert", paste(latex2,collapse="\n"))
 					if(is.null(attributes(latex2)$status)){
@@ -621,8 +621,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			tkadd(menuReport, "command", label = "knit to pdf", command = function() knitpdf(mode="knit", usefile=TRUE, usetxt=FALSE))
 			tkadd(menuReport, "command", label = "knit to pdf (from Sweave)", command = function() knitpdf(mode="sweave", usefile=TRUE, usetxt=FALSE))
 			tkadd(menuReport, "separator")
-			tkadd(menuReport, "command", label = "pdflatex (from rite script)", command = function() pdffromfile(texttopdf=TRUE))
-			tkadd(menuReport, "command", label = "pdflatex (from .tex file)", command = function() pdffromfile(texttopdf=FALSE))
+			tkadd(menuReport, "command", label = "pdflatex (from rite script)", command = function() pdffromfile(texttopdf=TRUE, bibtex=FALSE))
+			tkadd(menuReport, "command", label = "pdflatex (from file)", command = function() pdffromfile(texttopdf=FALSE, bibtex=FALSE))
+			tkadd(menuReport, "command", label = "pdflatex+bibtex (from rite script)", command = function() pdffromfile(texttopdf=TRUE, bibtex=TRUE))
+			tkadd(menuReport, "command", label = "pdflatex+bibtex (from file)", command = function() pdffromfile(texttopdf=FALSE, bibtex=TRUE))
 			tkadd(menuTop, "cascade", label = "Report Generation", menu = menuReport, underline = 0)
 	}
 	menuHelp <- tkmenu(menuTop, tearoff = FALSE)
