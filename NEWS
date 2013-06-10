@@ -1,3 +1,10 @@
+### CHANGES to rite 0.3 ###
+
+## BUG FIXES ##
+
+* Selecting Quit R from the rite File menu did not prompt to save an unsaved script or output.
+
+
 ### CHANGES TO rite 0.2 ###
 
 * rite 0.1 was apparently incompatible, for a number of reasons, with non-Windows operating systems. Thanks to significant feedback from Yihue Xie (Iowa State University), rite 0.2 is now compatible with UNIX-like platforms.

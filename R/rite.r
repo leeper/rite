@@ -574,7 +574,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		tkadd(menuFile, "separator")
 		tkadd(menuFile, "command", label = "Close rite", command = exitWiz, underline = 0)
 		tkadd(menuFile, "separator")
-		tkadd(menuFile, "command", label = "Quit R", command = function() {exitWiz; quit()}, underline = 0)
+		tkadd(menuFile, "command", label = "Quit R", command = function() {exitWiz(); quit()}, underline = 0)
 		tkadd(menuTop, "cascade", label = "File", menu = menuFile, underline = 0)
 	menuRun <- tkmenu(menuTop, tearoff = FALSE)
 		tkadd(menuRun, "command", label = "Run Line", command = runLine, underline = 4)
