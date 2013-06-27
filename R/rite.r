@@ -1191,3 +1191,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		tcl("wm", "attributes", editor, "fullscreen")
 	}
 }
+
+if(getRversion() >= "2.15.1")
+	utils::globalVariables(c("osink", "riteout"))
