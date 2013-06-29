@@ -1180,10 +1180,15 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	# markdown
 	if("markdown" %in% highlight){
 		message("Highlighting for markdown not yet supported")
+		# something for the various kinds of markdown syntax
+		## headers [both kinds], bold, italics, strikethrough, lists, links, images, latex equations, MathML equations
+		# something for code chunks of the form ```{} ... ```
+		# something for inline code chunks of the form `r ...`
 	}
 	# html
 	if("html" %in% highlight){
 		message("Highlighting for html not yet supported")
+		# something simple just to handle <...>, </...>, and <.../>
 	}
 	# r
 	if("r" %in% highlight){
