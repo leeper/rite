@@ -1098,6 +1098,19 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			cbcontents <- ""
 		tkinsert(txt_edit, "insert", paste(cbcontents,collapse="\n"))
 	}
+	
+	editcase <- function(type){
+		if(!tclvalue(tktag.ranges(txt_edit,"sel"))==""){
+			seltxt <- tclvalue(tkget(txt_edit,"sel.first","sel.last"))
+			if(type=="toupper")
+				seltxt <- toupper(seltxt)
+			else
+				seltxt <- tolower(seltxt)
+			tkdelete(txt_edit, "sel.first", "sel.last")
+			tkinsert(txt_edit, "insert", seltxt)
+		}
+	}
+	
 	contextMenu <- tkmenu(txt_edit, tearoff = FALSE)
 		tkadd(contextMenu, "command", label = "Run line/selection <Ctrl-R>", command = runkey)
 		tkadd(contextMenu, "command", label = "Parse all <F7>", command = tryparse)
@@ -1107,6 +1120,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		tkadd(contextMenu, "command", label = "Copy <Ctrl-C>", command = copyText)
 		tkadd(contextMenu, "command", label = "Cut <Ctrl-X>", command = function() copyText(docut=TRUE))
 		tkadd(contextMenu, "command", label = "Paste <Ctrl-V>", command = pasteText)
+		tkadd(contextMenu, "separator")
+		tkadd(contextMenu, "command", label = "To Upper", command = function() editcase("toupper"))
+		tkadd(contextMenu, "command", label = "To Lower", command = function() editcase("tolower"))
 		tkadd(contextMenu, "separator")
 		tkadd(contextMenu, "command", label = "Find <Ctrl-F>", command = findreplace)
 		tkadd(contextMenu, "command", label = "Go to line <Ctrl-G>", command = gotoline)
@@ -1130,7 +1146,14 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					digits = "orange",
 					characters = "darkgray",
 					latexmacros = "darkred",
-					latexcomments = "red")
+					latexequations = "black",
+					latexcomments = "red",
+					sweavechunks = "black", # not supported yet
+					rmd = "black", # not supported yet
+					rmdlabels = "black", # not supported yet
+					htmltags = "black", # not supported yet
+					htmlcomments = "black", # not supported yet
+					)
 	if(!is.null(color)){
 		for(i in 1:length(color)){
 			if(!is.null(color[[i]]) && !is.na(color[[i]]) && !color[[i]]=="" && is.character(color[[i]]))
@@ -1151,6 +1174,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			' {\\{\\\\[[:alnum:]|[:punct:]]*[[:space:]]*[[:alnum:]|[:punct:]|[:space:]]*\\}}',sep=''))
 		# comments
 		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," latexcomments ",hcolors$latexcomments," {%[^\n\r]*}",sep=""))
+		## AMEND ABOVE TO DEAL WITH %*% %in% type constructions
+		# add something here for code chunks
+	}
+	# markdown
+	if("markdown" %in% highlight){
+		message("Highlighting for markdown not yet supported")
+	}
+	# html
+	if("html" %in% highlight){
+		message("Highlighting for html not yet supported")
 	}
 	# r
 	if("r" %in% highlight){

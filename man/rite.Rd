@@ -14,8 +14,8 @@ rite(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
   \item{fontFamily}{The font family used in rite. Default is \dQuote{\code{Courier}}. Available fonts can be retrieved by \code{.Tcl("font families")}.}
   \item{fontSize}{The font size used in rite. Default is \code{10}.}
   \item{orientation}{If \code{catchOutput=TRUE}, whether the output and error panels should be oriented \dQuote{horizontal} (to the right) or \dQuote{vertical} (below) the script editing panel. Default is \dQuote{horizontal}.}
-  \item{highlight}{A character vector containing one or more of \dQuote{r}, \dQuote{latex}, to indicate what should be higlighted in script.}
-  \item{color}{Either \code{NULL}, or a named list specifying Tcl/Tk colors for highlighting. See details.}
+  \item{highlight}{A character vector containing one or more of \dQuote{r}, \dQuote{latex}, \dQuote{markdown}, \dQuote{html} to indicate what should be higlighted in script.}
+  \item{color}{Either \code{NULL}, or a named list specifying Tcl/Tk colors for highlighting. See details below.}
   \item{...}{Ignored}
 }
 \details{
@@ -35,7 +35,13 @@ By default, the following colors are used for syntax highlighting:
   \code{Digits (digits)}: {\dQuote{orange}}
   \code{Character strings (characters)}: {\dQuote{darkgray}}
   \code{LaTeX macros (latexmacros)}: {\dQuote{darkred}}
-  \code{LaTeX coments (latexcomments)}: {\dQuote{red}}
+  \code{LaTeX equations (latexequations)}: {\dQuote{black}}
+  \code{LaTeX comments (latexcomments)}: {\dQuote{red}}
+  \code{Sweave code chunks (sweavechunks)}: {\dQuote{black}} % not supported yet
+  \code{Markdown (rmd)}: {\dQuote{black}} % not supported yet
+  \code{Markdown code chunk labels (rmdlabels)}: {\dQuote{black}} % not supported yet
+  \code{HTML tags (htmltags)}: {\dQuote{black}} % not supported yet
+  \code{HTML comments (htmlcomments)}: {\dQuote{black}} % not supported yet
 
 The use of highlighting in general can be regulated by the \code{highlight} parameter. To specify alternative specific colors for any of the above highlighting rules, the \code{color} parameter accepts a named list of content types (listed in parentheses above) and their corresponding colors (in quotes). For example, calling \code{rite(color=list(rcomments='pink'))}, would open \code{rite} with R comments highlighted in pink but leave all other highlighting rules at their default settings.
 }
