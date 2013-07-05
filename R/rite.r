@@ -1214,11 +1214,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		# brackets
 		.Tcl(paste("ctext::addHighlightClassForSpecialChars ",.Tk.ID(txt_edit)," brackets ",hcolors$brackets," {[]{}()}",sep=""))
 		# floating point numbers
-		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," digits ",hcolors$digits," {[-+]?[0-9]*\\.?[0-9]+}",sep=""))
-		# numbers before/after letters
-		#.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," digits2 ",hcolors$normal," {[a-zA-Z]+[a-zA-Z0-9]*[:space:]$}",sep=""))
-		# still need to fix digits that are at the end of letters
-		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," digits2 ",hcolors$normal," {\\d+[A-Za-z]+[:space:]?}",sep=""))
+		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," digits ",hcolors$digits," {\\m[-+]?[0-9]*\\.?[0-9]+\\M}",sep=""))
+		# numbers before letters
+		#.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," digits2 ",hcolors$normal," {\\d+[A-Za-z]+[:space:]?}",sep=""))
 		# character
 		.Tcl(paste('ctext::addHighlightClassForRegexp ',.Tk.ID(txt_edit),' character1 ',hcolors$characters,' {"(?:[^\\"]|\\.)*"}',sep=""))
 		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," character2 ",hcolors$characters," {'(?:[^\\']|\\.)*'}",sep=""))
