@@ -724,12 +724,21 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 
 	### KEY BINDINGS ###	
 	f1 <- function(){
-		command <- tclvalue(tkget(txt_edit, "insert wordstart", "insert wordend"))
-		if(command %in% c("","\n","("))
-			command <- tclvalue(tkget(txt_edit, "insert-1char wordstart", "insert-1char wordend"))
-		if(command %in% c("\n","\t"," ","(",")","[","]","{","}","=",",","*","/","+","-","^","%","$"))
+		if(!tclvalue(tktag.ranges(txt_edit,"sel"))==""){
+			useSelect <- TRUE
+			command <- tclvalue(tkget(txt_edit,"sel.first","sel.last"))
+			if(command %in% c("","\n","("))
+				command <- tclvalue(tkget(txt_edit, "sel.first-1char wordstart", "sel.first-1char wordend"))
+		}
+		else {
+			useSelect <- TRUE
+			command <- tclvalue(tkget(txt_edit, "insert wordstart", "insert wordend"))
+			if(command %in% c("","\n","("))
+				command <- tclvalue(tkget(txt_edit, "insert-1char wordstart", "insert-1char wordend"))
+		}
+		if(command %in% c("\n","\t"," ","(",")","[","]","{","}","=",".",",","*","/","+","-","^","%","$"))
 			return()
-		helpresults <- eval(parse(text=paste("help(\"",command,"\")",sep="")))
+		helpresults <- help(command)
 		if(length(helpresults)==1)
 			runCode(paste("help(\"",command,"\")",sep=""))
 		else
