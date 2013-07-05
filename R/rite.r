@@ -13,6 +13,31 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		evalenv <- editenv
 	}
 	
+	# color rules
+	hcolors <- list(normal = "black", # txt_edit normal font color
+					background = "white", # txt_edit background color
+					functions = "purple",
+					rcomments = "darkgreen",
+					operators = "blue",
+					brackets = "darkblue",
+					digits = "orange",
+					characters = "darkgray",
+					latexmacros = "darkred",
+					latexequations = "black",
+					latexcomments = "red",
+					sweavechunks = "black", # not supported yet
+					rmd = "black", # not supported yet
+					rmdlabels = "black", # not supported yet
+					htmltags = "black", # not supported yet
+					htmlcomments = "black" # not supported yet
+					)
+	if(!is.null(color)){
+		for(i in 1:length(color)){
+			if(!is.null(color[[i]]) && !is.na(color[[i]]) && !color[[i]]=="" && is.character(color[[i]]))
+				hcolors[[names(color)[i]]] <- color[[i]]
+		}
+	}
+	
 	# configure catchOutput/catchError
 	if(catchOutput){
 		outputSaved <- TRUE # a logical for whether current output file is saved
@@ -638,7 +663,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		# script editor
 		edit_tab1 <- tk2notetab(nb1, "Script")
 		edit_scr <- tkscrollbar(edit_tab1, repeatinterval=25, command=function(...){ tkyview(txt_edit,...) })
-		txt_edit <- tk2ctext(edit_tab1, bg="white", undo="true",
+		txt_edit <- tk2ctext(edit_tab1, bg=hcolors$background, fg=hcolors$normal, undo="true",
 								yscrollcommand=function(...) tkset(edit_scr,...),
 								font=tkfont.create(family=fontFamily, size=fontSize))
 		editModified <- function(){
@@ -1139,27 +1164,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	tkbind(txt_edit, "<Button-3>", rightClick)
 	
 	## SYNTAX HIGHLIGHTING RULES
-	hcolors <- list(functions = "purple",
-					rcomments = "darkgreen",
-					operators = "blue",
-					brackets = "darkblue",
-					digits = "orange",
-					characters = "darkgray",
-					latexmacros = "darkred",
-					latexequations = "black",
-					latexcomments = "red",
-					sweavechunks = "black", # not supported yet
-					rmd = "black", # not supported yet
-					rmdlabels = "black", # not supported yet
-					htmltags = "black", # not supported yet
-					htmlcomments = "black" # not supported yet
-					)
-	if(!is.null(color)){
-		for(i in 1:length(color)){
-			if(!is.null(color[[i]]) && !is.na(color[[i]]) && !color[[i]]=="" && is.character(color[[i]]))
-				hcolors[[names(color)[i]]] <- color[[i]]
-		}
-	}
 	# latex
 	if("latex" %in% highlight){
 		# a macro without any brackets
@@ -1209,8 +1213,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		.Tcl(paste("ctext::addHighlightClassForSpecialChars ",.Tk.ID(txt_edit)," operators ",hcolors$operators," {@-+!~?:;*/^<>=&|$%,.}",sep=""))
 		# brackets
 		.Tcl(paste("ctext::addHighlightClassForSpecialChars ",.Tk.ID(txt_edit)," brackets ",hcolors$brackets," {[]{}()}",sep=""))
-		# numbers
-		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," digits ",hcolors$digits," {[0-9]}",sep=""))
+		# floating point numbers
+		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," digits ",hcolors$digits," {[-+]?[0-9]*\\.?[0-9]+}",sep=""))
+		# numbers before/after letters
+		#.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," digits2 ",hcolors$normal," {[a-zA-Z]+[a-zA-Z0-9]*[:space:]$}",sep=""))
+		# still need to fix digits that are at the end of letters
+		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," digits2 ",hcolors$normal," {\\d+[A-Za-z]+[:space:]?}",sep=""))
 		# character
 		.Tcl(paste('ctext::addHighlightClassForRegexp ',.Tk.ID(txt_edit),' character1 ',hcolors$characters,' {"(?:[^\\"]|\\.)*"}',sep=""))
 		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," character2 ",hcolors$characters," {'(?:[^\\']|\\.)*'}",sep=""))

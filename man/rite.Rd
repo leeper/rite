@@ -28,6 +28,8 @@ Scripts can be run by selection, line, or the entire contents of the script edit
 
 \section{Syntax highlighting}{
 By default, the following colors are used for syntax highlighting:
+  \code{Normal text (normal)}: {\dQuote{black}}
+  \code{Editor background (background)}: {\dQuote{white}}
   \code{R functions (functions)}: {\dQuote{purple} (this applies to both base functions and those from packages loaded within \code{rite})}
   \code{R comments (rcomments)}: {\dQuote{darkgreen}}
   \code{Operators (operators)}: {\dQuote{blue}}
