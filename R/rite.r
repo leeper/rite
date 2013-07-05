@@ -1152,7 +1152,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					rmd = "black", # not supported yet
 					rmdlabels = "black", # not supported yet
 					htmltags = "black", # not supported yet
-					htmlcomments = "black", # not supported yet
+					htmlcomments = "black" # not supported yet
 					)
 	if(!is.null(color)){
 		for(i in 1:length(color)){
