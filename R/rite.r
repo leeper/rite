@@ -724,22 +724,25 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 
 	### KEY BINDINGS ###	
 	f1 <- function(){
-		if(!tclvalue(tktag.ranges(txt_edit,"sel"))==""){
-			useSelect <- TRUE
+		if(!tclvalue(tktag.ranges(txt_edit,"sel"))=="")
 			command <- tclvalue(tkget(txt_edit,"sel.first","sel.last"))
-			if(command %in% c("","\n","("))
-				command <- tclvalue(tkget(txt_edit, "sel.first-1char wordstart", "sel.first-1char wordend"))
-		}
 		else {
-			useSelect <- TRUE
 			command <- tclvalue(tkget(txt_edit, "insert wordstart", "insert wordend"))
 			if(command %in% c("","\n","("))
 				command <- tclvalue(tkget(txt_edit, "insert-1char wordstart", "insert-1char wordend"))
+			if(	command=="." |
+				tclvalue(tkget(txt_edit, "insert wordstart-1char", "insert wordstart"))=="." |
+				tclvalue(tkget(txt_edit, "insert wordend", "insert wordend+1char"))==".")
+				command <- tclvalue(tkget(txt_edit, "insert wordstart-2char wordstart", "insert wordend+2char wordend"))
 		}
-		if(command %in% c("\n","\t"," ","(",")","[","]","{","}","=",".",",","*","/","+","-","^","%","$"))
+		if(command %in% c("\n","\t"," ",")","]","}","=",".",",","%"))
 			return()
+		else if(command %in% c("[","(","*","/","+","-","^","$","{","~"))
+			command <- paste("`",command,"`",sep="")
+		else
+			command <- gsub(" ","",command)
 		helpresults <- help(command)
-		if(length(helpresults)==1)
+		if(length(helpresults)>0)
 			runCode(paste("help(\"",command,"\")",sep=""))
 		else
 			runCode(paste("help.search(\"",command,"\")",sep=""))
