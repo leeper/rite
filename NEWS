@@ -4,7 +4,7 @@
 * Added support for `toupper` and `tolower` to the context menu
 
 ## BUG FIXES ##
-
+* Interrupting the printing of output caused rite to hang indefinitely. Printing can now be interrupted from the console/terminal.
 * Selecting Quit R from the rite File menu did not prompt to save an unsaved script or output.
 
 
