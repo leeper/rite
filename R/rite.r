@@ -298,14 +298,29 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					out <<- list(value="", visible=FALSE)
 				}
 			)
-			if(catchOutput){ # output to `output`
+			if(catchOutput){
+				# output to `output`
 				tkconfigure(output, state="normal")
 				if(out$visible){
-					tkinsert(output,"end",paste(paste(capture.output(out$value),collapse="\n"),"\n"))
+					tryCatch(tkinsert(output,"end",paste(paste(capture.output(out$value),collapse="\n"),"\n")),
+						error = function(e){
+							tkmessageBox(message=paste("Printing error:",e,"!"), icon="error")
+						},
+						interrupt = function(){
+							tkmessageBox(message="Printing interrupt!", icon="error")
+						}
+					)
 					tkselect(nb2, 0)
 				}
 				if(length(osink)>length2){
-					tkinsert(output,"end",paste(osink[(length2+1):length(osink)],"\n",collapse=""))
+					tryCatch(tkinsert(output,"end",paste(osink[(length2+1):length(osink)],"\n",collapse="")),
+						error = function(e){
+							tkmessageBox(message=paste("Printing error:",e,"!"), icon="error")
+						},
+						interrupt = function(){
+							tkmessageBox(message="Printing interrupt!", icon="error")
+						}
+					)
 					tkselect(nb2, 0)
 				}
 				tkconfigure(output, state="disabled")
@@ -313,7 +328,15 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				outputSaved <<- FALSE
 			}
 			else if(length(out)>1 && out$visible)
-				print(out$value)	# output to console
+				# output to console
+				tryCatch(print(out$value),
+					error = function(e){
+						tkmessageBox(message=paste("Printing error:",e,"!"), icon="error")
+					},
+					interrupt = function(){
+						tkmessageBox(message="Printing interrupt!", icon="error")
+					}
+				)
 		}
 		if(length(e)>1)
 			runCode(code=code,e=e[2:length(e)])
