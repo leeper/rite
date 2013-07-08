@@ -1,11 +1,14 @@
 \name{rite}
 \alias{rite}
+\alias{riteout}
 \title{rite}
 \description{Open rite}
 \usage{
 rite(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
      fontFamily="Courier", fontSize=10, orientation="horizontal", 
 	 highlight=c("r","latex"), color=NULL, ...)
+
+riteout(...)
 }
 \arguments{
   \item{filename}{Optionally, a character string specifying a file name in the working directory (or file path) to open in rite.}
@@ -16,7 +19,7 @@ rite(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
   \item{orientation}{If \code{catchOutput=TRUE}, whether the output and error panels should be oriented \dQuote{horizontal} (to the right) or \dQuote{vertical} (below) the script editing panel. Default is \dQuote{horizontal}.}
   \item{highlight}{A character vector containing one or more of \dQuote{r}, \dQuote{latex}, \dQuote{markdown}, \dQuote{html} to indicate what should be higlighted in script.}
   \item{color}{Either \code{NULL}, or a named list specifying Tcl/Tk colors for highlighting. See details below.}
-  \item{...}{Ignored}
+  \item{...}{Ignored by \code{rite}. Used by \code{riteout} to pass arguments to \code{rite}.}
 }
 \details{
 Create, edit, and save R scripts (or any text-based file) and, optionally, sink output to an output viewer rather than the R console.
@@ -24,6 +27,8 @@ Create, edit, and save R scripts (or any text-based file) and, optionally, sink 
 Scripts can be loaded, appended, referenced (via \code{source}) in the current script, and can be saved.
 
 Scripts can be run by selection, line, or the entire contents of the script editor from the \dQuote{Run} menu. Scripts can also be run from the context menu (via a right mouse click) or with \code{<Control-r>}. \code{<F8>} runs the entire script, whereas \code{<F7>} checks for parsing errors in the entire script without evaluating it.
+
+\code{riteout} is a wrapper for \code{rite} that defaults to \code{catchOutput=TRUE}.
 }
 
 \section{Syntax highlighting}{
