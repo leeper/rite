@@ -203,8 +203,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkfocus(txt_edit)
 			}
 		}
-		if(grepl("library(",e,fixed=TRUE)[[1]]){
-			lib <- try(eval(e[1]))
+		if(grepl("library(",e[1],fixed=TRUE)[[1]]){
+			lib <- try(eval(e))
 			if(inherits(lib,"try-error")){
 				if(catchOutput)
 					writeError(lib,"Error",TRUE)
@@ -212,7 +212,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					print(lib)
 			}
 			else if("r" %in% highlight){
-				packagename <- strsplit(strsplit(e[1],"library(",fixed=TRUE)[[1]][2],")")[[1]][1]
+				packagename <- strsplit(strsplit(as.character(e[1]),"library(",fixed=TRUE)[[1]][2],")")[[1]][1]
 				packs <- c(	packagename,
 							gsub(" ","",strsplit(packageDescription(packagename, fields="Depends"),",")[[1]]))
 				packs <- na.omit(packs)
