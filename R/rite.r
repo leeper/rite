@@ -5,7 +5,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	filename <- filename # script filename (if loaded or saved)
 	scriptSaved <- TRUE # a logical for whether current edit file is saved
 	searchterm <- ""
-	wmtitle <- packagetitle <- paste("rite ", packageDescription("rite", fields = "Version"), sep="")
+	if("rite" %in% unlist(strsplit(search(),"package:")))
+		wmtitle <- packagetitle <- paste("rite ", utils::packageDescription("rite", fields = "Version"), sep="")
+	else
+		wmtitle <- packagetitle <- "rite"
 	
 	# optionally setup evaluation environment
 	if(is.null(evalenv)){
