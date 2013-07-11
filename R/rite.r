@@ -217,8 +217,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			else if("r" %in% highlight){
 				packagename1 <- strsplit(as.character(e[1]),"library(",fixed=TRUE)[[1]][2]
 				packagename1 <- strsplit(packagename1,")")[[1]][1]
+				packagename1 <- strsplit(packagename1,",")[[1]][1]
 				packagename2 <- strsplit(as.character(e[1]),"require(",fixed=TRUE)[[1]][2]
 				packagename2 <- strsplit(packagename2,")")[[1]][1]
+				packagename2 <- strsplit(packagename2,",")[[1]][1]
 				# add something here to deal with commas
 				if(!is.na(packagename1))
 					packagename <- packagename1
