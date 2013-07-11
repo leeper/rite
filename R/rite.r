@@ -49,7 +49,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		sink(outsink, type="output") # sink stdout
 		errsink <- textConnection("esink", "w") # create connection for stderr
 		sink(errsink, type="message") # sink stderr
-		ritecat <- textConnection("riteout","w")
+		ritecat <- textConnection("riteoutcon","w")
 		cat <- function(..., sep=" ", catchOutput=catchOutput)
 			writeLines(text=paste(as.character(unlist(list(...))), collapse=sep), sep="\n", con=ritecat)
 	}
@@ -231,7 +231,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			
 		}
 		else if(catchOutput==TRUE && grepl("cat(",e,fixed=TRUE)[[1]]){
-			length1 <- length(riteout)
+			length1 <- length(riteoutcon)
 			lib <- try(eval(e[1]))
 			if(inherits(lib,"try-error")){
 				if(catchOutput)
@@ -241,7 +241,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			}
 			else{
 				tkconfigure(output, state="normal")
-				tkinsert(output,"end",paste(riteout[(length1+1):length(riteout)],"\n",collapse=""))
+				tkinsert(output,"end",paste(riteoutcon[(length1+1):length(riteoutcon)],"\n",collapse=""))
 				tkconfigure(output, state="disabled")
 			}	
 		}
@@ -1317,4 +1317,4 @@ riteout <- function(...)
 	rite(catchOutput=TRUE,...)
 
 if(getRversion() >= "2.15.1")
-	utils::globalVariables(c("osink", "riteout"))
+	utils::globalVariables(c("osink", "riteoutcon"))
