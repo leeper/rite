@@ -350,12 +350,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     	runLine <- function(){
 		if(autosave & is.null(filename)){
 			chn <- tclopen(ritetmpfile, "w")
-			tclputs(chn, tclvalue(tkget(output,"0.0","end")))
+			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
 			tclclose(chn)
 		}
 		else if(autosave & !is.null(filename)){
 			chn <- tclopen(outfilename, "w")
-			tclputs(chn, tclvalue(tkget(output,"0.0","end")))
+			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
 			tclclose(chn)
 		}
 		code <- tclvalue(tkget(txt_edit, "insert linestart", "insert lineend"))
@@ -365,12 +365,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	runSelection <- function(){
 		if(autosave & is.null(filename)){
 			chn <- tclopen(ritetmpfile, "w")
-			tclputs(chn, tclvalue(tkget(output,"0.0","end")))
+			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
 			tclclose(chn)
 		}
 		else if(autosave & !is.null(filename)){
 			chn <- tclopen(outfilename, "w")
-			tclputs(chn, tclvalue(tkget(output,"0.0","end")))
+			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
 			tclclose(chn)
 		}
 		if(!tclvalue(tktag.ranges(txt_edit,"sel"))=="")
@@ -379,12 +379,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	runAll <- function(){
 		if(autosave & is.null(filename)){
 			chn <- tclopen(ritetmpfile, "w")
-			tclputs(chn, tclvalue(tkget(output,"0.0","end")))
+			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
 			tclclose(chn)
 		}
 		else if(autosave & !is.null(filename)){
 			chn <- tclopen(outfilename, "w")
-			tclputs(chn, tclvalue(tkget(output,"0.0","end")))
+			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
 			tclclose(chn)
 		}
 		runCode(tclvalue(tkget(txt_edit,"1.0","end")))
