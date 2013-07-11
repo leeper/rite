@@ -348,13 +348,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			runCode(code=code,e=e[2:length(e)])
     }
     	runLine <- function(){
-		if(autosave & is.null(filename)){
+		if(autosave & (is.null(filename) || filename="")){
 			chn <- tclopen(ritetmpfile, "w")
 			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
 			tclclose(chn)
 		}
-		else if(autosave & !is.null(filename)){
-			chn <- tclopen(outfilename, "w")
+		else if(autosave & (!is.null(filename) && !filename=="")){
+			chn <- tclopen(filename, "w")
 			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
 			tclclose(chn)
 		}
@@ -363,13 +363,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			runCode(code)
 	}
 	runSelection <- function(){
-		if(autosave & is.null(filename)){
+		if(autosave & (is.null(filename) || filename="")){
 			chn <- tclopen(ritetmpfile, "w")
 			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
 			tclclose(chn)
 		}
-		else if(autosave & !is.null(filename)){
-			chn <- tclopen(outfilename, "w")
+		else if(autosave & (!is.null(filename) && !filename=="")){
+			chn <- tclopen(filename, "w")
 			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
 			tclclose(chn)
 		}
@@ -377,13 +377,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			runCode(tclvalue(tkget(txt_edit,"sel.first","sel.last")))
 	}
 	runAll <- function(){
-		if(autosave & is.null(filename)){
+		if(autosave & (is.null(filename) || filename="")){
 			chn <- tclopen(ritetmpfile, "w")
 			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
 			tclclose(chn)
 		}
-		else if(autosave & !is.null(filename)){
-			chn <- tclopen(outfilename, "w")
+		else if(autosave & (!is.null(filename) && !filename=="")){
+			chn <- tclopen(filename, "w")
 			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
 			tclclose(chn)
 		}
