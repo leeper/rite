@@ -213,7 +213,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				if(catchOutput)
 					writeError(lib,"Error",TRUE)
 				else
-					print(lib)
+					tkmessageBox(message = paste("Error:",lib), icon = "error")
 			}
 			else if("r" %in% highlight){
 				packagename <- e[1][[1]][[2]]
@@ -237,7 +237,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				if(catchOutput)
 					writeError(lib,"Error",TRUE)
 				else
-					print(lib)
+					tkmessageBox(message = paste("Error:",lib), icon = "error")
 			}
 			else{
 				tkconfigure(output, state="normal")
