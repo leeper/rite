@@ -1,10 +1,11 @@
 rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				fontFamily="Courier", fontSize=10, orientation="horizontal",
-				highlight=c("r","latex"), color=NULL, ...){	
+				highlight=c("r","latex"), color=NULL, autosave=TRUE, ...){	
 	# setup some values to deal with load/save/exit
 	filename <- filename # script filename (if loaded or saved)
 	scriptSaved <- TRUE # a logical for whether current edit file is saved
 	searchterm <- ""
+	ritetmpfile <- tempfile(pattern="rite",fileext=".r")
 	if("rite" %in% unlist(strsplit(search(),"package:")))
 		wmtitle <- packagetitle <- paste("rite ", utils::packageDescription("rite", fields = "Version"), sep="")
 	else
@@ -346,17 +347,48 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		if(length(e)>1)
 			runCode(code=code,e=e[2:length(e)])
     }
-    runLine <- function(){
+    	runLine <- function(){
+		if(autosave & is.null(filename)){
+			chn <- tclopen(ritetmpfile, "w")
+			tclputs(chn, tclvalue(tkget(output,"0.0","end")))
+			tclclose(chn)
+		}
+		else if(autosave & !is.null(filename)){
+			chn <- tclopen(outfilename, "w")
+			tclputs(chn, tclvalue(tkget(output,"0.0","end")))
+			tclclose(chn)
+		}
 		code <- tclvalue(tkget(txt_edit, "insert linestart", "insert lineend"))
 		if(!code=="")
 			runCode(code)
 	}
 	runSelection <- function(){
+		if(autosave & is.null(filename)){
+			chn <- tclopen(ritetmpfile, "w")
+			tclputs(chn, tclvalue(tkget(output,"0.0","end")))
+			tclclose(chn)
+		}
+		else if(autosave & !is.null(filename)){
+			chn <- tclopen(outfilename, "w")
+			tclputs(chn, tclvalue(tkget(output,"0.0","end")))
+			tclclose(chn)
+		}
 		if(!tclvalue(tktag.ranges(txt_edit,"sel"))=="")
 			runCode(tclvalue(tkget(txt_edit,"sel.first","sel.last")))
 	}
-	runAll <- function()
+	runAll <- function(){
+		if(autosave & is.null(filename)){
+			chn <- tclopen(ritetmpfile, "w")
+			tclputs(chn, tclvalue(tkget(output,"0.0","end")))
+			tclclose(chn)
+		}
+		else if(autosave & !is.null(filename)){
+			chn <- tclopen(outfilename, "w")
+			tclputs(chn, tclvalue(tkget(output,"0.0","end")))
+			tclclose(chn)
+		}
 		runCode(tclvalue(tkget(txt_edit,"1.0","end")))
+	}
 
 	### OUTPUT FUNCTIONS ###
 	if(catchOutput){
