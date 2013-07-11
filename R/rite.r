@@ -203,8 +203,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkfocus(txt_edit)
 			}
 		}
-		if(grepl("library(",e[1],fixed=TRUE)[[1]]){
-			lib <- try(eval(e))
+		if(grepl("library(",e[1],fixed=TRUE)[[1]] | grepl("require(",e[1],fixed=TRUE)[[1]]){
+			lib <- try(eval(e[1]))
 			if(inherits(lib,"try-error")){
 				if(catchOutput)
 					writeError(lib,"Error",TRUE)
@@ -212,7 +212,15 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					print(lib)
 			}
 			else if("r" %in% highlight){
-				packagename <- strsplit(strsplit(as.character(e[1]),"library(",fixed=TRUE)[[1]][2],")")[[1]][1]
+				packagename1 <- strsplit(as.character(e[1]),"library(",fixed=TRUE)[[1]][2]
+				packagename1 <- strsplit(packagename1,")")[[1]][1]
+				packagename2 <- strsplit(as.character(e[1]),"require(",fixed=TRUE)[[1]][2]
+				packagename2 <- strsplit(packagename2,")")[[1]][1]
+				# add something here to deal with commas
+				if(!is.na(packagename1))
+					packagename <- packagename1
+				else if(!is.na(packagename2))
+					packagename <- packagename2
 				packs <- c(	packagename,
 							gsub(" ","",strsplit(packageDescription(packagename, fields="Depends"),",")[[1]]))
 				packs <- na.omit(packs)
