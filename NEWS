@@ -1,10 +1,11 @@
 # CHANGES to rite 0.3 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
-* Added support for `toupper` and `tolower` to the context menu
+* Added support for `toupper` and `tolower` to the context menu.
+* Added support for option `autosave` to automatically save the script. See documentation.
 
 ## BUG FIXES ##
-* Fixed error on package load with `library`.
+* Fixed error on package load with `library` and added support for automatic syntax highlighting when packages are loaded with `require`.
 * Interrupting the printing of output caused rite to hang indefinitely. Printing can now be interrupted from the console/terminal.
 * Selecting Quit R from the rite File menu did not prompt to save an unsaved script or output.
 
