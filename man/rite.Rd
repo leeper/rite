@@ -6,7 +6,7 @@
 \usage{
 rite(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
      fontFamily="Courier", fontSize=10, orientation="horizontal", 
-	 highlight=c("r","latex"), color=NULL, ...)
+	 highlight=c("r","latex"), color=NULL, autosave=TRUE, ...)
 
 riteout(...)
 }
@@ -19,6 +19,7 @@ riteout(...)
   \item{orientation}{If \code{catchOutput=TRUE}, whether the output and error panels should be oriented \dQuote{horizontal} (to the right) or \dQuote{vertical} (below) the script editing panel. Default is \dQuote{horizontal}.}
   \item{highlight}{A character vector containing one or more of \dQuote{r}, \dQuote{latex}, \dQuote{markdown}, \dQuote{html} to indicate what should be higlighted in script.}
   \item{color}{Either \code{NULL}, or a named list specifying Tcl/Tk colors for highlighting. See details below.}
+  \item{autosave}{A logical specifying whether the script should automatically be saved whenever any of the script is run. Default is \code{TRUE}. Note: if \code{filename} is \code{NULL}, the result is saved in the current R session's temporary directory and will be deleted when the R session terminates normally.}
   \item{...}{Ignored by \code{rite}. Used by \code{riteout} to pass arguments to \code{rite}.}
 }
 \details{
