@@ -1081,6 +1081,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		tkbind(txt_edit, "<Control-L>", clearOutput)
 		tkbind(output, "<Control-L>", clearOutput)
 	}
+	else{
+	    tkbind(txt_edit, "<Control-l>", function() {cat(rep("\n",50),collapse="")})
+	    tkbind(txt_edit, "<Control-L>", function() {cat(rep("\n",50),collapse="")})
+	}
 	
 	toggleComment <- function(){
 		checkandtoggle <- function(pos){
