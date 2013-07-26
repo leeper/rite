@@ -708,9 +708,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					pdffromfile(filetopdf=knit_out)
 			}
 			# tkadd(menuReport, "separator")
+			# tkadd(menuReport, "command", label = "markdown to html (from rite script)", command = function() markdownToHTML())
+			# tkadd(menuReport, "command", label = "markdown to html (from file)", command = function() markdownToHTML())
 			# md_html <- function(usefile, usetxt) {}
 			# tkadd(menuReport, "command", label = "knit to html (from rite script)", command = function() md_html(usefile=FALSE, usetxt=TRUE))
 			# tkadd(menuReport, "command", label = "knit to html (from file)", command = function() md_html(usefile=FALSE, usetxt=TRUE))
+			# tkadd(menuReport, "separator")
 			tkadd(menuReport, "command", label = "knit to pdf", command = function() knitpdf(mode="knit", usefile=TRUE, usetxt=FALSE))
 			tkadd(menuReport, "command", label = "knit to pdf (from Sweave)", command = function() knitpdf(mode="sweave", usefile=TRUE, usetxt=FALSE))
 			tkadd(menuReport, "separator")
