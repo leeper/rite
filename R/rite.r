@@ -651,6 +651,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		tkadd(menuFile, "command", label="Append Script", command=includeScript, underline = 1)
 		tkadd(menuFile, "command", label="Insert Script Reference", command=includeScriptReference, underline = 0)
 		tkadd(menuFile, "separator")
+		tkadd(menuFile, "command", label="List all objects", command=function() ls())
+		tkadd(menuFile, "command", label="Remove all objects", command=function() rm(list=ls(all=TRUE)))
+		tkadd(menuFile, "command", label="List search path", command=function() search())
+		tkadd(menuFile, "separator")
 		tkadd(menuFile, "command", label="Change dir...", command=function(...){
 			tkdir <- tclvalue(tkchooseDirectory())
 			if(!tkdir=="")
