@@ -734,7 +734,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	}
 	menuHelp <- tkmenu(menuTop, tearoff = FALSE)
 		tkadd(menuHelp, "command", label = "Add Package Highlighting", command = addHighlighting, underline = 0)
-		#tkadd(menuHelp, "command", label = "Remove all objects", command = function() rm(list = ls(all = TRUE, envir=evalenv)), underline=0)
+		tkadd(menuHelp, "separator")
+		menuR <- tkmenu(menuHelp, tearoff = FALSE)
+			openlocalhelp <- function(file){
+				if(file=="R-lang")
+					browseURL("http://stat.ethz.ch/R-manual/R-devel/doc/manual/R-lang.html")
+			}
+			tkadd(menuHelp, "command", label = "R language help", underline = 0, command = function() openlocalhelp("R-lang"))
+			tkadd(menuHelp, "cascade", label = "R Help", menu = menuR, underline = 0)
+		tkadd(menuHelp, "separator")
+		tkadd(menuHelp, "command", label = "rite Documentation", command = function() help(rite))
 		tkadd(menuHelp, "command", label = "About rite Script Editor", command = about, underline = 0)
 		tkadd(menuTop, "cascade", label = "Help", menu = menuHelp, underline = 0)
 
