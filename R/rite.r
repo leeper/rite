@@ -1,6 +1,6 @@
 rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				fontFamily="Courier", fontSize=10, orientation="horizontal",
-				highlight=c("r","latex"), color=NULL, autosave=TRUE, ...){	
+				highlight="r", color=NULL, autosave=TRUE, ...){	
 	# setup some values to deal with load/save/exit
 	filename <- filename # script filename (if loaded or saved)
 	scriptSaved <- TRUE # a logical for whether current edit file is saved
@@ -27,13 +27,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					digits = "orange",
 					characters = "darkgray",
 					latexmacros = "darkred",
-					latexequations = "black",
+					latexequations = "blue",
 					latexcomments = "red",
 					sweavechunks = "black", # not supported yet
-					rmd = "black", # not supported yet
-					rmdlabels = "black", # not supported yet
-					htmltags = "black", # not supported yet
-					htmlcomments = "black" # not supported yet
+					rmd = "darkred",
+					rmdchunks = "darkred",
+					xml = "darkred",
+					xmlcomments = "red" # not supported yet
 					)
 	if(!is.null(color)){
 		for(i in 1:length(color)){
@@ -669,9 +669,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		if(catchOutput){
 			tkadd(menuRun, "command", label="List all objects", command=function() tkinsert(output,"end",capture.output(ls(envir=evalenv))))
 			tkadd(menuRun, "command", label="Remove all objects", command=function() {
-				rm(list=ls(all=TRUE,envir=evalenv),envir=evalenv)
-				tkmessageBox(message="All objects removed")
-				})
+				check <- tkmessageBox(message = "Are you sure?", icon = "question", type = "yesno", default = "no")
+				if(tclvalue(check)=="yes"){
+					rm(list=ls(all=TRUE,envir=evalenv),envir=evalenv)
+					tkmessageBox(message="All objects removed")
+				}	})
 			tkadd(menuRun, "command", label="List search path", command=function() tkinsert(output,"end",capture.output(search())))
 		} else {
 			tkadd(menuRun, "command", label="List all objects", command=function() print(ls(envir=evalenv)))
@@ -1278,20 +1280,30 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		# comments
 		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," latexcomments ",hcolors$latexcomments," {(^%[^%[:alnum:]?[:punct:]?].+|[^%[:alnum:]?[:punct:]?]%.+)}",sep=""))
 		## AMEND ABOVE TO DEAL WITH %*% %in% type constructions
-		# add something here for code chunks
+		# add something here for code chunks ' <<>> @ '
+		# equations
+		#.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' latexeq ', hcolors$latexequations, ' \\${.+}\\$', sep=''))
 	}
 	# markdown
 	if("markdown" %in% highlight){
-		message("Highlighting for markdown not yet supported")
+		message("Highlighting for markdown is only minimally supported")
 		# something for the various kinds of markdown syntax
 		## headers [both kinds], bold, italics, strikethrough, lists, links, images, latex equations, MathML equations
-		# something for code chunks of the form ```{} ... ```
-		# something for inline code chunks of the form `r ...`
+		# code chunks of the form ```{} ... ```
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdchunk1 ', hcolors$rmdchunks, ' `{3}\\{r.+\\}', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdchunk2 ', hcolors$rmdchunks, ' `{3}', sep=''))
+		# inline code chunks of the form `r ...`
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdchunk3 ', hcolors$rmdchunks, ' `r.+`', sep=''))
 	}
 	# html
-	if("html" %in% highlight){
-		message("Highlighting for html not yet supported")
-		# something simple just to handle <...>, </...>, and <.../>
+	if("xml" %in% highlight){
+		# xml/html tags <...>, </...>, and <.../>
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' xml1 ', hcolors$xml,
+		' {</?[[:alnum:]]*(\\s+[[:alnum:]]+=(\\\'|")?\\w*(\\\'|")?)*\\s*/?>}', sep=''))
+		# xml/html comments
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' xml2 ', hcolors$xmlcomments,
+			' {<!{1}-{2}.*(\\s+[[:alnum:]]+=(\\\'|")?\\w*(\\\'|")?)*\\s*-{2}>}', sep=''))
+		
 	}
 	# r
 	if("r" %in% highlight){

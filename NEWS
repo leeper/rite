@@ -1,6 +1,10 @@
 # CHANGES to rite 0.3 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
+* A new function `riteout` provides a shorter name wrapper for `rite(catchOutput=TRUE)`.
+* Default syntax highlighting now includes only `"r"` rather than `c("r","latex")` as in rite<=0.2.
+* Added preliminary syntax highlighting support for xml/html tags and comments, and for markdown code chunks.
+* Support for "objects" operations found on the RGui "Misc" dropdown menu have been added to the "Run" menu in `rite`.
 * Added support for `toupper` and `tolower` to the context menu.
 * Added support for option `autosave` to automatically save the script. See documentation.
 
@@ -12,7 +16,7 @@
 
 # CHANGES TO rite 0.2 #
 
-* rite 0.1 was apparently incompatible, for a number of reasons, with non-Windows operating systems. Thanks to significant feedback from Yihue Xie (Iowa State University), rite 0.2 is now compatible with UNIX-like platforms.
+* rite 0.1 was apparently incompatible, for a number of reasons, with non-Windows operating systems. Thanks to significant feedback from Yihue Xie, rite 0.2 is now compatible with UNIX-like platforms.
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
 
