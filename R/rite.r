@@ -667,12 +667,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		tkadd(menuRun, "command", label = "Run All", command = runAll, underline = 4)
 		tkadd(menuRun, "separator")
 		if(catchOutput){
-			tkadd(menuRun, "command", label="List all objects", command=function() tkinsert(output,"end",ls(envir=evalenv)))
+			tkadd(menuRun, "command", label="List all objects", command=function() tkinsert(output,"end",capture.output(ls(envir=evalenv))))
 			tkadd(menuRun, "command", label="Remove all objects", command=function() {
 				rm(list=ls(all=TRUE,envir=evalenv),envir=evalenv)
 				tkmessageBox(message="All objects removed")
 				})
-			tkadd(menuRun, "command", label="List search path", command=function() tkinsert(output,"end",search()))
+			tkadd(menuRun, "command", label="List search path", command=function() tkinsert(output,"end",capture.output(search())))
 		} else {
 			tkadd(menuRun, "command", label="List all objects", command=function() print(ls(envir=evalenv)))
 			tkadd(menuRun, "command", label="Remove all objects", command=function() rm(list=ls(all=TRUE,envir=evalenv),envir=evalenv))
