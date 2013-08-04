@@ -834,16 +834,14 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		iwordstart <- tclvalue(tkindex(txt_edit,"insert-1char wordstart"))
 		iwordend <- tclvalue(tkindex(txt_edit,"insert-1char wordend"))
 		command <- tclvalue(tkget(txt_edit, iwordstart, iwordend))
-		#if(command %in% c("","\n","(","$")){
-		if(command=="("){
-			tkmark.set(txt_edit, "temp", "insert-2char")
+		tkmark.set(txt_edit, "temp", "insert-2char")
+		if(command=="(")
 			command <- paste(tclvalue(tkget(txt_edit, "temp wordstart", "temp wordend")),"(",sep="")
-			tkmark.unset(txt_edit, "temp")
-		}
-		else if(command=="$"){
-			tkmark.set(txt_edit, "temp", "insert-2char")
+		else if(command=="$")
 			command <- paste(tclvalue(tkget(txt_edit, "temp wordstart", "temp wordend")),"$",sep="")
-			tkmark.unset(txt_edit, "temp")
+		if(tclvalue(tkget(txt_edit, "temp wordstart-1char", "temp wordstart"))=="."){
+			tkmark.set(txt_edit, "temp", "temp wordstart-2char")
+			command <- paste(tclvalue(tkget(txt_edit, "temp wordstart", "temp wordend")),command,sep=".")
 		}
 		if(command %in% c("\n","\t"," ","(",")","[","]","{","}","=",",","*","/","+","-","^","%","$"))
 			return()
@@ -904,7 +902,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		}
 		else if(substring(command,nchar(command),nchar(command))=="$"){
 			fnlist <- try(eval(parse(text=paste("objects(",substring(command,1,nchar(command)-1),")",sep=""))),silent=TRUE)
-			cat(fnlist)
 			if(!inherits(fnlist,"try-error")) {
 				insertCommand <- function(x)
 					tkinsert(txt_edit, "insert", fnlist[x])
@@ -965,7 +962,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				fnlist <- unique(c(fnlist, apropos(command)))
 			if(length(fnlist)>0){
 				insertCommand <- function(x){
-					tkdelete(txt_edit, iwordstart, iwordend)
+					tkdelete(txt_edit, "temp wordstart", iwordend)
 					tkinsert(txt_edit, "insert", fnlist[x])
 				}
 				fnContextMenu <- tkmenu(txt_edit, tearoff = FALSE)
