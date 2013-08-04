@@ -815,8 +815,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tclvalue(tkget(txt_edit, "insert wordstart-1char", "insert wordstart"))=="." |
 				tclvalue(tkget(txt_edit, "insert wordend", "insert wordend+1char"))==".")
 				command <- tclvalue(tkget(txt_edit, "insert wordstart-2char wordstart", "insert wordend+2char wordend"))
+			command <- gsub("[()=]","",command)
 		}
-		if(command %in% c("\n","\t"," ",")","]","}","=",".",",","%"))
+		if(command %in% c("","\n","\t"," ",")","]","}","=",".",",","%"))
 			return()
 		else if(command %in% c("[","(","*","/","+","-","^","$","{","~"))
 			command <- paste("`",command,"`",sep="")
