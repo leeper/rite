@@ -1,11 +1,6 @@
 rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				fontFamily="Courier", fontSize=10, orientation="horizontal",
 				highlight="r", color=NULL, autosave=TRUE, ...){	
-	if(!require(tcltk2)){
-		install <- try(install.packages("tcltk2"))
-		if(inherits(install,"try-error"))
-			stop("Package tcltk2 not found and cannot be installed")
-	}
 	# setup some values to deal with load/save/exit
 	filename <- filename # script filename (if loaded or saved)
 	scriptSaved <- TRUE # a logical for whether current edit file is saved
