@@ -1,6 +1,7 @@
 # CHANGES to rite 0.3 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
+* Added support for markdown conversion to the Report Generation menu; reorganized the menu accordingly.
 * A new function `riteout` provides a shorter name wrapper for `rite(catchOutput=TRUE)`.
 * Default syntax highlighting now includes only `"r"` rather than `c("r","latex")` as in rite<=0.2.
 * Added preliminary syntax highlighting support for xml/html tags and comments, and for markdown code chunks.
