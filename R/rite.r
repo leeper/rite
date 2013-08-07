@@ -671,7 +671,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			tkadd(menuRun, "command", label="Remove all objects", command=function() {
 				check <- tkmessageBox(message = "Are you sure?", icon = "question", type = "yesno", default = "no")
 				if(tclvalue(check)=="yes"){
-					rm(list=ls(all=TRUE,envir=evalenv),envir=evalenv)
+					rm(list=ls(all.names=TRUE,envir=evalenv),envir=evalenv)
 					tkmessageBox(message="All objects removed")
 				}	})
 			tkadd(menuRun, "command", label="List search path", command=function() tkinsert(output,"end",capture.output(search())))
