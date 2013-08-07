@@ -677,7 +677,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			tkadd(menuRun, "command", label="List search path", command=function() tkinsert(output,"end",capture.output(search())))
 		} else {
 			tkadd(menuRun, "command", label="List all objects", command=function() print(ls(envir=evalenv)))
-			tkadd(menuRun, "command", label="Remove all objects", command=function() rm(list=ls(all=TRUE,envir=evalenv),envir=evalenv))
+			tkadd(menuRun, "command", label="Remove all objects", command=function() rm(list=ls(all.names=TRUE,envir=evalenv),envir=evalenv))
 			tkadd(menuRun, "command", label="List search path", command=function() print(search()))
 		}
 		#tkadd(menuRun, "separator")
