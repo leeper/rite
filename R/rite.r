@@ -418,7 +418,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		# convert script to .tex or tangles with knitr
 		knittxt <- function(mode="knit", usetxt=TRUE, usefile=FALSE){
 			if(!"package:knitr" %in% search()){
-				knit_inst <- try(library(knitr), silent=TRUE)
+				knit_inst <- try(require(knitr), silent=TRUE)
 				if(inherits(knit_inst, "try-error")){
 					i <- try(install.packages("knitr"), silent=TRUE)
 					if(inherits(i, "try-error")){
@@ -447,32 +447,32 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				inputvalue <- filename
 			}
 			if(mode=="knit")
-				knit_out <- try(knit(input=inputvalue, text=txtvalue))
+				knit_out <- try(knitr::knit(input=inputvalue, text=txtvalue))
 			else if(mode=="purl")
-				knit_out <- try(purl(input=inputvalue, text=txtvalue))
+				knit_out <- try(knitr::purl(input=inputvalue, text=txtvalue))
 			else if(mode=="sweave"){
-				sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
+				sweave_out <- try(knitr::Sweave2knitr(file=inputvalue, text=txtvalue))
 				if(inherits(sweave_out, "try-error")){
 					tkmessageBox(message="Could not convert Sweave to knitr!")
 					return()
 				}
 				else if(!is.null(inputvalue)){
-					knit_out <- try(knit(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
+					knit_out <- try(knitr::knit(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
 				}
 				else if(!is.null(txtvalue))
-					knit_out <- try(knit(text=sweave_out))
+					knit_out <- try(knitr::knit(text=sweave_out))
 			}
 			else if(mode=="tangle"){
-				sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
+				sweave_out <- try(knitr::Sweave2knitr(file=inputvalue, text=txtvalue))
 				if(inherits(sweave_out, "try-error")){
 					tkmessageBox(message="Could not convert Sweave to knitr!")
 					return()
 				}
 				else if(!is.null(inputvalue)){
-					knit_out <- try(purl(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
+					knit_out <- try(knitr::purl(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
 				}
 				else if(!is.null(txtvalue))
-					knit_out <- try(purl(text=sweave_out))
+					knit_out <- try(knitr::purl(text=sweave_out))
 			}
 			else{
 				tkmessageBox(message=paste("Unable to ",mode,"!",sep=""))
