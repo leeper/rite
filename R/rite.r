@@ -447,53 +447,50 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				inputvalue <- NULL
 			}
 			else if(usefile){
-				if(!scriptSaved && is.null(filename))
-					saveAsScript()
-				else if(!scriptSaved && !is.null(filename))
-					saveScript()
+				loadScript()
 				txtvalue <- NULL
 				inputvalue <- filename
 			}
 			if(genmode=="knit")
-				knit_out <- try(knitr::knit(input=inputvalue, text=txtvalue))
+				knit_out <- try(knit(input=inputvalue, text=txtvalue))
 			else if(genmode=="purl")
-				knit_out <- try(knitr::purl(input=inputvalue, text=txtvalue))
+				knit_out <- try(purl(input=inputvalue, text=txtvalue))
 			else if(genmode=="sweave"){
-				sweave_out <- try(knitr::Sweave2knitr(file=inputvalue, text=txtvalue))
+				sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
 				if(inherits(sweave_out, "try-error")){
 					tkmessageBox(message="Could not convert Sweave to knitr!")
 					return()
 				}
 				else if(!is.null(inputvalue))
-					knit_out <- try(knitr::knit(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
+					knit_out <- try(knit(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
 				else if(!is.null(txtvalue))
-					knit_out <- try(knitr::knit(text=sweave_out))
+					knit_out <- try(knit(text=sweave_out))
 			}
 			else if(genmode=="tangle"){
-				sweave_out <- try(knitr::Sweave2knitr(file=inputvalue, text=txtvalue))
+				sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
 				if(inherits(sweave_out, "try-error")){
 					tkmessageBox(message="Could not convert Sweave to knitr!")
 					return()
 				}
 				else if(!is.null(inputvalue))
-					knit_out <- try(knitr::purl(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
+					knit_out <- try(purl(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
 				else if(!is.null(txtvalue))
-					knit_out <- try(knitr::purl(text=sweave_out))
+					knit_out <- try(purl(text=sweave_out))
 			}
-			else if("rmd2html"){
+			else if(genmode=="rmd2html"){
 				if(!is.null(inputvalue))
-					knit_out <- try(knitr::knit2html(input=inputvalue))
+					knit_out <- try(knit2html(input=inputvalue))
 				else if(!is.null(txtvalue))
-					knit_out <- try(knitr::knit2html(text=txtvalue))
+					knit_out <- try(knit2html(text=txtvalue))
 			}
-			else if("md2html"){
+			else if(genmode=="md2html"){
 				if(!is.null(inputvalue))
 					knit_out <- try(markdown::markdownToHTML(file=inputvalue))
 				else if(!is.null(txtvalue))
 					knit_out <- try(markdown::markdownToHTML(text=txtvalue))
 			}
 			else{
-				tkmessageBox(message=paste("Unable to ",genmode,"!",sep=""))
+				tkmessageBox(message=paste("Unrecognized report type!",sep=""))
 				invisible()
 			}
 			sink(NULL, type="output")
@@ -518,6 +515,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					chn <- tclopen(knit_out, "r")
 					tkinsert(output, "end", tclvalue(tclread(chn)))
 					tclclose(chn)
+					if(genmode %in% c("md2html","rmd2html"))
+						browseURL(knit_out)
 				}
 				else
 					tkinsert(output, "insert", knit_out)
@@ -727,24 +726,24 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			menuKnit <- tkmenu(menuReport, tearoff = FALSE)
 				tkadd(menuKnit, "command", label = "knit",
 					command = function() knittxt(genmode="knit", usefile=FALSE, usetxt=TRUE), underline = 0)
-				tkadd(menuKnit, "command", label = "knit (from Sweave)",
+				tkadd(menuKnit, "command", label = "knit (from Sweave source)",
 					command = function() knittxt(genmode="sweave", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuKnit, "separator")
 				tkadd(menuKnit, "command", label = "knit Rmd to HTML (from rite)",
 					command = function() knittxt(genmode="rmd2html", usefile=FALSE, usetxt=TRUE))
-				tkadd(menuKnit, "command", label = "knit Rmd to HTML (from file)",
+				tkadd(menuKnit, "command", label = "knit Rmd to HTML (from local file)",
 					command = function() knittxt(genmode="rmd2html", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuKnit, "separator")
 				tkadd(menuKnit, "command", label = "knit to pdf",
 					command = function() knitpdf(genmode="knit", usefile=TRUE, usetxt=FALSE))
-				tkadd(menuKnit, "command", label = "knit to pdf (from Sweave)",
+				tkadd(menuKnit, "command", label = "knit to pdf (from Sweave source)",
 					command = function() knitpdf(genmode="sweave", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuReport, "cascade", label = "Knit", menu = menuKnit, underline = 0)
 			tkadd(menuReport, "separator")
 			menuPurl <- tkmenu(menuReport, tearoff = FALSE)
 				tkadd(menuPurl, "command", label = "purl",
 					command = function() knittxt(genmode="purl", usefile=FALSE, usetxt=TRUE), underline = 0)
-				tkadd(menuPurl, "command", label = "purl (from Sweave)",
+				tkadd(menuPurl, "command", label = "purl (from Sweave source)",
 					command = function() knittxt(genmode="tangle", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuReport, "cascade", label = "Purl", menu = menuPurl, underline = 0)
 			knitpdf <- function(...){
@@ -758,28 +757,28 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			menuMD <- tkmenu(menuReport, tearoff = FALSE)
 				tkadd(menuMD, "command", label = "Convert md to HTML (from rite)",
 					command = function() knittxt(genmode="md2html", usefile=FALSE, usetxt=TRUE))
-				tkadd(menuMD, "command", label = "Convert md to HTML (from file)",
+				tkadd(menuMD, "command", label = "Convert md to HTML (from local file)",
 					command = function() knittxt(genmode="md2html", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuMD, "separator")
 				tkadd(menuMD, "command", label = "knit Rmd to HTML (from rite)",
 					command = function() knittxt(genmode="rmd2html", usefile=FALSE, usetxt=TRUE))
-				tkadd(menuMD, "command", label = "knit Rmd to HTML (from file)",
+				tkadd(menuMD, "command", label = "knit Rmd to HTML (from local file)",
 					command = function() knittxt(genmode="rmd2html", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuReport, "cascade", label = "Markdown", menu = menuMD, underline = 0)
 			tkadd(menuReport, "separator")
 			menuLatex <- tkmenu(menuReport, tearoff = FALSE)
 				tkadd(menuLatex, "command", label = "pdflatex (from rite)",
 					command = function() pdffromfile(texttopdf=TRUE, bibtex=FALSE))
-				tkadd(menuLatex, "command", label = "pdflatex (from file)",
+				tkadd(menuLatex, "command", label = "pdflatex (from local file)",
 					command = function() pdffromfile(texttopdf=FALSE, bibtex=FALSE))
 				tkadd(menuLatex, "command", label = "pdflatex+bibtex (from rite)",
 					command = function() pdffromfile(texttopdf=TRUE, bibtex=TRUE))
-				tkadd(menuLatex, "command", label = "pdflatex+bibtex (from file)",
+				tkadd(menuLatex, "command", label = "pdflatex+bibtex (from local file)",
 					command = function() pdffromfile(texttopdf=FALSE, bibtex=TRUE))
 				tkadd(menuLatex, "separator")
 				tkadd(menuLatex, "command", label = "knit to pdf",
 					command = function() knitpdf(genmode="knit", usefile=TRUE, usetxt=FALSE))
-				tkadd(menuLatex, "command", label = "knit to pdf (from Sweave)",
+				tkadd(menuLatex, "command", label = "knit to pdf (from Sweave source)",
 					command = function() knitpdf(genmode="sweave", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuReport, "cascade", label = "LaTeX", menu = menuLatex, underline = 0)
 			tkadd(menuTop, "cascade", label = "Report Generation", menu = menuReport, underline = 0)
