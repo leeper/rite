@@ -478,13 +478,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				else if(!is.null(txtvalue))
 					knit_out <- try(knit2html(text=txtvalue))
 			}
-			else if(genmode %in% c("md2html","stitch.rmd2html")){
-				if(genmode=="stitch.rmd2html"){
-					if(!is.null(inputvalue))
-						inputvalue <- try(stitch(script=inputvalue))
-					else if(!is.null(txtvalue))
-						txtvalue <- try(stitch(text=txtvalue))
-				}
+			else if(genmode=="md2html"){
 				if(!is.null(inputvalue))
 					knit_out <- try(markdown::markdownToHTML(file=inputvalue))
 				else if(!is.null(txtvalue))
@@ -534,7 +528,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					chn <- tclopen(knit_out, "r")
 					tkinsert(output, "end", tclvalue(tclread(chn)))
 					tclclose(chn)
-					if(genmode %in% c("md2html","rmd2html","stitch.rhtml","stitch.rmd2html"))
+					if(genmode %in% c("md2html","rmd2html","stitch.rnw","stitch.rhtml","stitch.rmd"))
 						browseURL(knit_out)
 				}
 				else
@@ -768,7 +762,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkadd(menuKnit, "command", label = "knit to pdf (from Sweave source)",
 					command = function() knitpdf(genmode="sweave", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuReport, "cascade", label = "Knit", menu = menuKnit, underline = 0)
-			tkadd(menuReport, "separator")
 			menuPurl <- tkmenu(menuReport, tearoff = FALSE)
 				tkadd(menuPurl, "command", label = "purl",
 					command = function() knittxt(genmode="purl", usefile=FALSE, usetxt=TRUE), underline = 0)
@@ -777,22 +770,18 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkadd(menuReport, "cascade", label = "Purl", menu = menuPurl, underline = 0)
 			menuStitch <- tkmenu(menuReport, tearoff = FALSE)
 				tkadd(menuStitch, "command", label = "stitch (tex)",
-					command = function() knitpdf(genmode="stitch.rnw", usefile=FALSE, usetxt=TRUE), underline = 0)
+					command = function() knittxt(genmode="stitch.rnw", usefile=FALSE, usetxt=TRUE), underline = 0)
 				tkadd(menuStitch, "command", label = "stitch (HTML)",
 					command = function() knittxt(genmode="stitch.rhtml", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuStitch, "command", label = "stitch (markdown)",
 					command = function() knittxt(genmode="stitch.rmd", usefile=FALSE, usetxt=TRUE))
-				#tkadd(menuStitch, "command", label = "stitch (markdown) to HTML",
-				#	command = function() knittxt(genmode="stitch.rmd2html", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuStitch, "separator")
 				tkadd(menuStitch, "command", label = "stitch (tex) from file",
-					command = function() knitpdf(genmode="stitch.rnw", usefile=FALSE, usetxt=TRUE))
+					command = function() knittxt(genmode="stitch.rnw", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuStitch, "command", label = "stitch (HTML) from file",
 					command = function() knittxt(genmode="stitch.rhtml", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuStitch, "command", label = "stitch (markdown) from file",
 					command = function() knittxt(genmode="stitch.rmd", usefile=FALSE, usetxt=TRUE))
-				tkadd(menuStitch, "command", label = "stitch (markdown) to HTML from file",
-					command = function() knittxt(genmode="stitch.rmd2html", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuReport, "cascade", label = "Stitch", menu = menuStitch, underline = 0)
 			tkadd(menuReport, "separator")
 			menuMD <- tkmenu(menuReport, tearoff = FALSE)
