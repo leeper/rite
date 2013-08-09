@@ -1574,7 +1574,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	if("rest" %in% highlight){
 		# chunks
 		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rest1 ', hcolors$restchunks, ' {[.]{2} \\{r.+\\}}', sep=''))
-		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rest1 ', hcolors$restchunks, ' {[.]{2} [.]{2}}', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rest2 ', hcolors$restchunks, ' {[.]{2} [.]{2}}', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rest3 ', hcolors$restchunks, ' {:r:`.+`.}', sep=''))
 	}
 	# r
 	if("r" %in% highlight){
