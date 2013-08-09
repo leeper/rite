@@ -26,11 +26,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					latexmacros = "darkred",
 					latexequations = "blue",
 					latexcomments = "red",
-					rnwchunks = "blue", # not supported yet
+					rnwchunks = "blue",
 					rmd = "darkred",
-					rmdchunks = "darkred",
+					rmdchunks = "blue",
 					xml = "darkred",
-					xmlcomments = "red" # not supported yet
+					xmlcomments = "red",
+					roxygentext = "black",
+					roxygenchunks = "blue"
 					)
 	if(!is.null(color)){
 		for(i in 1:length(color)){
@@ -1526,6 +1528,15 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' xml2 ', hcolors$xmlcomments,
 			' {<!{1}-{2}.*(\\s+[[:alnum:]]+=(\\\'|")?\\w*(\\\'|")?)*\\s*-{2}>}', sep=''))		
 	}
+	# roxygen
+	if("roxygen" %in% highlight){
+		# comments
+		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," comments ",hcolors$rcomments," {#[^\n\r]*}",sep=""))
+		# text
+		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," roxygen1 ",hcolors$roxygentext," {#'[^\n\r]*}",sep=""))
+		# chunks
+		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," roxygen2 ",hcolors$roxygenchunks," {#[+|-][^\n\r]*}",sep=""))
+	}
 	# r
 	if("r" %in% highlight){
 		# functions
@@ -1554,7 +1565,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		.Tcl(paste('ctext::addHighlightClassForRegexp ',.Tk.ID(txt_edit),' character1 ',hcolors$characters,' {"(?:[^\\"]|\\.)*"}',sep=""))
 		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," character2 ",hcolors$characters," {'(?:[^\\']|\\.)*'}",sep=""))
 		# comments
-		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," comments ",hcolors$rcomments," {#[^\n\r]*}",sep=""))
+		if(!"roxygen" %in% highlight)
+			.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," comments ",hcolors$rcomments," {#[^\n\r]*}",sep=""))
 	}
 	
 	# DISPLAY EDITOR

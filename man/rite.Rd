@@ -47,9 +47,11 @@ By default, the following colors are used for syntax highlighting:
   \code{LaTeX comments (latexcomments)}: {\dQuote{red}}
   \code{Sweave/knitr code chunks (rnwchunks)}: {\dQuote{blue}}
   \code{Markdown (rmd)}: {\dQuote{darkred}} % not supported yet
-  \code{Markdown code chunks (rmdchunks)}: {\dQuote{darkred}}
+  \code{Markdown code chunks (rmdchunks)}: {\dQuote{blue}}
   \code{XML/HTML tags (xml)}: {\dQuote{darkred}}
   \code{XML/HTML comments (xmlcomments)}: {\dQuote{red}}
+  \code{Roxygen text (roxygentext)}: {\dQuote{black}}
+  \code{Roxygen code chunks (roxygenchunks)}: {\dQuote{blue}}
 
 The use of highlighting in general can be regulated by the \code{highlight} parameter. To specify alternative specific colors for any of the above highlighting rules, the \code{color} parameter accepts a named list of content types (listed in parentheses above) and their corresponding colors (in quotes). For example, calling \code{rite(color=list(rcomments='pink'))}, would open \code{rite} with R comments highlighted in pink but leave all other highlighting rules at their default settings.
 }
