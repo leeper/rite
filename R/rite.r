@@ -1547,7 +1547,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		# text
 		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," roxygen1 ",hcolors$roxygentext," {#'[^\n\r]*}",sep=""))
 		# chunks
-		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," roxygen2 ",hcolors$roxygenchunks," {#[+|-][^\n\r]*}",sep=""))
+		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," roxygen2a ",hcolors$roxygenchunks," {#[+|-][^\n\r]*}",sep=""))
+		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," roxygen2b ",hcolors$roxygenchunks," {# (@knitr)[^\n\r]*}",sep=""))
 	}
 	# r
 	if("r" %in% highlight){
