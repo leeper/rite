@@ -45,7 +45,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		outsink <- textConnection("osink", "w") # create connection for stdout
 		sink(outsink, type="output") # sink stdout
 		errsink <- textConnection("esink", "w") # create connection for stderr
-		#sink(errsink, type="message") # sink stderr
+		sink(errsink, type="message") # sink stderr
 		ritecat <- textConnection("riteoutcon","w")
 		cat <- function(..., sep=" ", catchOutput=catchOutput)
 			writeLines(text=paste(as.character(unlist(list(...))), collapse=sep), sep="\n", con=ritecat)
