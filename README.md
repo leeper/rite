@@ -31,3 +31,11 @@ install_github("rite","leeper")
 ```
 
 If you find that you use **rite** often, you may want to consider adding it to your [R startup profile](http://stat.ethz.ch/R-manual/R-devel/library/base/html/Startup.html).
+
+## Integration with [knitr](http://yihui.name/knitr/) ##
+
+**rite** provides the first visual interface for report generation in R through the `riteout` function (a simple wrapper for `rite(catchOutput=TRUE)`. Through `riteout`, users can generate reports in a variety of formats (including markdown, HTML, and LaTeX) through just a single mouse-click. `riteout` currently offers access to the **knitr** functions `knit` and `purl`, allowing users to convert documents embedded with R code chunks into either finished reports and analysis replication files, respectively. These functions work analogously to `Sweave` and `Stangle` provided by base R.
+
+Additionally, `riteout` allows users to `stitch` simple reports from unformatted R scripts, making the quick production of readable R analyses a mouse click away. Support for **knitr**'s `spin` (using Roxygen-style syntax) is planned for the future.
+
+To complement this functionality, **rite** provides syntax highlighting for R (by default) and, optionally, for LaTeX, markdown, and HTML. Higlighting of `Sweave`/`knitr`-style code chunks is supported in each case. Syntax highlighting for other languages is planned for the future.
