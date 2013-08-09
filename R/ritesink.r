@@ -1,4 +1,4 @@
-ritesink <- function(...,evalenv=.GlobalEnv, fontFamily="Courier", fontSize=10){
+ritesink <- function(..., evalenv=.GlobalEnv, fontFamily="Courier", fontSize=10){
 	# setup
 	errsink <- textConnection("esink", "w") # create connection for stderr
 	
