@@ -521,7 +521,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				invisible(knit_out)
 			}
 		}
-		pdffromfile <- function(filetopdf=NULL, texttopdf=FALSE, bibtex=TRUE){
+		pdffromfile <- function(filetopdf=NULL, texttopdf=FALSE, textype="latex", bibtex=TRUE){
 			if(texttopdf){
 				if(!scriptSaved)
 					saveScript()
@@ -543,19 +543,22 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				clearError()
 				tkconfigure(err_out, state="normal")
 				tkmark.set(err_out, "insert", "end")
-				latex1 <- system(paste("pdflatex",filetopdf), intern=TRUE)
+				if(textype=="latex")
+					tex1 <- system(paste("pdflatex",filetopdf), intern=TRUE)
+				else
+					tex1 <- system(paste("xelatex",filetopdf), intern=TRUE)
 				tkselect(nb2, 1)
 				tkfocus(txt_edit)
-				tkinsert(err_out, "insert", paste(latex1,collapse="\n"))
-				if(is.null(attributes(latex1)$status) && bibtex==TRUE){
-					latex2 <- system(paste("bibtex",filetopdf), intern=TRUE)
-					tkinsert(err_out, "insert", paste(latex2,collapse="\n"))
-					if(is.null(attributes(latex2)$status)){
-						latex3 <- system(paste("pdflatex",filetopdf), intern=TRUE)
-						tkinsert(err_out, "insert", paste(latex3,collapse="\n"))
-						if(is.null(attributes(latex3)$status)){
-							latex4 <- system(paste("pdflatex",filetopdf), intern=TRUE)
-							tkinsert(err_out, "insert", paste(latex4,collapse="\n"))
+				tkinsert(err_out, "insert", paste(tex1,collapse="\n"))
+				if(is.null(attributes(tex1)$status) && bibtex==TRUE){
+					tex2 <- system(paste("bibtex",filetopdf), intern=TRUE)
+					tkinsert(err_out, "insert", paste(tex2,collapse="\n"))
+					if(is.null(attributes(tex2)$status)){
+						tex3 <- system(paste("pdflatex",filetopdf), intern=TRUE)
+						tkinsert(err_out, "insert", paste(tex3,collapse="\n"))
+						if(is.null(attributes(tex3)$status)){
+							tex4 <- system(paste("pdflatex",filetopdf), intern=TRUE)
+							tkinsert(err_out, "insert", paste(tex4,collapse="\n"))
 						}
 					}
 				}
@@ -741,12 +744,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkadd(menuPurl, "command", label = "purl (from Sweave source)",
 					command = function() knittxt(genmode="tangle", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuReport, "cascade", label = "Purl", menu = menuPurl, underline = 0)
-			knitpdf <- function(...){
+			knitpdf <- function(textype="latex",...){
 				if(!scriptSaved)
 					saveAsScript()
 				knit_out <- knittxt(...)
 				if(!inherits(knit_out,"try-error"))
-					pdffromfile(filetopdf=knit_out)
+					pdffromfile(filetopdf=knit_out, textype=textype)
 			}
 			tkadd(menuReport, "separator")
 			menuMD <- tkmenu(menuReport, tearoff = FALSE)
@@ -776,6 +779,21 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkadd(menuLatex, "command", label = "knit to pdf (from Sweave source)",
 					command = function() knitpdf(genmode="sweave", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuReport, "cascade", label = "LaTeX", menu = menuLatex, underline = 0)
+			menuXetex <- tkmenu(menuReport, tearoff = FALSE)
+				tkadd(menuXetex, "command", label = "xelatex (from rite)",
+					command = function() pdffromfile(texttopdf=TRUE, textype="xelatex", bibtex=FALSE))
+				tkadd(menuXetex, "command", label = "xelatex (from local file)",
+					command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=FALSE))
+				tkadd(menuXetex, "command", label = "xelatex+bibtex (from rite)",
+					command = function() pdffromfile(texttopdf=TRUE, textype="xelatex", bibtex=TRUE))
+				tkadd(menuXetex, "command", label = "xelatex+bibtex (from local file)",
+					command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=TRUE))
+				tkadd(menuXetex, "separator")
+				tkadd(menuXetex, "command", label = "knit to pdf",
+					command = function() knitpdf(genmode="knit", usefile=TRUE, usetxt=FALSE, textype="xelatex"))
+				tkadd(menuXetex, "command", label = "knit to pdf (from Sweave source)",
+					command = function() knitpdf(genmode="sweave", usefile=TRUE, usetxt=FALSE, textype="xelatex"))
+				tkadd(menuReport, "cascade", label = "LaTeX", menu = menuXetex, underline = 0)
 			tkadd(menuTop, "cascade", label = "Report Generation", menu = menuReport, underline = 0)
 	}
 	menuHelp <- tkmenu(menuTop, tearoff = FALSE)
