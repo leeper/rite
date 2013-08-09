@@ -525,8 +525,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			}
 			else{
 				clearOutput()
-				tkconfigure(output, state="normal")
-				if(usefile){
+				tkconfigure(output, state="normal")					
+				if(usefile || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd")){
 					chn <- tclopen(knit_out, "r")
 					tkinsert(output, "end", tclvalue(tclread(chn)))
 					tclclose(chn)
