@@ -845,7 +845,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					command = function() knitpdf(genmode="knit", usefile=TRUE, usetxt=FALSE, textype="xelatex"))
 				tkadd(menuXetex, "command", label = "knit to pdf (from Sweave source)",
 					command = function() knitpdf(genmode="sweave", usefile=TRUE, usetxt=FALSE, textype="xelatex"))
-				tkadd(menuReport, "cascade", label = "LaTeX", menu = menuXetex, underline = 0)
+				tkadd(menuReport, "cascade", label = "XeLaTeX", menu = menuXetex, underline = 0)
 			tkadd(menuTop, "cascade", label = "Report Generation", menu = menuReport, underline = 0)
 	}
 	menuHelp <- tkmenu(menuTop, tearoff = FALSE)
