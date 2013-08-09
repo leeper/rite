@@ -45,7 +45,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		outsink <- textConnection("osink", "w") # create connection for stdout
 		sink(outsink, type="output") # sink stdout
 		errsink <- textConnection("esink", "w") # create connection for stderr
-		sink(errsink, type="message") # sink stderr
+		#sink(errsink, type="message") # sink stderr
 		ritecat <- textConnection("riteoutcon","w")
 		cat <- function(..., sep=" ", catchOutput=catchOutput)
 			writeLines(text=paste(as.character(unlist(list(...))), collapse=sep), sep="\n", con=ritecat)
@@ -344,7 +344,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		if(length(e)>1)
 			runCode(code=code,e=e[2:length(e)])
     }
-    	runLine <- function(){
+    runLine <- function(){
 		if(autosave & (is.null(filename) || filename=="")){
 			chn <- tclopen(ritetmpfile, "w")
 			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
@@ -489,7 +489,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					knit_out <- try(stitch(script=inputvalue))
 				else if(!is.null(txtvalue))
 					knit_out <- try(stitch(text=txtvalue))
-				if(!inherits(knit_out_tex,"try-error"))
+				if(!inherits(knit_out,"try-error"))
 					knit_out_pdf <- paste(tools::file_path_sans_ext(knit_out),"pdf",sep=".")
 			}
 			else if(genmode=="stitch.rhtml"){
@@ -508,14 +508,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkmessageBox(message=paste("Unrecognized report type!",sep=""))
 				invisible()
 			}
-			sink(NULL, type="output")
-			sink(NULL, type="message")
+			sink(type="output")
+			sink(type="message")
 			close(knitsink1)
 			close(knitsink2)
 			tkselect(nb2, 1)
 			tkconfigure(err_out, state="normal")
 			tkinsert(err_out, "insert", paste(ksink1,collapse="\n"))
 			tkinsert(err_out, "insert", paste(ksink2,collapse="\n"))
+			rm(ksink1) # cleanup
+			rm(ksink2) # cleanup
 			tkconfigure(err_out, state="disabled")
 			sink(errsink, type="message")
 			tkfocus(txt_edit)
@@ -1560,7 +1562,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	tksee(txt_edit, "insert")
 	if(catchOutput && "windows"==.Platform$OS.type){
 		tcl("wm", "state", editor, "zoomed")
-		tcl("wm", "attributes", editor, "fullscreen")
+		#tcl("wm", "attributes", editor, "fullscreen")
 	}
 }
 
