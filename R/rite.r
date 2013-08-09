@@ -489,8 +489,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					knit_out <- try(stitch(script=inputvalue))
 				else if(!is.null(txtvalue))
 					knit_out <- try(stitch(text=txtvalue))
-				if(!inherits(knit_out,"try-error"))
-					knit_out <- paste(tools::file_path_sans_ext(knit_out),"pdf",sep=".")
+				if(!inherits(knit_out_tex,"try-error"))
+					knit_out_pdf <- paste(tools::file_path_sans_ext(knit_out),"pdf",sep=".")
 			}
 			else if(genmode=="stitch.rhtml"){
 				if(!is.null(inputvalue))
@@ -530,8 +530,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					chn <- tclopen(knit_out, "r")
 					tkinsert(output, "end", tclvalue(tclread(chn)))
 					tclclose(chn)
-					if(genmode %in% c("md2html","rmd2html","stitch.rnw","stitch.rhtml","stitch.rmd"))
+					if(genmode %in% c("md2html","rmd2html","stitch.rhtml","stitch.rmd"))
 						browseURL(knit_out)
+					else if(genmode=="stitch.rnw")
+						browseURL(knit_out_pdf)
 				}
 				else
 					tkinsert(output, "insert", knit_out)
