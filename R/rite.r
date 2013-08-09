@@ -32,7 +32,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					xml = "darkred",
 					xmlcomments = "red",
 					roxygentext = "black",
-					roxygenchunks = "blue"
+					roxygenchunks = "blue",
+					brewcomments = "red",
+					brewchunks = "blue",
+					brewtemplate = "black"
 					)
 	if(!is.null(color)){
 		for(i in 1:length(color)){
@@ -1535,10 +1538,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	if("xml" %in% highlight){
 		# xml/html tags <...>, </...>, and <.../>
 		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' xml1 ', hcolors$xml,
-		' {</?[[:alnum:]]*(\\s+[[:alnum:]]+=(\\\'|")?\\w*(\\\'|")?)*\\s*/?>}', sep=''))
+			' {</?[[:alnum:]]*(\\s+[[:alnum:]]+=(\\\'|")?\\w*(\\\'|")?)*\\s*/?>}', sep=''))
 		# xml/html comments
 		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' xml2 ', hcolors$xmlcomments,
-			' {<!{1}-{2}.*(\\s+[[:alnum:]]+=(\\\'|")?\\w*(\\\'|")?)*\\s*-{2}>}', sep=''))		
+			' {<!{1}-{2}.*(\\s+[[:alnum:]]+=(\\\'|")?\\w*(\\\'|")?)*\\s*-{2}>}', sep=''))
 	}
 	# roxygen
 	if("roxygen" %in% highlight){
@@ -1549,6 +1552,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		# chunks
 		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," roxygen2a ",hcolors$roxygenchunks," {#[+|-][^\n\r]*}",sep=""))
 		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," roxygen2b ",hcolors$roxygenchunks," {# (@knitr)[^\n\r]*}",sep=""))
+	}
+	# brew
+	if("brew" %in% highlight){
+		# chunks
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' brew1a ', hcolors$brewchunks, ' <%.+%>', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' brew1b ', hcolors$brewchunks, ' <%=.+%>', sep=''))
+		# comments
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' brew2 ', hcolors$brewcomments, ' <%#.+%>', sep=''))
+		# template
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' brew3 ', hcolors$brewtemplate, ' <%%.+%%>', sep=''))
 	}
 	# r
 	if("r" %in% highlight){
