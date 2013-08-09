@@ -17,7 +17,7 @@ riteout(...)
   \item{fontFamily}{The font family used in rite. Default is \dQuote{\code{Courier}}. Available fonts can be retrieved by \code{.Tcl("font families")}.}
   \item{fontSize}{The font size used in rite. Default is \code{10}.}
   \item{orientation}{If \code{catchOutput=TRUE}, whether the output and error panels should be oriented \dQuote{horizontal} (to the right) or \dQuote{vertical} (below) the script editing panel. Default is \dQuote{horizontal}.}
-  \item{highlight}{A character vector containing one or more of \dQuote{r}, \dQuote{latex}, \dQuote{markdown}, \dQuote{xml} to indicate what should be higlighted in script. Default is \dQuote{r}.}
+  \item{highlight}{A character vector containing one or more of \dQuote{r}, \dQuote{latex}, \dQuote{markdown}, \dQuote{xml}, \dQuote{roxygen}, \dQuote{brew}, and \dQuote{rest} to indicate what should be higlighted in script. Default is \dQuote{r}. Note that using more than a few of these simultaneously may cause unexpected highlighting.}
   \item{color}{Either \code{NULL}, or a named list specifying Tcl/Tk colors for highlighting. See details below.}
   \item{autosave}{A logical specifying whether the script should automatically be saved whenever any of the script is run. Default is \code{TRUE}. Note: if \code{filename} is \code{NULL}, the result is saved in the current R session's temporary directory and will be deleted when the R session terminates normally.}
   \item{...}{Ignored by \code{rite}. Used by \code{riteout} to pass arguments to \code{rite}.}
