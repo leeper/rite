@@ -46,6 +46,7 @@ By default, the following colors are used for syntax highlighting:
   \code{LaTeX equations (latexequations)}: {\dQuote{black}}
   \code{LaTeX comments (latexcomments)}: {\dQuote{red}}
   \code{Sweave/knitr code chunks (rnwchunks)}: {\dQuote{blue}}
+  \code{Rtex code chunks (rtexchunks)}: {\dQuote{blue}}
   \code{Markdown (rmd)}: {\dQuote{darkred}} % not supported yet
   \code{Markdown code chunks (rmdchunks)}: {\dQuote{blue}}
   \code{XML/HTML tags (xml)}: {\dQuote{darkred}}
