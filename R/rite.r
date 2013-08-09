@@ -36,7 +36,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					roxygenchunks = "blue",
 					brewcomments = "red",
 					brewchunks = "blue",
-					brewtemplate = "black"
+					brewtemplate = "black",
+					restchunks = "blue"
 					)
 	if(!is.null(color)){
 		for(i in 1:length(color)){
@@ -1568,6 +1569,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' brew2 ', hcolors$brewcomments, ' <%#.+%>', sep=''))
 		# template
 		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' brew3 ', hcolors$brewtemplate, ' <%%.+%%>', sep=''))
+	}
+	# reST
+	if("rest" %in% highlight){
+		# chunks
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rest1 ', hcolors$restchunks, ' {[.]{2} \\{r.+\\}}', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rest1 ', hcolors$restchunks, ' {[.]{2} [.]{2}}', sep=''))
 	}
 	# r
 	if("r" %in% highlight){

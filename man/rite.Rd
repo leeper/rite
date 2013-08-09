@@ -56,6 +56,7 @@ By default, the following colors are used for syntax highlighting:
   \code{Brew comments (brewcomments)}: {\dQuote{red}}
   \code{Brew chunks (brewchunks)}: {\dQuote{blue}}
   \code{Brew templates (brewtemplate)}: {\dQuote{black}}
+  \code{reST chunks (restchunks)}: {\dQuote{blue}}
 
 The use of highlighting in general can be regulated by the \code{highlight} parameter. To specify alternative specific colors for any of the above highlighting rules, the \code{color} parameter accepts a named list of content types (listed in parentheses above) and their corresponding colors (in quotes). For example, calling \code{rite(color=list(rcomments='pink'))}, would open \code{rite} with R comments highlighted in pink but leave all other highlighting rules at their default settings.
 }
