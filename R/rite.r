@@ -26,7 +26,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					latexmacros = "darkred",
 					latexequations = "blue",
 					latexcomments = "red",
-					sweavechunks = "black", # not supported yet
+					rnwchunks = "blue", # not supported yet
 					rmd = "darkred",
 					rmdchunks = "darkred",
 					xml = "darkred",
@@ -1499,6 +1499,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," latexcomments ",hcolors$latexcomments," {(^%[^%[:alnum:]?[:punct:]?].+|[^%[:alnum:]?[:punct:]?]%.+)}",sep=""))
 		## AMEND ABOVE TO DEAL WITH %*% %in% type constructions
 		# add something here for code chunks ' <<>> @ '
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rnwchunk1a ', hcolors$rnwchunk,
+			' {<{2}[[:alnum:]?|[:punct:]?|[:space:]?|=?]*>{2}}', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rnwchunk1b ', hcolors$rnwchunk, ' @', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rnwchunk2 ', hcolors$rnwchunk, ' \\\\Sexpr\\{.?\\}', sep=''))
 		# equations
 		#.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' latexeq ', hcolors$latexequations, ' \\${.+}\\$', sep=''))
 	}
