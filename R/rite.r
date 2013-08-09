@@ -490,7 +490,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				else if(!is.null(txtvalue))
 					knit_out <- try(stitch(text=txtvalue))
 				if(!inherits(knit_out,"try-error"))
-					knitout <- paste(tools::file_path_sans_ext(knit_out),"pdf",sep=".")
+					knit_out <- paste(tools::file_path_sans_ext(knit_out),"pdf",sep=".")
 			}
 			else if(genmode=="stitch.rhtml"){
 				if(!is.null(inputvalue))
