@@ -489,18 +489,20 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					knit_out <- try(stitch(script=inputvalue))
 				else if(!is.null(txtvalue))
 					knit_out <- try(stitch(text=txtvalue))
+				if(!inherits(knit_out,"try-error"))
+					knitout <- paste(tools::file_path_sans_ext(knit_out),"pdf",sep=".")
 			}
 			else if(genmode=="stitch.rhtml"){
 				if(!is.null(inputvalue))
-					knit_out <- try(stitch(script=inputvalue))
+					knit_out <- try(stitch_rhtml(script=inputvalue))
 				else if(!is.null(txtvalue))
-					knit_out <- try(stitch(text=txtvalue))
+					knit_out <- try(stitch_rhtml(text=txtvalue))
 			}
 			else if(genmode=="stitch.rmd"){
 				if(!is.null(inputvalue))
-					knit_out <- try(stitch(script=inputvalue))
+					knit_out <- try(stitch_rmd(script=inputvalue))
 				else if(!is.null(txtvalue))
-					knit_out <- try(stitch(text=txtvalue))
+					knit_out <- try(stitch_rmd(text=txtvalue))
 			}
 			else{
 				tkmessageBox(message=paste("Unrecognized report type!",sep=""))
@@ -777,11 +779,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					command = function() knittxt(genmode="stitch.rmd", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuStitch, "separator")
 				tkadd(menuStitch, "command", label = "stitch (tex) from file",
-					command = function() knittxt(genmode="stitch.rnw", usefile=FALSE, usetxt=TRUE))
+					command = function() knittxt(genmode="stitch.rnw", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuStitch, "command", label = "stitch (HTML) from file",
-					command = function() knittxt(genmode="stitch.rhtml", usefile=FALSE, usetxt=TRUE))
+					command = function() knittxt(genmode="stitch.rhtml", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuStitch, "command", label = "stitch (markdown) from file",
-					command = function() knittxt(genmode="stitch.rmd", usefile=FALSE, usetxt=TRUE))
+					command = function() knittxt(genmode="stitch.rmd", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuReport, "cascade", label = "Stitch", menu = menuStitch, underline = 0)
 			tkadd(menuReport, "separator")
 			menuMD <- tkmenu(menuReport, tearoff = FALSE)
