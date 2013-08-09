@@ -506,6 +506,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				else if(!is.null(txtvalue))
 					knit_out <- try(stitch_rmd(text=txtvalue))
 			}
+			else if(genmode=="spin"){
+				if(!is.null(inputvalue))
+					knit_out <- try(spin(hair=inputvalue))
+				else if(!is.null(txtvalue))
+					knit_out <- try(spin(text=txtvalue))
+			}
 			else{
 				tkmessageBox(message=paste("Unrecognized report type!",sep=""))
 				invisible()
@@ -791,6 +797,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkadd(menuStitch, "command", label = "stitch (markdown) from file",
 					command = function() knittxt(genmode="stitch.rmd", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuReport, "cascade", label = "Stitch", menu = menuStitch, underline = 0)
+			menuSpin <- tkmenu(menuReport, tearoff = FALSE)
+				tkadd(menuSpin, "command", label = "spin (from rite)",
+					command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE))
+				tkadd(menuSpin, "command", label = "spin (from local file)",
+					command = function() knittxt(genmode="spin", usefile=FALSE, usetxt=TRUE))
+				tkadd(menuReport, "cascade", label = "Spin", menu = menuSpin, underline = 0)
 			tkadd(menuReport, "separator")
 			menuMD <- tkmenu(menuReport, tearoff = FALSE)
 				tkadd(menuMD, "command", label = "Convert md to HTML (from rite)",
