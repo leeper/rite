@@ -1,24 +1,24 @@
 # CHANGES to rite 0.3 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
-* Added support for markdown conversion to the Report Generation menu; reorganized the menu accordingly.
+* Added support for the **knitr** functions `stitch` and `spin`, as well as markdown conversion to the Report Generation menu; reorganized the menu accordingly.
 * A new function `riteout` provides a shorter name wrapper for `rite(catchOutput=TRUE)`.
 * A new function `ritesink` provides an experimental (and primitive) tk widget for displaying color-coded R output.
-* Default syntax highlighting now includes only `"r"` rather than `c("r","latex")` as in rite<=0.2.
-* Added preliminary syntax highlighting support for xml/html tags and comments, and for markdown code chunks.
-* Support for "objects" operations found on the RGui "Misc" dropdown menu have been added to the "Run" menu in `rite`.
+* Default syntax highlighting now includes only `"r"` rather than `c("r","latex")` as in **rite** (<=0.2).
+* Added preliminary syntax highlighting support for xml/html tags and comments, rnw in-line code chunks, rtex code chunks, brew, reST, roxygen, and markdown code chunks.
+* Support for "objects" operations found on the RGui Misc menu have been added to the Run menu.
 * Added support for `toupper` and `tolower` to the context menu.
 * Added support for option `autosave` to automatically save the script. See documentation.
 
 ## BUG FIXES ##
 * Fixed error on package load with `library` and added support for automatic syntax highlighting when packages are loaded with `require`.
 * Interrupting the printing of output caused rite to hang indefinitely. Printing can now be interrupted from the console/terminal.
-* Selecting Quit R from the rite File menu did not prompt to save an unsaved script or output.
+* Selecting "Quit R" from the rite File menu did not prompt to save an unsaved script or output.
 
 
 # CHANGES TO rite 0.2 #
 
-* rite 0.1 was apparently incompatible, for a number of reasons, with non-Windows operating systems. Thanks to significant feedback from Yihue Xie, rite 0.2 is now compatible with UNIX-like platforms.
+* **rite** 0.1 was apparently incompatible, for a number of reasons, with non-Windows operating systems. Thanks to significant feedback from Yihue Xie, **rite** 0.2 is now compatible with UNIX-like platforms.
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
 
@@ -27,12 +27,13 @@
 
 ## BUG FIXES ##
 
-* Removed references to tkwm.bitmap, which was causing a critical failure on linux. (h/t Yihue Xie)
+* Removed references to `tkwm.bitmap`, which was causing a critical failure on linux. (h/t Yihue Xie)
 * Removed a Windows-specific call to `bringToTop` that was preventing loading on other platforms. (h/t Yihue Xie)
-* Modified syntax highlighting code to prevent errors of the form `Error in structure(.External(.C_dotTcl, ...), class = "tclObj") : [tcl] missing close-bracket.` when rite was initialized. Specifically, modified syntax highlighting procedure to handle function names that include punctuation.(h/t Yihue Xie)
-* Fixed a bug in cut (<Ctrl-x> or from the context menu) that was copying but not deleting selected text.
+* Modified syntax highlighting code to prevent errors of the form:
+>`Error in structure(.External(.C_dotTcl, ...), class = "tclObj") : [tcl] missing close-bracket.` when rite was initialized. Specifically, modified syntax highlighting procedure to handle function names that include punctuation.(h/t Yihue Xie)
+* Fixed a bug in cut ("<Ctrl-x>" or from the context menu) that was copying but not deleting selected text.
 * Fixed a typo that prevented the addition of new syntax highlighting when packages were loaded from the script editor.
-* Changed tk2panedwindow (from tcltk2) to ttkpanedwindow (from tcltk).
+* Changed `tk2panedwindow` (from **tcltk2**) to ttkpanedwindow (from **tcltk**).
 
 
 # CHANGES TO rite 0.1 #
