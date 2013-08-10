@@ -399,7 +399,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		saveOutput <- function(outfilename="") {
 			if(outfilename=="")
 				outfilename <- tclvalue(tkgetSaveFile(initialdir=getwd()))
-			if (!length(outfilename) || outfilename=="")
+			if(!length(outfilename) || outfilename=="")
 				return()
 			chn <- tclopen(outfilename, "w")
 			tclputs(chn, tclvalue(tkget(output,"0.0","end")))
@@ -568,6 +568,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					else if(genmode=="stitch.rnw")
 						browseURL(knit_out_pdf)
 				}
+				else if(genmode=="spin")
+					tkinsert(output, "end", paste(knit_out,collapse="\n"))
 				else
 					tkinsert(output, "end", knit_out)
 				tkconfigure(output, state="disabled")
@@ -631,7 +633,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				saveScript()
 			knit_out <- knittxt(...)
 			if(!inherits(knit_out,"try-error"))
-				pdffromfile(filetopdf=knit_out, textype=textype)
+				pdffromfile(filetopdf=filename, textype=textype)
 		}
 	}
 	
