@@ -1,8 +1,22 @@
 ritesink <- function(..., evalenv=.GlobalEnv, fontFamily="Courier", fontSize=10){
 	# setup
-	errsink <- textConnection("esink", "w") # create connection for stderr
+	stdsink <- textConnection("osink", "w") # create connection for stderr
+	sink(stdsink,"output")
+	lengtho <- length(osink)
 	
 	thesink <- tktoplevel(borderwidth=0)
+	exitsink <- function() {
+		tkdestroy(thesink)
+		if("windows"==.Platform$OS.type)
+			bringToTop(-1)
+		sink() # end stdsink
+		close(stdsink)
+		if(exists("osink"))
+			rm(osink)
+		invisible()
+	}
+	on.exit(exitsink)
+	tkwm.protocol(thesink, "WM_DELETE_WINDOW", exitsink)
 	tkwm.title(thesink, "rite sink")	# title
 	scr <- tkscrollbar(thesink, repeatinterval=25, command=function(...){ tkyview(output,...) })
 	output <- tk2ctext(thesink, bg="white", fg="black", undo="true",
@@ -15,52 +29,78 @@ ritesink <- function(..., evalenv=.GlobalEnv, fontFamily="Courier", fontSize=10)
 	tkgrid.columnconfigure(thesink,2,weight=0)
 	tkgrid.rowconfigure(thesink,1,weight=1)
 	
-	tktag.configure(output, "text", foreground="black", underline=1)
-	tktag.configure(output, "error", foreground="red", underline=1)
-	tktag.configure(output, "warning", foreground="purple", underline=1)
-	tktag.configure(output, "message", foreground="blue", underline=1)
+	tktag.configure(output, "text", foreground="black", underline=0)
+	tktag.configure(output, "error", foreground="red", underline=0)
+	tktag.configure(output, "warning", foreground="purple", underline=0)
+	tktag.configure(output, "message", foreground="blue", underline=0)
 	
 	internalsink <- function(){
+		lengtho <<- length(osink)
 		z <- readline(prompt="R> ")
-	
+			
 		if(z=="EXIT")
-			invisible()
+			exitsink()
 		else{
-			out <- try(withVisible(eval(parse(text=z),envir=evalenv)),silent=TRUE) # convert to tryCatch
-			if(!inherits(out,"try-error")){
-				if(out$visible && !is.null(out$value)){
-					tkinsert(output,"end",paste(capture.output(out$value),"\n",collapse=""))
-					tksee(output,"end")
-				}
-			}
-			else if(grepl("unexpected end of input",out)){
+			out <- tryCatch(withVisible(eval(parse(text=z),envir=evalenv)),
+					error = function(e){
+						if(any(grepl("unexpected end of input",e$message))){
+							invisible("unexpectedEOL")
+						}
+						else{
+							tkinsert(output,"end",paste(e,"\n",collapse=""), ("error"))
+							tksee(output,"end")
+							invisible("badcondition")
+						}
+					},
+					warning = function(w){
+						tkinsert(output,"end",paste(w,"\n",collapse=""), ("warning"))
+						tksee(output,"end")
+						invisible("badcondition")
+					},
+					message = function(m){
+						tkinsert(output,"end",paste(m,"\n",collapse=""), ("message"))
+						tksee(output,"end")
+						invisible("badcondition")
+					}
+				)
+			if(any(grepl("unexpectedEOL",out))){
 				complete <- FALSE
 				while(!complete){
 					z <- paste(z, readline(prompt=" + "),sep="")
-					out <- try(withVisible(eval(parse(text=z),envir=evalenv)),silent=TRUE) # convert to tryCatch
-					if(inherits(out,"try-error")){
-						if(!grepl("unexpected end of input",out))
-							complete <- TRUE
-						else{
-							tkinsert(output,"end",paste(out,"\n",collapse=""), ("error"))
-							tksee(output,"end")
-						}
-					}
-					else{
-						complete <- TRUE
-						if(out$visible && !is.null(out$value)){
-							tkinsert(output,"end",paste(capture.output(out$value),"\n",collapse=""))
-							tksee(output,"end")
-						}
+					out <- tryCatch(withVisible(eval(parse(text=z),envir=evalenv)),
+								error = function(e){
+									if(any(grepl("unexpected end of input",e$message))){
+										invisible("unexpectedEOL")
+									}
+									else{
+										tkinsert(output,"end",paste(e,"\n",collapse=""), ("error"))
+										tksee(output,"end")
+									}
+								},
+								warning = function(w){
+									tkinsert(output,"end",paste(w,"\n",collapse=""), ("warning"))
+									tksee(output,"end")
+								},
+								message = function(m){
+									tkinsert(output,"end",paste(m,"\n",collapse=""), ("message"))
+									tksee(output,"end")
+								}
+							)
+					if(any(grepl("unexpectedEOL",out)))
+						next
+					complete <- TRUE
+					if(out$visible && !is.null(out$value)){
+						tkinsert(output,"end",paste(capture.output(out$value),"\n",collapse=""), ("text"))
+						tksee(output,"end")
 					}
 				}
 			}
-			else if(inherits(out,"try-error")){
-				tkinsert(output,"end",paste(out,"\n",collapse=""), ("error"))
+			else if(!out=="badcondition" && out$visible && !is.null(out$value)){
+				tkinsert(output,"end",paste(capture.output(out$value),"\n",collapse=""), ("text"))
 				tksee(output,"end")
 			}
-			else{
-				tkinsert(output,"end",paste(capture.output(out$value),"\n",collapse=""))
+			if(exists("osink") && length(osink)>lengtho){
+				tkinsert(output,"end",paste(paste(osink[(lengtho+1):length(osink)],collapse="\n"),"\n"))
 				tksee(output,"end")
 			}
 			Recall()
