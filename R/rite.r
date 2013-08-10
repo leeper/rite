@@ -437,6 +437,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					}
 				}
 			}
+			clearError()
+			tkconfigure(err_out, state="normal")
+			tkinsert(err_out, "end", "Generating report...")
+			tkconfigure(err_out, state="disabled")
 			ksink1 <- ""
 			ksink2 <- ""
 			knitsink1 <- textConnection("ksink1", "w") # create connection for stdout
@@ -513,16 +517,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			}
 			else if(genmode=="spin"){
 				if(!is.null(inputvalue))
-					knit_out <- try(spin(hair=inputvalue, knit=FALSE, format=spinformat))
+					knit_out <- try(spin(hair=inputvalue, text=NULL, knit=FALSE, format=spinformat))
 				else if(!is.null(txtvalue))
-					knit_out <- try(spin(text=txtvalue, knit=FALSE, format=spinformat))
+					knit_out <- try(spin(hair=NULL, text=txtvalue, knit=FALSE, format=spinformat))
 			}
 			else if(genmode=="spinknit"){
 				if(!is.null(inputvalue)){
-					knit_out <- try(spin(hair=inputvalue, knit=TRUE, format=spinformat))
+					knit_out <- try(spin(hair=inputvalue, text=NULL, knit=TRUE, format=spinformat))
 				}
 				else if(!is.null(txtvalue)){
-					knit_out <- try(spin(text=txtvalue, knit=TRUE, format=spinformat))
+					knit_out <- try(spin(hair=NULL, text=txtvalue, knit=TRUE, format=spinformat))
 				}
 			}
 			else{
@@ -535,20 +539,26 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			close(knitsink2)
 			tkselect(nb2, 1)
 			tkconfigure(err_out, state="normal")
-			tkinsert(err_out, "insert", paste(ksink1,collapse="\n"))
-			tkinsert(err_out, "insert", paste(ksink2,collapse="\n"))
+			tkinsert(err_out, "end", paste(ksink1,collapse="\n"))
+			tkinsert(err_out, "end", paste(ksink2,collapse="\n"))
 			rm(ksink1) # cleanup
 			rm(ksink2) # cleanup
 			tkconfigure(err_out, state="disabled")
 			sink(errsink, type="message")
 			tkfocus(txt_edit)
 			if(inherits(knit_out,"try-error")){
+				tkconfigure(err_out, state="normal")
+				tkinsert(err_out, "end", "Report generation failed!")
+				tkconfigure(err_out, state="disabled")
 				tkmessageBox(message=paste("Report generation failed:\n",knit_out))
 				invisible(knit_out)
 			}
 			else{
+				tkconfigure(err_out, state="normal")
+				tkinsert(err_out, "end", "Report finished!")
+				tkconfigure(err_out, state="disabled")
 				clearOutput()
-				tkconfigure(output, state="normal")					
+				tkconfigure(output, state="normal")
 				if(usefile || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd")){
 					chn <- tclopen(knit_out, "r")
 					tkinsert(output, "end", tclvalue(tclread(chn)))
@@ -559,7 +569,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 						browseURL(knit_out_pdf)
 				}
 				else
-					tkinsert(output, "insert", knit_out)
+					tkinsert(output, "end", knit_out)
 				tkconfigure(output, state="disabled")
 				tkselect(nb2, 0)
 				tkfocus(txt_edit)
@@ -827,11 +837,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkadd(menuSpin, "command", label = "spin to Rmd and knit",
 					command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rmd"))
 				tkadd(menuSpin, "command", label = "spin to Rnw and knit",
-					command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rnw"))
+					command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rnw"), state="disabled")
 				tkadd(menuSpin, "command", label = "spin to Rhtml and knit",
 					command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rhtml"))
 				tkadd(menuSpin, "command", label = "spin to Rtex and knit",
-					command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rtex"))
+					command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rtex"), state="disabled")
 				tkadd(menuSpin, "command", label = "spin to Rrst and knit",
 					command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rrst"))
 				tkadd(menuReport, "cascade", label = "Spin", menu = menuSpin, underline = 0)
