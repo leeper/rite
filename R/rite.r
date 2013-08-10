@@ -420,7 +420,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		}
 		
 		# convert script to .tex or tangles with knitr
-		knittxt <- function(genmode="knit", usetxt=TRUE, usefile=FALSE, ...){
+		knittxt <- function(genmode="knit", usetxt=TRUE, usefile=FALSE, spinformat=NULL){
 			if(!require(knitr)){
 				install <- try(install.packages("knitr"), silent=TRUE)
 				if(inherits(install, "try-error")){
@@ -785,9 +785,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				#	command = function() knittxt(genmode="rmd2html", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuKnit, "separator")
 				tkadd(menuKnit, "command", label = "knit to pdf",
-					command = function() knitpdf(genmode="knit", usefile=TRUE, usetxt=FALSE))
+					command = function() knitpdf(genmode="knit", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuKnit, "command", label = "knit to pdf (from Sweave source)",
-					command = function() knitpdf(genmode="sweave", usefile=TRUE, usetxt=FALSE))
+					command = function() knitpdf(genmode="sweave", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuReport, "cascade", label = "Knit", menu = menuKnit, underline = 0)
 			menuPurl <- tkmenu(menuReport, tearoff = FALSE)
 				tkadd(menuPurl, "command", label = "purl",
@@ -812,28 +812,28 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkadd(menuReport, "cascade", label = "Stitch", menu = menuStitch, underline = 0)
 			menuSpin <- tkmenu(menuReport, tearoff = FALSE)
 				tkadd(menuSpin, "command", label = "spin to Rmd",
-					command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE, spinformat="Rmd"))
+					command = function() knittxt(genmode="spin", usefile=FALSE, usetxt=TRUE, spinformat="Rmd"))
 				#tkadd(menuSpin, "command", label = "spin (from local file)",
-				#	command = function() knittxt(genmode="spin", usefile=FALSE, usetxt=TRUE))
+				#	command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuSpin, "command", label = "spin to Rnw",
-					command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE, spinformat="Rnw"))
+					command = function() knittxt(genmode="spin", usefile=FALSE, usetxt=TRUE, spinformat="Rnw"))
 				tkadd(menuSpin, "command", label = "spin to Rhtml",
-					command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE, spinformat="Rhtml"))
+					command = function() knittxt(genmode="spin", usefile=FALSE, usetxt=TRUE, spinformat="Rhtml"))
 				tkadd(menuSpin, "command", label = "spin to Rtex",
-					command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE, spinformat="Rtex"))
+					command = function() knittxt(genmode="spin", usefile=FALSE, usetxt=TRUE, spinformat="Rtex"))
 				tkadd(menuSpin, "command", label = "spin to Rrst",
-					command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE, spinformat="Rrst"))
+					command = function() knittxt(genmode="spin", usefile=FALSE, usetxt=TRUE, spinformat="Rrst"))
 				tkadd(menuSpin, "separator")
 				tkadd(menuSpin, "command", label = "spin to Rmd and knit",
-					command = function() knittxt(genmode="spinknit", usefile=TRUE, usetxt=FALSE, spinformat="Rmd"))
+					command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rmd"))
 				tkadd(menuSpin, "command", label = "spin to Rnw and knit",
-					command = function() knittxt(genmode="spinknit", usefile=TRUE, usetxt=FALSE, spinformat="Rnw"))
+					command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rnw"))
 				tkadd(menuSpin, "command", label = "spin to Rhtml and knit",
-					command = function() knittxt(genmode="spinknit", usefile=TRUE, usetxt=FALSE, spinformat="Rhtml"))
+					command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rhtml"))
 				tkadd(menuSpin, "command", label = "spin to Rtex and knit",
-					command = function() knittxt(genmode="spinknit", usefile=TRUE, usetxt=FALSE, spinformat="Rtex"))
+					command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rtex"))
 				tkadd(menuSpin, "command", label = "spin to Rrst and knit",
-					command = function() knittxt(genmode="spinknit", usefile=TRUE, usetxt=FALSE, spinformat="Rrst"))
+					command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rrst"))
 				tkadd(menuReport, "cascade", label = "Spin", menu = menuSpin, underline = 0)
 			tkadd(menuReport, "separator")
 			menuMD <- tkmenu(menuReport, tearoff = FALSE)
@@ -857,11 +857,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					command = function() pdffromfile(texttopdf=TRUE, bibtex=TRUE))
 				#tkadd(menuLatex, "command", label = "pdflatex+bibtex (from local file)",
 				#	command = function() pdffromfile(texttopdf=FALSE, bibtex=TRUE))
-				tkadd(menuLatex, "separator")
-				tkadd(menuLatex, "command", label = "knit to pdf",
-					command = function() knitpdf(genmode="knit", usefile=TRUE, usetxt=FALSE))
-				tkadd(menuLatex, "command", label = "knit to pdf (from Sweave source)",
-					command = function() knitpdf(genmode="sweave", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuReport, "cascade", label = "LaTeX", menu = menuLatex, underline = 0)
 			menuXetex <- tkmenu(menuReport, tearoff = FALSE)
 				tkadd(menuXetex, "command", label = "xelatex",
@@ -872,11 +867,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					command = function() pdffromfile(texttopdf=TRUE, textype="xelatex", bibtex=TRUE))
 				#tkadd(menuXetex, "command", label = "xelatex+bibtex (from local file)",
 				#	command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=TRUE))
-				tkadd(menuXetex, "separator")
-				tkadd(menuXetex, "command", label = "knit to pdf",
-					command = function() knitpdf(genmode="knit", usefile=TRUE, usetxt=FALSE, textype="xelatex"))
-				tkadd(menuXetex, "command", label = "knit to pdf (from Sweave source)",
-					command = function() knitpdf(genmode="sweave", usefile=TRUE, usetxt=FALSE, textype="xelatex"))
 				tkadd(menuReport, "cascade", label = "XeLaTeX", menu = menuXetex, underline = 0)
 			tkadd(menuTop, "cascade", label = "Report Generation", menu = menuReport, underline = 0)
 	}
