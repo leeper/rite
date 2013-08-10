@@ -420,7 +420,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		}
 		
 		# convert script to .tex or tangles with knitr
-		knittxt <- function(genmode="knit", usetxt=TRUE, usefile=FALSE){
+		knittxt <- function(genmode="knit", usetxt=TRUE, usefile=FALSE, ...){
 			if(!require(knitr)){
 				install <- try(install.packages("knitr"), silent=TRUE)
 				if(inherits(install, "try-error")){
@@ -513,9 +513,17 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			}
 			else if(genmode=="spin"){
 				if(!is.null(inputvalue))
-					knit_out <- try(spin(hair=inputvalue))
+					knit_out <- try(spin(hair=inputvalue, knit=FALSE, format=spinformat))
 				else if(!is.null(txtvalue))
-					knit_out <- try(spin(text=txtvalue))
+					knit_out <- try(spin(text=txtvalue, knit=FALSE, format=spinformat))
+			}
+			else if(genmode=="spinknit"){
+				if(!is.null(inputvalue)){
+					knit_out <- try(spin(hair=inputvalue, knit=TRUE, format=spinformat))
+				}
+				else if(!is.null(txtvalue)){
+					knit_out <- try(spin(text=txtvalue, knit=TRUE, format=spinformat))
+				}
 			}
 			else{
 				tkmessageBox(message=paste("Unrecognized report type!",sep=""))
@@ -804,17 +812,28 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkadd(menuReport, "cascade", label = "Stitch", menu = menuStitch, underline = 0)
 			menuSpin <- tkmenu(menuReport, tearoff = FALSE)
 				tkadd(menuSpin, "command", label = "spin to Rmd",
-					command = function() knittxt(genmode="spin.rmd", usefile=TRUE, usetxt=FALSE))
-				tkadd(menuSpin, "command", label = "spin to Rnw",
-					command = function() knittxt(genmode="spin.rnw", usefile=TRUE, usetxt=FALSE))
-				tkadd(menuSpin, "command", label = "spin to Rhtml",
-					command = function() knittxt(genmode="spin.rhtml", usefile=TRUE, usetxt=FALSE))
-				tkadd(menuSpin, "command", label = "spin to Rtex",
-					command = function() knittxt(genmode="spin.rtex", usefile=TRUE, usetxt=FALSE))
-				tkadd(menuSpin, "command", label = "spin to Rrst",
-					command = function() knittxt(genmode="spin.rrst", usefile=TRUE, usetxt=FALSE))
+					command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE, spinformat="Rmd"))
 				#tkadd(menuSpin, "command", label = "spin (from local file)",
 				#	command = function() knittxt(genmode="spin", usefile=FALSE, usetxt=TRUE))
+				tkadd(menuSpin, "command", label = "spin to Rnw",
+					command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE, spinformat="Rnw"))
+				tkadd(menuSpin, "command", label = "spin to Rhtml",
+					command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE, spinformat="Rhtml"))
+				tkadd(menuSpin, "command", label = "spin to Rtex",
+					command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE, spinformat="Rtex"))
+				tkadd(menuSpin, "command", label = "spin to Rrst",
+					command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE, spinformat="Rrst"))
+				tkadd(menuSpin, "separator")
+				tkadd(menuSpin, "command", label = "spin to Rmd and knit",
+					command = function() knittxt(genmode="spinknit", usefile=TRUE, usetxt=FALSE, spinformat="Rmd"))
+				tkadd(menuSpin, "command", label = "spin to Rnw and knit",
+					command = function() knittxt(genmode="spinknit", usefile=TRUE, usetxt=FALSE, spinformat="Rnw"))
+				tkadd(menuSpin, "command", label = "spin to Rhtml and knit",
+					command = function() knittxt(genmode="spinknit", usefile=TRUE, usetxt=FALSE, spinformat="Rhtml"))
+				tkadd(menuSpin, "command", label = "spin to Rtex and knit",
+					command = function() knittxt(genmode="spinknit", usefile=TRUE, usetxt=FALSE, spinformat="Rtex"))
+				tkadd(menuSpin, "command", label = "spin to Rrst and knit",
+					command = function() knittxt(genmode="spinknit", usefile=TRUE, usetxt=FALSE, spinformat="Rrst"))
 				tkadd(menuReport, "cascade", label = "Spin", menu = menuSpin, underline = 0)
 			tkadd(menuReport, "separator")
 			menuMD <- tkmenu(menuReport, tearoff = FALSE)
