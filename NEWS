@@ -3,6 +3,7 @@
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
 * Added support for markdown conversion to the Report Generation menu; reorganized the menu accordingly.
 * A new function `riteout` provides a shorter name wrapper for `rite(catchOutput=TRUE)`.
+* A new function `ritesink` provides an experimental (and primitive) tk widget for displaying color-coded R output.
 * Default syntax highlighting now includes only `"r"` rather than `c("r","latex")` as in rite<=0.2.
 * Added preliminary syntax highlighting support for xml/html tags and comments, and for markdown code chunks.
 * Support for "objects" operations found on the RGui "Misc" dropdown menu have been added to the "Run" menu in `rite`.
