@@ -8,4 +8,5 @@ Imports: tcltk, tcltk2
 Suggests: knitr, markdown
 Description: A simple yet powerful script editor built natively in R with tcltk.
 License: GPL-2
-URL: http://thomasleeper.com/software.html
+URL: https://github.com/leeper/rite
+BugReports: https://github.com/leeper/rite/issues
