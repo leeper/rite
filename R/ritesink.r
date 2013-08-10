@@ -11,8 +11,6 @@ ritesink <- function(..., evalenv=.GlobalEnv, fontFamily="Courier", fontSize=10)
 			bringToTop(-1)
 		sink() # end stdsink
 		close(stdsink)
-		if(exists("osink"))
-			rm(osink)
 		invisible()
 	}
 	on.exit(exitsink)
@@ -49,18 +47,16 @@ ritesink <- function(..., evalenv=.GlobalEnv, fontFamily="Courier", fontSize=10)
 						else{
 							tkinsert(output,"end",paste(e,"\n",collapse=""), ("error"))
 							tksee(output,"end")
-							invisible("badcondition")
+							invisible("othererror")
 						}
 					},
 					warning = function(w){
 						tkinsert(output,"end",paste(w,"\n",collapse=""), ("warning"))
 						tksee(output,"end")
-						invisible("badcondition")
 					},
 					message = function(m){
 						tkinsert(output,"end",paste(m,"\n",collapse=""), ("message"))
 						tksee(output,"end")
-						invisible("badcondition")
 					}
 				)
 			if(any(grepl("unexpectedEOL",out))){
@@ -75,6 +71,7 @@ ritesink <- function(..., evalenv=.GlobalEnv, fontFamily="Courier", fontSize=10)
 									else{
 										tkinsert(output,"end",paste(e,"\n",collapse=""), ("error"))
 										tksee(output,"end")
+										invisible("othererror")
 									}
 								},
 								warning = function(w){
@@ -88,14 +85,21 @@ ritesink <- function(..., evalenv=.GlobalEnv, fontFamily="Courier", fontSize=10)
 							)
 					if(any(grepl("unexpectedEOL",out)))
 						next
-					complete <- TRUE
-					if(out$visible && !is.null(out$value)){
+					else if(any(grepl("othererror",out)))
+						complete <- TRUE
+					else if(is.null(names(out))){
+						tkinsert(output,"end",paste(out,"\n",collapse=""), ("text"))
+						tksee(output,"end")
+						complete <- TRUE
+					}
+					else if(out$visible && !is.null(out$value)){
 						tkinsert(output,"end",paste(capture.output(out$value),"\n",collapse=""), ("text"))
 						tksee(output,"end")
+						complete <- TRUE
 					}
 				}
 			}
-			else if(!out=="badcondition" && out$visible && !is.null(out$value)){
+			else if(!any(grepl("othererror",out)) && out$visible && !is.null(out$value)){
 				tkinsert(output,"end",paste(capture.output(out$value),"\n",collapse=""), ("text"))
 				tksee(output,"end")
 			}
