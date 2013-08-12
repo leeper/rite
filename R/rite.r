@@ -101,6 +101,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		if("windows"==.Platform$OS.type)
 			bringToTop(-1)
 		tkdestroy(editor)
+		unlink(ritetmpfile)
 		#if(is.null(evalenv))
 			#return(mget(ls(editenv),editenv))
 	}
