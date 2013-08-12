@@ -632,6 +632,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				else if(!is.null(txtvalue))
 					knit_out <- try(markdown::markdownToHTML(text=txtvalue))
 			}
+			else if(genmode=="md2html.fragment"){
+				if(!is.null(inputvalue))
+					knit_out <- try(markdown::markdownToHTML(file=inputvalue,fragment.only=TRUE))
+				else if(!is.null(txtvalue))
+					knit_out <- try(markdown::markdownToHTML(text=txtvalue,fragment.only=TRUE))
+			}
 			else if(genmode=="stitch.rnw"){
 				if(!is.null(inputvalue))
 					knit_out <- try(stitch(script=inputvalue))
@@ -1001,6 +1007,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			menuMD <- tkmenu(menuReport, tearoff = FALSE)
 				tkadd(menuMD, "command", label = "Convert md to HTML",
 					command = function() knittxt(genmode="md2html", usefile=FALSE, usetxt=TRUE))
+				tkadd(menuMD, "command", label = "Convert md to HTML fragment",
+					command = function() knittxt(genmode="md2html.fragment", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuMD, "command", label = "knit Rmd to HTML",
 					command = function() knittxt(genmode="rmd2html", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuReport, "cascade", label = "Markdown", menu = menuMD, underline = 0)
@@ -1046,6 +1054,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkadd(menuFromFile, "separator")
 				tkadd(menuFromFile, "command", label = "Convert md to HTML",
 					command = function() knittxt(genmode="md2html", usefile=TRUE, usetxt=FALSE))
+				tkadd(menuFromFile, "command", label = "Convert md to HTML fragment",
+					command = function() knittxt(genmode="md2html.fragment", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuFromFile, "separator")
 				tkadd(menuFromFile, "command", label = "pdflatex",
 					command = function() pdffromfile(texttopdf=FALSE, bibtex=FALSE))
