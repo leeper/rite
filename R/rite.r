@@ -123,9 +123,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		wmtitle <<- packagetitle
 		tkwm.title(editor, wmtitle)
 	}
-	loadScript <- function(fname=NULL, local=TRUE, gist=FALSE){
+	loadScript <- function(fname=NULL, locals=TRUE, gist=FALSE){
 		newScript()
-		if(local){
+		if(locals==TRUE){
 			if(is.null(filename) || is.na(filename) || filename %in% c(""))
 				fname <- tclvalue(tkgetOpenFile())
 			if(!length(fname) || fname==""){
@@ -141,6 +141,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		}
 		else{
 			processEntry <- function() {
+				tkdestroy(gistDialog)
+				entry <- tclvalue(entry)
 				if(gist){
 					# load from gist ( code adapted from httr::source_gist )
 					if (is.numeric(entry) || grepl("^[0-9a-f]+$", entry)) {
@@ -151,8 +153,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 									regmatches(entry, regexpr("[0-9a-f]+$", entry)), sep = "")
 					}
 				}
-				content <- try(RCurl::httpGET(entry),ssl.verifypeer=FALSE)
-				if(!inherits(content),"try-error"){
+				content <- try(RCurl::getURL(entry,ssl.verifypeer=FALSE,followlocation=TRUE))
+				if(!inherits(content,"try-error")){
 					tkinsert(txt_edit, "end", content)
 					scriptSaved <<- FALSE
 				}
@@ -169,7 +171,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkgrid(urlentry, row=2, column=2, columnspan=4)
 				tkgrid(ttklabel(entryform, text = "     "), row=3)
 			tkgrid(entryform)
-			buttons <- tkframe(gethitDialog)
+			buttons <- tkframe(gistDialog)
 				OKbutton <- tkbutton(buttons, text="   OK   ", command=processEntry)
 				Cancelbutton <- tkbutton(buttons, text=" Cancel ",
 					command=function() {tkdestroy(gistDialog); tkfocus(txt_edit)})
@@ -209,57 +211,59 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			tkwm.title(editor, wmtitle)
 		}
 	}
-	saveGist <- function() {
+	saveGist <- function(browse=FALSE) {
 		gisturl <- "https://api.github.com/gists"
 		if(!is.null(filename) && filename=="")
 			description <- filename
 		else
-			description <- "ritescript.txt"
+			description <- "rite script"
 		content <- tclvalue(tkget(txt_edit,"0.0","end"))
+		#gistbody2 <- RJSONIO::toJSON(list(description="rite script", public="true",
+		#					files=list("file1.txt"=list(content=content))),collapse="")
+		content <- gsub("\n","\\\\n",content)
+		content <- gsub("\t","\\\\t",content)
+		content <- gsub("\r","\\\\r",content)
 		gistbody <- paste('{','"description":"',description,'","public":"true"',',"files":{"file1.txt":{"content":"',content,'"}}}',sep="")
-		#gistbody2 <- RJSONIO::toJSON(list(description="test", public="true", files=list("file1.txt"=list(content="2+2"))),collapse="")
 		gistout <- RCurl::postForm(uri=gisturl, .opts=list(postfields = gistbody,
 						followlocation = TRUE, ssl.verifypeer = TRUE, ssl.verifyhost = TRUE,
 						cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl"),
 						httpheader = c('Content-Type' = 'application/json', Accept = 'application/json')))
 		outsplit <- strsplit(gistout,'","')[[1]] # parse JSON
 		gistid <- strsplit(outsplit[grep("id",outsplit)],':"')[[1]][2]
-		results <- paste("Script saved as Gist ",gistid," at: ","https://gist.github.com/",gistid,sep="")
-		if(catchOutput)
+		gistouturl <- paste("https://gist.github.com/",gistid,sep="")
+		results <- paste("Script saved as Gist ",gistid," at: ",gistouturl,sep="")
+		if(catchOutput){
+			tkconfigure(err_out, state="normal")
 			tkinsert(err_out,"end",results)
+			tkconfigure(err_out, state="disabled")
+			tkselect(nb2, 1)
+			tkfocus(txt_edit)
+		}
 		else
 			message(results)
-		
-		gistout2 <- RCurl::curlPerform(url=gisturl, .opts=list(postfields=gistbody,
-						followlocation = TRUE, ssl.verifypeer = TRUE, ssl.verifyhost = TRUE,
-						cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl"),
-						httpheader = c('Content-Type' = 'application/json', Accept = 'application/json')))
-		
-
-
-		
-			
-		temp <- httpPUT(paste("https://api.github.com/gists/",gistid,sep=""), .opts=list(
-						postfields = gistbody,
-						followlocation = TRUE, ssl.verifypeer = TRUE, ssl.verifyhost = TRUE,
-						cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl")))
-		
-		
+		if(browse)
+			browseURL(gistouturl)
 	}
-	includeScript <- function(local=TRUE,gist=FALSE){
-		if(local){
+	includeScript <- function(locals=TRUE,refonly=FALSE,gist=FALSE){
+		if(locals){
 			filename <- tclvalue(tkgetOpenFile())
 			if (!length(filename) || filename=="")
 				return()
 			else{
-				chn <- tclopen(filename, "r")
-				tkinsert(txt_edit, "insert", tclvalue(tclread(chn)))
-				tclclose(chn)
+				if(refonly)
+					tkinsert(txt_edit, "insert", paste("source(\"",filename,"\")\n",sep=""))
+				else{
+					chn <- tclopen(filename, "r")
+					tkinsert(txt_edit, "insert", tclvalue(tclread(chn)))
+					tclclose(chn)
+				}
 				scriptSaved <<- FALSE
 			}
 		}
 		else{
 			processEntry <- function() {
+				tkdestroy(gistDialog)
+				entry <- tclvalue(entry)
 				if(gist) {
 					# load from gist ( code adapted from httr::source_gist )
 					if (is.numeric(entry) || grepl("^[0-9a-f]+$", entry)) {
@@ -270,13 +274,25 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 									regmatches(entry, regexpr("[0-9a-f]+$", entry)), sep = "")
 					}
 				}
-				content <- try(RCurl::httpGET(entry),ssl.verifypeer=FALSE)
-				if(!inherits(content),"try-error"){
-					tkinsert(txt_edit, "end", content)
-					scriptSaved <<- FALSE
+				if(refonly){
+					if(gist || grepl("https",entry))
+						tkinsert(txt_edit, "insert", paste(
+							"library(RCurl)\n",
+							"writeLines(getURL('",entry,
+								"',\n\tssl.verifypeer=FALSE,followlocation=TRUE),\n\ttemp_file <- tempfile())\n",
+							"source(temp_file)\n",
+							"unlink(temp_file)\n",sep=""))
+					else
+						tkinsert(txt_edit, "insert", paste("source(\"",entry,"\")\n",sep=""))
 				}
-				else
-					tkmessageBox(message="Script not loaded!", icon="error")				
+				else{
+					content <- try(RCurl::getURL(entry,ssl.verifypeer=FALSE,followlocation=TRUE))
+					if(!inherits(content,"try-error"))
+						tkinsert(txt_edit, "insert", content)
+					else
+						tkmessageBox(message="Script not loaded!", icon="error")
+				}
+				scriptSaved <<- FALSE
 			}
 			gistDialog <- tktoplevel()
 			if(gist)
@@ -294,7 +310,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkgrid(urlentry, row=2, column=2, columnspan=4)
 				tkgrid(ttklabel(entryform, text = "     "), row=3)
 			tkgrid(entryform)
-			buttons <- tkframe(gethitDialog)
+			buttons <- tkframe(gistDialog)
 				OKbutton <- tkbutton(buttons, text="   OK   ", command=processEntry)
 				Cancelbutton <- tkbutton(buttons, text=" Cancel ",
 					command=function() {tkdestroy(gistDialog); tkfocus(txt_edit)})
@@ -303,21 +319,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			tkgrid(buttons)
 			tkfocus(gistDialog)
 		}
-	}
-	includeScriptReference <- function(local=TRUE){
-		if(local){
-			filename <- tclvalue(tkgetOpenFile())
-		}
-		else{
-			# window to enter URL
-			# filename <- # value from window
-			# if filename is https, insert "library(RCurl); getURL(filename)"
-			# invisible()
-		}
-		if (!length(filename) || filename=="")
-			return()
-		else
-			tkinsert(txt_edit, "insert", paste("source(\"",filename,"\")\n",sep=""))
 	}
 	
 	
@@ -856,26 +857,34 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	tkconfigure(editor, menu = menuTop) # Add it to the 'editor' window
 	menuFile <- tkmenu(menuTop, tearoff = FALSE)
 		tkadd(menuFile, "command", label="New Script", command=newScript, underline = 0)
-		tkadd(menuFile, "command", label="Load Script", command=loadScript, underline = 0)
+		tkadd(menuFile, "command", label="Load Script",
+			command=function() loadScript(locals=TRUE), underline = 0)
 		tkadd(menuFile, "command", label="Save Script", command=saveScript, underline = 0)
 		tkadd(menuFile, "command", label="SaveAs Script", command=saveAsScript, underline = 1)
-		tkadd(menuFile, "command", label="Append Script", command=includeScript, underline = 1)
-		tkadd(menuFile, "command", label="Insert Script Reference", command=includeScriptReference, underline = 0)
+		tkadd(menuFile, "command", label="Append Script",
+			command=function() includeScript(locals=TRUE), underline = 1)
+		tkadd(menuFile, "command", label="Insert Script Reference",
+			command=function() includeScript(locals=TRUE, refonly=TRUE), underline = 0)
 		tkadd(menuFile, "separator")
 		menuFileWeb <- tkmenu(menuFile, tearoff = FALSE)
-			tkadd(menuFile, "command", label="Load Remote Script",
-				command=function() loadScript(local=FALSE), underline = 0)
-			tkadd(menuFile, "command", label="Append Remote Script",
-				command=function() includeScript(local=FALSE), underline = 1)
-			tkadd(menuFile, "command", label="Insert Remote Script Reference",
-				command=function() includeScriptReference(local=FALSE), underline = 0)
-			tkadd(menuFile, "separator")
-			tkadd(menuFile, "command", label="Load Script from Gist",
-				command=function() loadScript(local=FALSE,gist=TRUE), underline = 0)
-			tkadd(menuFile, "command", label="Include Script from Gist",
-				command=function() includeScript(local=FALSE,gist=TRUE), underline = 0)
-			tkadd(menuFile, "command", label="Save Script as Gist",
+			tkadd(menuFileWeb, "command", label="Load Remote Script",
+				command=function() loadScript(locals=FALSE), underline = 0)
+			tkadd(menuFileWeb, "command", label="Append Remote Script",
+				command=function() includeScript(locals=FALSE, refonly=FALSE), underline = 1)
+			tkadd(menuFileWeb, "command", label="Insert Remote Script Reference",
+				command=function() includeScript(locals=FALSE,refonly=TRUE), underline = 0)
+			tkadd(menuFileWeb, "separator")
+			tkadd(menuFileWeb, "command", label="Load Script from Gist",
+				command=function() loadScript(locals=FALSE,gist=TRUE), underline = 0)
+			tkadd(menuFileWeb, "command", label="Append Script from Gist",
+				command=function() includeScript(locals=FALSE,gist=TRUE), underline = 0)
+			tkadd(menuFileWeb, "command", label="Insert Gist Reference",
+				command=function() includeScript(locals=FALSE,gist=TRUE,refonly=TRUE), underline = 0)
+			tkadd(menuFileWeb, "separator")
+			tkadd(menuFileWeb, "command", label="Save Script as Gist",
 				command=function() saveGist(), underline = 0)
+			tkadd(menuFileWeb, "command", label="Save Script as Gist and Open",
+				command=function() saveGist(browse=TRUE), underline = 0)
 			tkadd(menuFile, "cascade", label = "Remote scripts...", menu = menuFileWeb, underline = 0)
 		tkadd(menuFile, "separator")
 		tkadd(menuFile, "command", label="Change dir...", command=function(...){
