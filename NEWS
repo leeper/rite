@@ -1,6 +1,8 @@
 # CHANGES to rite 0.3 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
+* Added the ability to load/append/reference a remote file either via printing a `source` call or a multi-line command using **RCurl** and `source`.
+* Added support for loading from and (anonymously) saving to Github gists.
 * Added support for the **knitr** functions `stitch` and `spin`, as well as markdown conversion to the Report Generation menu; reorganized the menu accordingly.
 * A new function `riteout` provides a shorter name wrapper for `rite(catchOutput=TRUE)`.
 * A new function `ritesink` provides an experimental (and primitive) tk widget for displaying color-coded R output.

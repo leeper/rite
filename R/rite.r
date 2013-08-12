@@ -162,7 +162,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					tkmessageBox(message="Gist not loaded!", icon="error")
 			}
 			gistDialog <- tktoplevel()
-			tkwm.title(gistDialog, "Enter Gist ID or raw URL")
+			if(gist)
+				tkwm.title(gistDialog, "Enter Gist ID or raw URL")
+			else
+				tkwm.title(gistDialog, "Enter raw URL")
 			entryform <- tkframe(gistDialog, relief="groove", borderwidth=2)
 				entry <- tclVar()
 				tkgrid(ttklabel(entryform, text = "     "), row=1)
