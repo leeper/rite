@@ -123,7 +123,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		wmtitle <<- packagetitle
 		tkwm.title(editor, wmtitle)
 	}
-	loadScript <- function(fname=NULL, local=TRUE){
+	loadScript <- function(fname=NULL, local=TRUE, gist=FALSE){
 		newScript()
 		if(local){
 			if(is.null(filename) || is.na(filename) || filename %in% c(""))
@@ -140,10 +140,43 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			tkwm.title(editor, wmtitle)
 		}
 		else{
-			# window to enter URL
-			# filename <- # value from window
-			# if filename is https, insert "library(RCurl); getURL(filename)"
-			# invisible()
+			processEntry <- function() {
+				if(gist){
+					# load from gist ( code adapted from httr::source_gist )
+					if (is.numeric(entry) || grepl("^[0-9a-f]+$", entry)) {
+						entry <- paste("https://raw.github.com/gist/", entry, sep = "")
+					}
+					else if (grepl("((^https://)|^)gist.github.com/([^/]+/)?[0-9a-f]+$", entry)) {
+						entry <- paste("https://raw.github.com/gist/",
+									regmatches(entry, regexpr("[0-9a-f]+$", entry)), sep = "")
+					}
+				}
+				content <- try(RCurl::httpGET(entry),ssl.verifypeer=FALSE)
+				if(!inherits(content),"try-error"){
+					tkinsert(txt_edit, "end", content)
+					scriptSaved <<- FALSE
+				}
+				else
+					tkmessageBox(message="Gist not loaded!", icon="error")
+			}
+			gistDialog <- tktoplevel()
+			tkwm.title(gistDialog, "Enter Gist ID or raw URL")
+			entryform <- tkframe(gistDialog, relief="groove", borderwidth=2)
+				entry <- tclVar()
+				tkgrid(ttklabel(entryform, text = "     "), row=1)
+				urlentry <- tkentry(entryform, width = 50, textvariable=entry)
+				tkgrid(tklabel(entryform, text = "ID/URL: "), row=2, column=1)
+				tkgrid(urlentry, row=2, column=2, columnspan=4)
+				tkgrid(ttklabel(entryform, text = "     "), row=3)
+			tkgrid(entryform)
+			buttons <- tkframe(gethitDialog)
+				OKbutton <- tkbutton(buttons, text="   OK   ", command=processEntry)
+				Cancelbutton <- tkbutton(buttons, text=" Cancel ",
+					command=function() {tkdestroy(gistDialog); tkfocus(txt_edit)})
+				tkgrid(OKbutton, row=1, column=2)
+				tkgrid(Cancelbutton, row=1, column=3)
+			tkgrid(buttons)
+			tkfocus(gistDialog)
 		}
 	}
 	saveScript <- function(){
@@ -177,12 +210,43 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		}
 	}
 	saveGist <- function() {
-		# save to a gist
+		gisturl <- "https://api.github.com/gists"
+		if(!is.null(filename) && filename=="")
+			description <- filename
+		else
+			description <- "ritescript.txt"
+		content <- tclvalue(tkget(txt_edit,"0.0","end"))
+		gistbody <- paste('{','"description":"',description,'","public":"true"',',"files":{"file1.txt":{"content":"',content,'"}}}',sep="")
+		#gistbody2 <- RJSONIO::toJSON(list(description="test", public="true", files=list("file1.txt"=list(content="2+2"))),collapse="")
+		gistout <- RCurl::postForm(uri=gisturl, .opts=list(postfields = gistbody,
+						followlocation = TRUE, ssl.verifypeer = TRUE, ssl.verifyhost = TRUE,
+						cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl"),
+						httpheader = c('Content-Type' = 'application/json', Accept = 'application/json')))
+		outsplit <- strsplit(gistout,'","')[[1]] # parse JSON
+		gistid <- strsplit(outsplit[grep("id",outsplit)],':"')[[1]][2]
+		results <- paste("Script saved as Gist ",gistid," at: ","https://gist.github.com/",gistid,sep="")
+		if(catchOutput)
+			tkinsert(err_out,"end",results)
+		else
+			message(results)
+		
+		gistout2 <- RCurl::curlPerform(url=gisturl, .opts=list(postfields=gistbody,
+						followlocation = TRUE, ssl.verifypeer = TRUE, ssl.verifyhost = TRUE,
+						cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl"),
+						httpheader = c('Content-Type' = 'application/json', Accept = 'application/json')))
+		
+
+
+		
+			
+		temp <- httpPUT(paste("https://api.github.com/gists/",gistid,sep=""), .opts=list(
+						postfields = gistbody,
+						followlocation = TRUE, ssl.verifypeer = TRUE, ssl.verifyhost = TRUE,
+						cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl")))
+		
+		
 	}
-	loadGist <- function() {
-		# load from gist
-	}
-	includeScript <- function(local=TRUE){
+	includeScript <- function(local=TRUE,gist=FALSE){
 		if(local){
 			filename <- tclvalue(tkgetOpenFile())
 			if (!length(filename) || filename=="")
@@ -195,10 +259,49 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			}
 		}
 		else{
-			# window to enter URL
-			# filename <- # value from window
-			# if filename is https, insert "library(RCurl); getURL(filename)"
-			# invisible()
+			processEntry <- function() {
+				if(gist) {
+					# load from gist ( code adapted from httr::source_gist )
+					if (is.numeric(entry) || grepl("^[0-9a-f]+$", entry)) {
+						entry <- paste("https://raw.github.com/gist/", entry, sep = "")
+					}
+					else if (grepl("((^https://)|^)gist.github.com/([^/]+/)?[0-9a-f]+$", entry)) {
+						entry <- paste("https://raw.github.com/gist/",
+									regmatches(entry, regexpr("[0-9a-f]+$", entry)), sep = "")
+					}
+				}
+				content <- try(RCurl::httpGET(entry),ssl.verifypeer=FALSE)
+				if(!inherits(content),"try-error"){
+					tkinsert(txt_edit, "end", content)
+					scriptSaved <<- FALSE
+				}
+				else
+					tkmessageBox(message="Script not loaded!", icon="error")				
+			}
+			gistDialog <- tktoplevel()
+			if(gist)
+				tkwm.title(gistDialog, "Enter Gist ID or raw URL")
+			else
+				tkwm.title(gistDialog, "Enter Script URL")
+			entryform <- tkframe(gistDialog, relief="groove", borderwidth=2)
+				entry <- tclVar()
+				tkgrid(ttklabel(entryform, text = "     "), row=1)
+				urlentry <- tkentry(entryform, width = 50, textvariable=entry)
+				if(gist)
+					tkgrid(tklabel(entryform, text = "ID/URL: "), row=2, column=1)
+				else
+					tkgrid(tklabel(entryform, text = "URL: "), row=2, column=1)
+				tkgrid(urlentry, row=2, column=2, columnspan=4)
+				tkgrid(ttklabel(entryform, text = "     "), row=3)
+			tkgrid(entryform)
+			buttons <- tkframe(gethitDialog)
+				OKbutton <- tkbutton(buttons, text="   OK   ", command=processEntry)
+				Cancelbutton <- tkbutton(buttons, text=" Cancel ",
+					command=function() {tkdestroy(gistDialog); tkfocus(txt_edit)})
+				tkgrid(OKbutton, row=1, column=2)
+				tkgrid(Cancelbutton, row=1, column=3)
+			tkgrid(buttons)
+			tkfocus(gistDialog)
 		}
 	}
 	includeScriptReference <- function(local=TRUE){
@@ -766,10 +869,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				command=function() includeScript(local=FALSE), underline = 1)
 			tkadd(menuFile, "command", label="Insert Remote Script Reference",
 				command=function() includeScriptReference(local=FALSE), underline = 0)
+			tkadd(menuFile, "separator")
+			tkadd(menuFile, "command", label="Load Script from Gist",
+				command=function() loadScript(local=FALSE,gist=TRUE), underline = 0)
+			tkadd(menuFile, "command", label="Include Script from Gist",
+				command=function() includeScript(local=FALSE,gist=TRUE), underline = 0)
 			tkadd(menuFile, "command", label="Save Script as Gist",
 				command=function() saveGist(), underline = 0)
-			tkadd(menuFile, "command", label="Load Script from Gist",
-				command=function() loadGist(), underline = 0)
 			tkadd(menuFile, "cascade", label = "Remote scripts...", menu = menuFileWeb, underline = 0)
 		tkadd(menuFile, "separator")
 		tkadd(menuFile, "command", label="Change dir...", command=function(...){

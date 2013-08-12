@@ -2,5 +2,6 @@
 import(tcltk)
 import(tcltk2)
 importFrom(utils, available.packages, install.packages)
+importFrom(RCurl, getURL, postForm)
 
 exportPattern("^[[:alpha:]]+")
