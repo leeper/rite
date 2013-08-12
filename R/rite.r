@@ -123,20 +123,28 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		wmtitle <<- packagetitle
 		tkwm.title(editor, wmtitle)
 	}
-	loadScript <- function(fname=NULL){
+	loadScript <- function(fname=NULL, local=TRUE){
 		newScript()
-		if(is.null(filename) || is.na(filename) || filename %in% c(""))
-			fname <- tclvalue(tkgetOpenFile())
-		if(!length(fname) || fname==""){
-			return()
+		if(local){
+			if(is.null(filename) || is.na(filename) || filename %in% c(""))
+				fname <- tclvalue(tkgetOpenFile())
+			if(!length(fname) || fname==""){
+				return()
+			}
+			chn <- tclopen(fname, "r")
+			tkinsert(txt_edit, "end", tclvalue(tclread(chn)))
+			tclclose(chn)
+			scriptSaved <<- TRUE
+			filename <<- fname
+			wmtitle <<- paste(filename,"-",packagetitle)
+			tkwm.title(editor, wmtitle)
 		}
-		chn <- tclopen(fname, "r")
-		tkinsert(txt_edit, "end", tclvalue(tclread(chn)))
-		tclclose(chn)
-		scriptSaved <<- TRUE
-		filename <<- fname
-		wmtitle <<- paste(filename,"-",packagetitle)
-		tkwm.title(editor, wmtitle)
+		else{
+			# window to enter URL
+			# filename <- # value from window
+			# if filename is https, insert "library(RCurl); getURL(filename)"
+			# invisible()
+		}
 	}
 	saveScript <- function(){
 		if(is.null(filename) || !length(filename) || filename=="")
@@ -167,27 +175,48 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			wmtitle <<- paste(fname,"-",wmtitle)
 			tkwm.title(editor, wmtitle)
 		}
-	}	
-	includeScript <- function(){
-		filename <- tclvalue(tkgetOpenFile())
-		if (!length(filename) || filename==""){
-			filename <<- filename
-			return()
+	}
+	saveGist <- function() {
+		# save to a gist
+	}
+	loadGist <- function() {
+		# load from gist
+	}
+	includeScript <- function(local=TRUE){
+		if(local){
+			filename <- tclvalue(tkgetOpenFile())
+			if (!length(filename) || filename=="")
+				return()
+			else{
+				chn <- tclopen(filename, "r")
+				tkinsert(txt_edit, "insert", tclvalue(tclread(chn)))
+				tclclose(chn)
+				scriptSaved <<- FALSE
+			}
 		}
 		else{
-			chn <- tclopen(filename, "r")
-			tkinsert(txt_edit, "insert", tclvalue(tclread(chn)))
-			tclclose(chn)
-			scriptSaved <<- FALSE
+			# window to enter URL
+			# filename <- # value from window
+			# if filename is https, insert "library(RCurl); getURL(filename)"
+			# invisible()
 		}
 	}
-	includeScriptReference <- function(){
-		filename <- tclvalue(tkgetOpenFile())
+	includeScriptReference <- function(local=TRUE){
+		if(local){
+			filename <- tclvalue(tkgetOpenFile())
+		}
+		else{
+			# window to enter URL
+			# filename <- # value from window
+			# if filename is https, insert "library(RCurl); getURL(filename)"
+			# invisible()
+		}
 		if (!length(filename) || filename=="")
 			return()
 		else
-			tkinsert(txt_edit, "insert", paste("sys.source(\"",filename,"\")\n",sep=""))
+			tkinsert(txt_edit, "insert", paste("source(\"",filename,"\")\n",sep=""))
 	}
+	
 	
 	### RUN FUNCTIONS ###
 	runCode <- function(code=NULL, e=NULL) {
@@ -729,6 +758,19 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		tkadd(menuFile, "command", label="SaveAs Script", command=saveAsScript, underline = 1)
 		tkadd(menuFile, "command", label="Append Script", command=includeScript, underline = 1)
 		tkadd(menuFile, "command", label="Insert Script Reference", command=includeScriptReference, underline = 0)
+		tkadd(menuFile, "separator")
+		menuFileWeb <- tkmenu(menuFile, tearoff = FALSE)
+			tkadd(menuFile, "command", label="Load Remote Script",
+				command=function() loadScript(local=FALSE), underline = 0)
+			tkadd(menuFile, "command", label="Append Remote Script",
+				command=function() includeScript(local=FALSE), underline = 1)
+			tkadd(menuFile, "command", label="Insert Remote Script Reference",
+				command=function() includeScriptReference(local=FALSE), underline = 0)
+			tkadd(menuFile, "command", label="Save Script as Gist",
+				command=function() saveGist(), underline = 0)
+			tkadd(menuFile, "command", label="Load Script from Gist",
+				command=function() loadGist(), underline = 0)
+			tkadd(menuFile, "cascade", label = "Remote scripts...", menu = menuFileWeb, underline = 0)
 		tkadd(menuFile, "separator")
 		tkadd(menuFile, "command", label="Change dir...", command=function(...){
 			tkdir <- tclvalue(tkchooseDirectory())
