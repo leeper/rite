@@ -1,20 +1,17 @@
 rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				fontFamily="Courier", fontSize=10, orientation="horizontal",
 				highlight="r", color=NULL, autosave=TRUE, ...){	
-	# setup some values to deal with load/save/exit
+	## STARTUP OPTIONS ##
 	filename <- filename # script filename (if loaded or saved)
 	scriptSaved <- TRUE # a logical for whether current edit file is saved
 	searchterm <- ""
 	ritetmpfile <- tempfile(pattern="rite",fileext=".r")
 	wmtitle <- packagetitle <- "rite"
-	
 	# optionally setup evaluation environment
 	if(is.null(evalenv)){
 		editenv <- new.env()
 		evalenv <- editenv
 	}
-	
-	# color rules
 	hcolors <- list(normal = "black", # txt_edit normal font color
 					background = "white", # txt_edit background color
 					functions = "purple",
@@ -45,8 +42,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				hcolors[[names(color)[i]]] <- color[[i]]
 		}
 	}
-	
-	# configure catchOutput/catchError
 	if(catchOutput){
 		outputSaved <- TRUE # a logical for whether current output file is saved
 		outsink <- textConnection("osink", "w") # create connection for stdout
@@ -58,7 +53,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			writeLines(text=paste(as.character(unlist(list(...))), collapse=sep), sep="\n", con=ritecat)
 	}
 			
-	# exit procedure
+	## EXIT PROCEDURE ##
 	exitWiz <- function() {
 		if(catchOutput){
 			if(!outputSaved){
@@ -104,7 +99,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		unlink(ritetmpfile)
 	}
 	
-	### FILE MENU FUNCTIONS ###
+	## FILE MENU FUNCTIONS ##
 	newScript <- function(){
 		if(!scriptSaved){
 			exit <- tkmessageBox(message = "Do you want to save the current script?", icon = "question", type = "yesnocancel", default = "yes")			
@@ -323,7 +318,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		}
 	}
 	
-	### RUN FUNCTIONS ###
+	## RUN FUNCTIONS ##
 	runCode <- function(code=NULL, e=NULL) {
 		if(is.null(e)){
 			e <- try(parse(text=code))
@@ -528,7 +523,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		runCode(tclvalue(tkget(txt_edit,"1.0","end")))
 	}
 
-	### OUTPUT FUNCTIONS ###
+	## OUTPUT FUNCTIONS ##
 	if(catchOutput){
 		saveOutput <- function(outfilename="") {
 			if(outfilename=="")
@@ -777,7 +772,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		}
 	}
 	
-	### HELP MENU FUNCTIONS ###
+	## HELP MENU FUNCTIONS ##
 	addHighlighting <- function(){
 		addHighlight <- function(){
 			if(!tclvalue(objectval)=="")
@@ -795,7 +790,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		}
 		highlightbox <- tktoplevel()
 		tkwm.title(highlightbox, paste("Add Highlighting Class",sep=""))
-		#tkwm.iconbitmap(highlightbox,system.file("logo", "rlogo.gif", package = "rite"))
 		r <- 1
 		tkgrid.columnconfigure(highlightbox,1,weight=3)
 		tkgrid.columnconfigure(highlightbox,2,weight=10)
@@ -851,12 +845,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		tkfocus(aboutbox)
 	}
 	
-	### EDITOR LAYOUT ###
+	## EDITOR LAYOUT ##
 	editor <- tktoplevel(borderwidth=0)
 	tkwm.title(editor, wmtitle)	# title
 	tkwm.protocol(editor, "WM_DELETE_WINDOW", exitWiz) # regulate exit
 
-	### EDITOR MENUS ###
+	## EDITOR MENUS ##
 	menuTop <- tkmenu(editor)           # Create a menu
 	tkconfigure(editor, menu = menuTop) # Add it to the 'editor' window
 	menuFile <- tkmenu(menuTop, tearoff = FALSE)
@@ -1128,7 +1122,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	}
 	tkpack(pw, fill="both", expand = "yes") # pack panedwindow to editor
 
-	### KEY BINDINGS ###	
+	## KEY BINDINGS ##
 	f1 <- function(){
 		if(!tclvalue(tktag.ranges(txt_edit,"sel"))=="")
 			command <- tclvalue(tkget(txt_edit,"sel.first","sel.last"))
@@ -1623,7 +1617,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	}
 	tkbind(txt_edit, "<Button-3>", rightClick)
 	
-	## SYNTAX HIGHLIGHTING RULES
+	## SYNTAX HIGHLIGHTING RULES ##
 	# latex
 	if("latex" %in% highlight){
 		# a macro without any brackets
@@ -1730,7 +1724,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," comments ",hcolors$rcomments," {#[^\n\r]*}",sep=""))
 	}
 	
-	# DISPLAY EDITOR
+	## DISPLAY EDITOR ##
 	if(!is.null(filename))
 		loadScript(fname=filename)
 	tkmark.set(txt_edit,"insert","1.0")
