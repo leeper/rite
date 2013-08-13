@@ -1649,12 +1649,21 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	if("markdown" %in% highlight){
 		message("Highlighting for markdown is only minimally supported")
 		# something for the various kinds of markdown syntax
-		## headers [both kinds], bold, italics, strikethrough, lists, links, images, latex equations, MathML equations
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdheader1 ', hcolors$rmd, ' =+', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdheader2 ', hcolors$rmd, ' -+', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdheader3 ', hcolors$rmd, ' {#{1,6} *.+ *#{0,6}$}', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdlist1 ', hcolors$rmd, ' {^ *[-] .+$}', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdlist2 ', hcolors$rmd, ' {^ *[+] .+$}', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdlist3 ', hcolors$rmd, ' {^ *[*] .+$}', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdlist4 ', hcolors$rmd, ' {[0-9]+[.] .+$}', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdquote ', hcolors$rmd, ' {^ *[>].+$}', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdlink ', hcolors$rmd, ' {\\[.+\\]\\(.+\\)}', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdcode ', hcolors$rmd, ' {`[^r].+`}', sep=''))
 		# code chunks of the form ```{} ... ```
 		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdchunk1 ', hcolors$rmdchunks, ' `{3}\\{r.+\\}', sep=''))
 		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdchunk2 ', hcolors$rmdchunks, ' `{3}', sep=''))
 		# inline code chunks of the form `r ...`
-		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdchunk3 ', hcolors$rmdchunks, ' `r.+`', sep=''))
+		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdchunk3 ', hcolors$rmdchunks, ' {`r .+`}', sep=''))
 	}
 	# html
 	if("xml" %in% highlight){
