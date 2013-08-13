@@ -1168,7 +1168,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	commandCompletion <- function(){
 		iwordstart <- tclvalue(tkindex(txt_edit,"insert-1char wordstart"))
 		iwordend <- tclvalue(tkindex(txt_edit,"insert-1char wordend"))
-		command <- tclvalue(tkget(txt_edit, iwordstart, iwordend))
+		sel <- tclvalue(tktag.ranges(txt_edit,"sel"))
+		if(!sel=="")
+			command <- sel
+		else
+			command <- tclvalue(tkget(txt_edit, iwordstart, iwordend))
 		tkmark.set(txt_edit, "temp", "insert-2char")
 		if(command=="(")
 			command <- paste(tclvalue(tkget(txt_edit, "temp wordstart", "temp wordend")),"(",sep="")
@@ -1178,61 +1182,23 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			tkmark.set(txt_edit, "temp", "temp wordstart-2char")
 			command <- paste(tclvalue(tkget(txt_edit, "temp wordstart", "temp wordend")),command,sep=".")
 		}
-		if(command %in% c("\n","\t"," ","(",")","[","]","{","}","=",",","*","/","+","-","^","%","$"))
-			return()
+		fnlist <- vector(mode="character")
+		#if(command %in% c("\n","\t"," ","(",")","[","]","{","}","=",",","*","/","+","-","^","%","$","<",">"))
+		#	return()
+		if(tclvalue(tkget(txt_edit, "insert linestart", "insert")) %in%
+				c("<<","```{r","<!--begin.rcode","..~{r","% begin.rcode")){
+			fnlist <- c("eval","echo","results","tidy","cache",
+						"fig.width","fig.height","out.width","out.height",
+						"include","child","engine")
+			insertCommand <- function(x)
+				tkinsert(txt_edit, "insert", paste(" ",fnlist[x],"=",sep=""))
+			fnContextMenu <- tkmenu(txt_edit, tearoff = FALSE)
+		}
 		else if(substring(command,nchar(command),nchar(command))=="("){
 			fnlist <- try(names(formals(substring(command,1,nchar(command)-1))),silent=TRUE)
 			if(!inherits(fnlist,"try-error")) {
 				insertCommand <- function(x)
 					tkinsert(txt_edit, "insert", paste(fnlist[x],"=",sep=""))
-				fnContextMenu <- tkmenu(txt_edit, tearoff = FALSE)
-				# conditionally add menu items
-				## adding them programmatically failed to work (always added last command)
-					if(length(fnlist)>0)
-						tkadd(fnContextMenu, "command", label = fnlist[1], command = function() insertCommand(1))
-					if(length(fnlist)>1)
-						tkadd(fnContextMenu, "command", label = fnlist[2], command = function() insertCommand(2))
-					if(length(fnlist)>2)
-						tkadd(fnContextMenu, "command", label = fnlist[3], command = function() insertCommand(3))
-					if(length(fnlist)>3)
-						tkadd(fnContextMenu, "command", label = fnlist[4], command = function() insertCommand(4))
-					if(length(fnlist)>4)
-						tkadd(fnContextMenu, "command", label = fnlist[5], command = function() insertCommand(5))
-					if(length(fnlist)>5)
-						tkadd(fnContextMenu, "command", label = fnlist[6], command = function() insertCommand(6))
-					if(length(fnlist)>6)
-						tkadd(fnContextMenu, "command", label = fnlist[7], command = function() insertCommand(7))
-					if(length(fnlist)>7)
-						tkadd(fnContextMenu, "command", label = fnlist[8], command = function() insertCommand(8))
-					if(length(fnlist)>8)
-						tkadd(fnContextMenu, "command", label = fnlist[9], command = function() insertCommand(9))
-					if(length(fnlist)>9)
-						tkadd(fnContextMenu, "command", label = fnlist[10], command = function() insertCommand(10))
-					if(length(fnlist)>10)
-						tkadd(fnContextMenu, "command", label = fnlist[11], command = function() insertCommand(11))
-					if(length(fnlist)>11)
-						tkadd(fnContextMenu, "command", label = fnlist[12], command = function() insertCommand(12))
-					if(length(fnlist)>12)
-						tkadd(fnContextMenu, "command", label = fnlist[13], command = function() insertCommand(13))
-					if(length(fnlist)>13)
-						tkadd(fnContextMenu, "command", label = fnlist[14], command = function() insertCommand(14))
-					if(length(fnlist)>14)
-						tkadd(fnContextMenu, "command", label = fnlist[14], command = function() insertCommand(15))
-				# root x,y
-				rootx <- as.integer(tkwinfo("rootx", txt_edit))
-				rooty <- as.integer(tkwinfo("rooty", txt_edit))
-				# line height
-				font <- strsplit(tclvalue(tkfont.metrics(fontFamily))," -")[[1]]
-				lheight <- as.numeric(strsplit(font[grepl("linespace",font)]," ")[[1]][2])
-				nl <- floor(as.numeric(iwordstart))
-				# font width
-				wordnchar <- as.numeric(strsplit(as.character(as.numeric(iwordend) %% 1),".",fixed=TRUE)[[1]][2])
-				fontwidth <- as.numeric(tkfont.measure("m", fontFamily))
-				# @x,y position
-				xTxt <- rootx + wordnchar
-				yTxt <- rooty + lheight*nl
-				tkpost(fnContextMenu, xTxt, yTxt)
-				tkbind(fnContextMenu, "<Shift-Tab>", function() tkunpost(fnContextMenu))
 			}
 		}
 		else if(substring(command,nchar(command),nchar(command))=="$"){
@@ -1240,54 +1206,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			if(!inherits(fnlist,"try-error")) {
 				insertCommand <- function(x)
 					tkinsert(txt_edit, "insert", fnlist[x])
-				fnContextMenu <- tkmenu(txt_edit, tearoff = FALSE)
-				# conditionally add menu items
-				## adding them programmatically failed to work (always added last command)
-					if(length(fnlist)>0)
-						tkadd(fnContextMenu, "command", label = fnlist[1], command = function() insertCommand(1))
-					if(length(fnlist)>1)
-						tkadd(fnContextMenu, "command", label = fnlist[2], command = function() insertCommand(2))
-					if(length(fnlist)>2)
-						tkadd(fnContextMenu, "command", label = fnlist[3], command = function() insertCommand(3))
-					if(length(fnlist)>3)
-						tkadd(fnContextMenu, "command", label = fnlist[4], command = function() insertCommand(4))
-					if(length(fnlist)>4)
-						tkadd(fnContextMenu, "command", label = fnlist[5], command = function() insertCommand(5))
-					if(length(fnlist)>5)
-						tkadd(fnContextMenu, "command", label = fnlist[6], command = function() insertCommand(6))
-					if(length(fnlist)>6)
-						tkadd(fnContextMenu, "command", label = fnlist[7], command = function() insertCommand(7))
-					if(length(fnlist)>7)
-						tkadd(fnContextMenu, "command", label = fnlist[8], command = function() insertCommand(8))
-					if(length(fnlist)>8)
-						tkadd(fnContextMenu, "command", label = fnlist[9], command = function() insertCommand(9))
-					if(length(fnlist)>9)
-						tkadd(fnContextMenu, "command", label = fnlist[10], command = function() insertCommand(10))
-					if(length(fnlist)>10)
-						tkadd(fnContextMenu, "command", label = fnlist[11], command = function() insertCommand(11))
-					if(length(fnlist)>11)
-						tkadd(fnContextMenu, "command", label = fnlist[12], command = function() insertCommand(12))
-					if(length(fnlist)>12)
-						tkadd(fnContextMenu, "command", label = fnlist[13], command = function() insertCommand(13))
-					if(length(fnlist)>13)
-						tkadd(fnContextMenu, "command", label = fnlist[14], command = function() insertCommand(14))
-					if(length(fnlist)>13)
-						tkadd(fnContextMenu, "command", label = fnlist[14], command = function() insertCommand(15))
-				# root x,
-				rootx <- as.integer(tkwinfo("rootx", txt_edit))
-				rooty <- as.integer(tkwinfo("rooty", txt_edit))
-				# line height
-				font <- strsplit(tclvalue(tkfont.metrics(fontFamily))," -")[[1]]
-				lheight <- as.numeric(strsplit(font[grepl("linespace",font)]," ")[[1]][2])
-				nl <- floor(as.numeric(iwordstart))
-				# font width
-				wordnchar <- as.numeric(strsplit(as.character(as.numeric(iwordend) %% 1),".",fixed=TRUE)[[1]][2])
-				fontwidth <- as.numeric(tkfont.measure("m", fontFamily))
-				# @x,y position
-				xTxt <- rootx + wordnchar
-				yTxt <- rooty + lheight*nl
-				tkpost(fnContextMenu, xTxt, yTxt)
-				tkbind(fnContextMenu, "<Shift-Tab>", function() tkunpost(fnContextMenu))
 			}
 		}
 		else{
@@ -1295,60 +1213,60 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			fnlist <- apropos(paste("^", command,sep=""))
 			if(length(fnlist<15))
 				fnlist <- unique(c(fnlist, apropos(command)))
-			if(length(fnlist)>0){
-				insertCommand <- function(x){
-					tkdelete(txt_edit, "temp wordstart", iwordend)
-					tkinsert(txt_edit, "insert", fnlist[x])
-				}
-				fnContextMenu <- tkmenu(txt_edit, tearoff = FALSE)
-				# conditionally add menu items
-				## adding them programmatically failed to work (always added last command)
-					if(length(fnlist)>0)
-						tkadd(fnContextMenu, "command", label = fnlist[1], command = function() insertCommand(1))
-					if(length(fnlist)>1)
-						tkadd(fnContextMenu, "command", label = fnlist[2], command = function() insertCommand(2))
-					if(length(fnlist)>2)
-						tkadd(fnContextMenu, "command", label = fnlist[3], command = function() insertCommand(3))
-					if(length(fnlist)>3)
-						tkadd(fnContextMenu, "command", label = fnlist[4], command = function() insertCommand(4))
-					if(length(fnlist)>4)
-						tkadd(fnContextMenu, "command", label = fnlist[5], command = function() insertCommand(5))
-					if(length(fnlist)>5)
-						tkadd(fnContextMenu, "command", label = fnlist[6], command = function() insertCommand(6))
-					if(length(fnlist)>6)
-						tkadd(fnContextMenu, "command", label = fnlist[7], command = function() insertCommand(7))
-					if(length(fnlist)>7)
-						tkadd(fnContextMenu, "command", label = fnlist[8], command = function() insertCommand(8))
-					if(length(fnlist)>8)
-						tkadd(fnContextMenu, "command", label = fnlist[9], command = function() insertCommand(9))
-					if(length(fnlist)>9)
-						tkadd(fnContextMenu, "command", label = fnlist[10], command = function() insertCommand(10))
-					if(length(fnlist)>10)
-						tkadd(fnContextMenu, "command", label = fnlist[11], command = function() insertCommand(11))
-					if(length(fnlist)>11)
-						tkadd(fnContextMenu, "command", label = fnlist[12], command = function() insertCommand(12))
-					if(length(fnlist)>12)
-						tkadd(fnContextMenu, "command", label = fnlist[13], command = function() insertCommand(13))
-					if(length(fnlist)>13)
-						tkadd(fnContextMenu, "command", label = fnlist[14], command = function() insertCommand(14))
-					if(length(fnlist)>14)
-						tkadd(fnContextMenu, "command", label = fnlist[14], command = function() insertCommand(15))
-				# root x,y
-				rootx <- as.integer(tkwinfo("rootx", txt_edit))
-				rooty <- as.integer(tkwinfo("rooty", txt_edit))
-				# line height
-				font <- strsplit(tclvalue(tkfont.metrics(fontFamily))," -")[[1]]
-				lheight <- as.numeric(strsplit(font[grepl("linespace",font)]," ")[[1]][2])
-				nl <- floor(as.numeric(iwordstart))
-				# font width
-				wordnchar <- as.numeric(strsplit(as.character(as.numeric(iwordend) %% 1),".",fixed=TRUE)[[1]][2])
-				fontwidth <- as.numeric(tkfont.measure("m", fontFamily))
-				# @x,y position
-				xTxt <- rootx + wordnchar
-				yTxt <- rooty + lheight*nl
-				tkpost(fnContextMenu, xTxt, yTxt)
-				tkbind(fnContextMenu, "<Shift-Tab>", function() tkunpost(fnContextMenu))
+			insertCommand <- function(x){
+				tkdelete(txt_edit, "temp wordstart", iwordend)
+				tkinsert(txt_edit, "insert", fnlist[x])
 			}
+		}
+		if(length(fnlist)>0){
+			fnContextMenu <- tkmenu(txt_edit, tearoff = FALSE)
+			# conditionally add menu items
+			## adding them programmatically failed to work (always added last command)
+				if(length(fnlist)>0)
+					tkadd(fnContextMenu, "command", label = fnlist[1], command = function() insertCommand(1))
+				if(length(fnlist)>1)
+					tkadd(fnContextMenu, "command", label = fnlist[2], command = function() insertCommand(2))
+				if(length(fnlist)>2)
+					tkadd(fnContextMenu, "command", label = fnlist[3], command = function() insertCommand(3))
+				if(length(fnlist)>3)
+					tkadd(fnContextMenu, "command", label = fnlist[4], command = function() insertCommand(4))
+				if(length(fnlist)>4)
+					tkadd(fnContextMenu, "command", label = fnlist[5], command = function() insertCommand(5))
+				if(length(fnlist)>5)
+					tkadd(fnContextMenu, "command", label = fnlist[6], command = function() insertCommand(6))
+				if(length(fnlist)>6)
+					tkadd(fnContextMenu, "command", label = fnlist[7], command = function() insertCommand(7))
+				if(length(fnlist)>7)
+					tkadd(fnContextMenu, "command", label = fnlist[8], command = function() insertCommand(8))
+				if(length(fnlist)>8)
+					tkadd(fnContextMenu, "command", label = fnlist[9], command = function() insertCommand(9))
+				if(length(fnlist)>9)
+					tkadd(fnContextMenu, "command", label = fnlist[10], command = function() insertCommand(10))
+				if(length(fnlist)>10)
+					tkadd(fnContextMenu, "command", label = fnlist[11], command = function() insertCommand(11))
+				if(length(fnlist)>11)
+					tkadd(fnContextMenu, "command", label = fnlist[12], command = function() insertCommand(12))
+				if(length(fnlist)>12)
+					tkadd(fnContextMenu, "command", label = fnlist[13], command = function() insertCommand(13))
+				if(length(fnlist)>13)
+					tkadd(fnContextMenu, "command", label = fnlist[14], command = function() insertCommand(14))
+				if(length(fnlist)>14)
+					tkadd(fnContextMenu, "command", label = fnlist[15], command = function() insertCommand(15))
+			# root x,y
+			rootx <- as.integer(tkwinfo("rootx", txt_edit))
+			rooty <- as.integer(tkwinfo("rooty", txt_edit))
+			# line height
+			font <- strsplit(tclvalue(tkfont.metrics(fontFamily))," -")[[1]]
+			lheight <- as.numeric(strsplit(font[grepl("linespace",font)]," ")[[1]][2])
+			nl <- floor(as.numeric(iwordstart))
+			# font width
+			wordnchar <- as.numeric(strsplit(as.character(as.numeric(iwordend) %% 1),".",fixed=TRUE)[[1]][2])
+			fontwidth <- as.numeric(tkfont.measure("m", fontFamily))
+			# @x,y position
+			xTxt <- rootx + wordnchar
+			yTxt <- rooty + lheight*nl
+			tkpost(fnContextMenu, xTxt, yTxt)
+			tkbind(fnContextMenu, "<Shift-Tab>", function() tkunpost(fnContextMenu))
 		}
 	}
 	tkbind(txt_edit, "<Shift-Tab>", commandCompletion)
