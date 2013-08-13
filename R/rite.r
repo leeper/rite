@@ -102,8 +102,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			bringToTop(-1)
 		tkdestroy(editor)
 		unlink(ritetmpfile)
-		#if(is.null(evalenv))
-			#return(mget(ls(editenv),editenv))
 	}
 	
 	### FILE MENU FUNCTIONS ###
@@ -324,7 +322,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			tkfocus(gistDialog)
 		}
 	}
-	
 	
 	### RUN FUNCTIONS ###
 	runCode <- function(code=NULL, e=NULL) {
@@ -838,7 +835,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	about <- function(){
 		aboutbox <- tktoplevel()
 		tkwm.title(aboutbox, wmtitle)
-		#tkwm.iconbitmap(aboutbox,system.file("logo", "rlogo.gif", package = "rite"))
 		tkgrid(ttklabel(aboutbox, text= "     "), row=1, column=1)
 		tkgrid(ttklabel(aboutbox, text= "     "), row=1, column=3)
 		tkgrid(ttklabel(aboutbox, text = paste("(C) Thomas J. Leeper ",
@@ -858,8 +854,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	### EDITOR LAYOUT ###
 	editor <- tktoplevel(borderwidth=0)
 	tkwm.title(editor, wmtitle)	# title
-	#tcl("wm", "iconphoto", editor, "-default", system.file("logo", "rlogo.gif", package = "rite"))
-	#tkwm.iconbitmap(editor,system.file("logo", "rlogo.gif", package = "rite"))
 	tkwm.protocol(editor, "WM_DELETE_WINDOW", exitWiz) # regulate exit
 
 	### EDITOR MENUS ###
@@ -1128,10 +1122,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			tkgrid.columnconfigure(out_tab2,1,weight=1)
 			tkgrid.columnconfigure(out_tab2,2,weight=0)
 			tkgrid.rowconfigure(out_tab2,1,weight=1)
-			
-			# plot
-			#out_tab3 <- tk2notetab(nb3, "Plot")
-			#output <- tkrplot(out_tab3, width=50)
+
 		# pack right notebook
 		tkadd(pw, nb2, weight=1) # right pane
 	}
@@ -1331,7 +1322,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		tkbind(searchDialog, "<FocusIn>", search1)
 		tkbind(searchDialog, "<FocusOut>", searchTrans)
 		tkwm.title(searchDialog, paste("Search", sep=""))	# title
-		#tkwm.iconbitmap(searchDialog, system.file("logo", "rlogo.gif", package = "rite")) # CHANGE FILE TO BITMAP
 		entryform <- tkframe(searchDialog, relief="groove", borderwidth=2)
 			find.entry <- tkentry(entryform, width = 40, textvariable=findval)
 			#replace.entry <- tkentry(entryform, width = 40, textvariable=replaceval)
@@ -1410,7 +1400,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		}
 		goDialog <- tktoplevel()
 		tkwm.title(goDialog, paste("Go to line",sep=""))	# title
-		#tkwm.iconbitmap(goDialog,system.file("logo", "rlogo.gif", package = "rite")) # CHANGE FILE TO BITMAP
 		entryform <- tkframe(goDialog, relief="groove", borderwidth=2)
 			lineval <- tclVar("")
 			line.entry <- tkentry(goDialog, width = 5, textvariable=lineval)
@@ -1651,7 +1640,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," latexcomments ",hcolors$latexcomments,
 			" {(^%[^%[:alnum:]?[:punct:]?].+|[^%[:alnum:]?[:punct:]?]%.+)}",sep=""))
 		## AMEND ABOVE TO DEAL WITH %*% %in% type constructions
-		# add something here for code chunks ' <<>> @ '
 		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rnwchunk1a ', hcolors$rnwchunk,
 			' {<{2}[[:alnum:]?|[:punct:]?|[:space:]?|=?]*>{2}}', sep=''))
 		.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rnwchunk1b ', hcolors$rnwchunk, ' @', sep=''))
