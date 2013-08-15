@@ -159,12 +159,15 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			if(gist)
 				tkwm.title(gistDialog, "Enter Gist ID or raw URL")
 			else
-				tkwm.title(gistDialog, "Enter raw URL")
+				tkwm.title(gistDialog, "Enter URL")
 			entryform <- tkframe(gistDialog, relief="groove", borderwidth=2)
 				entry <- tclVar()
 				tkgrid(ttklabel(entryform, text = "     "), row=1)
 				urlentry <- tkentry(entryform, width = 50, textvariable=entry)
-				tkgrid(tklabel(entryform, text = "ID/URL: "), row=2, column=1)
+				if(gist)
+					tkgrid(tklabel(entryform, text = "ID/URL: "), row=2, column=1)
+				else
+					tkgrid(tklabel(entryform, text = "URL: "), row=2, column=1)
 				tkgrid(urlentry, row=2, column=2, columnspan=4)
 				tkgrid(ttklabel(entryform, text = "     "), row=3)
 			tkgrid(entryform)
