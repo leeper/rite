@@ -1589,7 +1589,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			tabs <- tabs + 1
 			more <- TRUE
 			while(more){
-				tab2 <- tclvalue(tkget(txt_edit, paste("insert linestart+",tabs,"char",sep=""), paste("insert linestart+",tabs+1,"char",sep="")))
+				tab2 <- tclvalue(tkget(txt_edit, 	paste("insert linestart+",tabs,"char",sep=""),
+													paste("insert linestart+",tabs+1,"char",sep="")))
 				if(tab2=="\t")
 					tabs <- tabs + 1
 				else
