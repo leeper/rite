@@ -1442,6 +1442,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	tkbind(txt_edit, "<Control-r>", runkey)
 	tkbind(txt_edit, "<Control-R>", runkey)
 	tkbind(txt_edit, "<F8>", runAll)
+	tkbind(txt_edit, "<Control-Return>", expression(runkey, break))
 	
 	tkbind(txt_edit, "<Control-s>", saveScript)
 	tkbind(txt_edit, "<Control-S>", saveScript)
