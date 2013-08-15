@@ -36,6 +36,21 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					brewtemplate = "black",
 					restchunks = "blue"
 					)
+	filetypelist <- paste(	"{{R Script} {.R}}",
+							"{{brew} {.brew}}",
+							"{{HTML} {.html}}",
+							"{{R HTML} {.Rhtml}}",
+							"{{Markdown} {.md}}",
+							"{{R markdown} {.Rmd}}",
+							"{{reST} {.rst}}",
+							"{{R reST} {.Rrst}}",
+							"{{Sweave} {.Rnw}}",
+							"{{TeX} {.tex}}",
+							"{{R TeX} {.Rtex}}",
+							"{{Text} {.txt}}",
+							"{{All files} {*.*}}",
+						sep=" ")
+	defaultfiletype <- "{{R Script} {.R}}"
 	if(!is.null(color)){
 		for(i in 1:length(color)){
 			if(!is.null(color[[i]]) && !is.na(color[[i]]) && !color[[i]]=="" && is.character(color[[i]]))
@@ -121,7 +136,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		newScript()
 		if(locals==TRUE){
 			if(is.null(filename) || is.na(filename) || filename %in% c(""))
-				fname <- tclvalue(tkgetOpenFile())
+				fname <- tclvalue(tkgetOpenFile(title="Load Script",
+												filetypes=filetypelist))
 			if(!length(fname) || fname==""){
 				return()
 			}
@@ -195,7 +211,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		}
 	}
 	saveAsScript <- function() {
-		fname <- tclvalue(tkgetSaveFile(initialdir=getwd()))
+		fname <- tclvalue(tkgetSaveFile(initialdir=getwd(),
+										title="Save Script As",
+										filetypes=filetypelist))
 		if(!length(fname) || fname==""){
 			filename <<- ""
 			return()
@@ -223,11 +241,14 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		content <- gsub("\n","\\\\n",content)
 		content <- gsub("\t","\\\\t",content)
 		content <- gsub("\r","\\\\r",content)
-		gistbody <- paste('{','"description":"',description,'","public":"true"',',"files":{"file1.txt":{"content":"',content,'"}}}',sep="")
+		gistbody <- paste('{',	'"description":"',description,
+								'","public":"true"',
+								',"files":{"file1.txt":{"content":"',content,'"}}}',sep="")
 		gistout <- RCurl::postForm(uri=gisturl, .opts=list(postfields = gistbody,
 						followlocation = TRUE, ssl.verifypeer = TRUE, ssl.verifyhost = TRUE,
 						cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl"),
-						httpheader = c('Content-Type' = 'application/json', Accept = 'application/json')))
+						httpheader = c('Content-Type' = 'application/json',
+										Accept = 'application/json')))
 		outsplit <- strsplit(gistout,'","')[[1]] # parse JSON
 		gistid <- strsplit(outsplit[grep("id",outsplit)],':"')[[1]][2]
 		gistouturl <- paste("https://gist.github.com/",gistid,sep="")
@@ -246,7 +267,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	}
 	includeScript <- function(locals=TRUE,refonly=FALSE,gist=FALSE){
 		if(locals){
-			filename <- tclvalue(tkgetOpenFile())
+			filename <- tclvalue(tkgetOpenFile(	title="Append Script",
+												filetypes=filetypelist))
 			if (!length(filename) || filename=="")
 				return()
 			else{
@@ -404,7 +426,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					errmsg <- strsplit(as.character(errmsg),":")[[1]]
 					errmsg <- paste(errmsg[length(errmsg)],collapse=":")
 					if(length(e)>1){
-						errbox <- tkmessageBox(message = paste("Warning:",errmsg,"\nDo you want to continue evaluation?"),
+						errbox <- tkmessageBox(message = paste("Warning:",errmsg,
+												"\nDo you want to continue evaluation?"),
 												icon = "warning", type = "yesno", default = "no")
 						if(tclvalue(errbox)=="no")
 							e <<- ""
@@ -420,7 +443,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					errmsg <- strsplit(as.character(errmsg),":")[[1]]
 					errmsg <- paste(errmsg[length(errmsg)],collapse=":")
 					if(length(e)>1){
-						errbox <- tkmessageBox(message = paste("Message:",errmsg,"\nDo you want to continue evaluation?"),
+						errbox <- tkmessageBox(message = paste("Message:",errmsg,
+												"\nDo you want to continue evaluation?"),
 												icon = "info", type = "yesno", default = "no")
 						if(tclvalue(errbox)=="no")
 							e <<- ""
@@ -530,7 +554,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	if(catchOutput){
 		saveOutput <- function(outfilename="") {
 			if(outfilename=="")
-				outfilename <- tclvalue(tkgetSaveFile(initialdir=getwd()))
+				outfilename <- tclvalue(tkgetSaveFile(	initialdir=getwd(),
+														title="Save Output",
+														filetypes=filetypelist))
 			if(!length(outfilename) || outfilename=="")
 				return()
 			chn <- tclopen(outfilename, "w")
@@ -726,7 +752,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					filetopdf <- filename
 			}
 			else if(is.null(filetopdf))
-				filetopdf <- tclvalue(tkgetOpenFile())
+				filetopdf <- tclvalue(tkgetOpenFile(title="Open File",
+													filetypes=filetypelist))
 			if(!filetopdf==""){
 				if(dirname(filetopdf) %in% c(".",getwd())) {}
 				else{
@@ -779,15 +806,18 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	addHighlighting <- function(){
 		addHighlight <- function(){
 			if(!tclvalue(objectval)=="")
-				.Tcl(paste("ctext::addHighlightClass ",.Tk.ID(txt_edit)," functions ","purple","  [list ",tclvalue(objectval)," ]",sep=""))
+				.Tcl(paste(	"ctext::addHighlightClass ",.Tk.ID(txt_edit),
+							" functions ","purple","  [list ",tclvalue(objectval)," ]",sep=""))
 			if(!tclvalue(envirval)=="" && paste("package:",tclvalue(envirval),sep="") %in% search()){
 				packs <- c(	tclvalue(envirval),
 							gsub(" ","",strsplit(packageDescription(tclvalue(envirval), fields="Depends"),",")[[1]]))
 				packs <- na.omit(packs)
 				for(i in 1:length(packs)){
-					funs <- try(paste(unique(gsub("<-","",objects(paste("package:",tclvalue(envirval),sep="")))),collapse=" "), silent=TRUE)
+					funs <- try(paste(	unique(gsub("<-","",
+										objects(paste("package:",tclvalue(envirval),sep="")))),collapse=" "), silent=TRUE)
 					if(!inherits(funs,"try-error"))
-						.Tcl(paste("ctext::addHighlightClass ",.Tk.ID(txt_edit)," ",tclvalue(envirval),"functions ","purple","  [list ",funs," ]",sep=""))
+						.Tcl(paste("ctext::addHighlightClass ",.Tk.ID(txt_edit)," ",tclvalue(envirval),
+									"functions ","purple","  [list ",funs," ]",sep=""))
 				}
 			}
 		}
@@ -823,7 +853,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		r <- r + 1
 		buttons <- tkframe(highlightbox)
 			tkgrid(tkbutton(buttons, text = "  Add  ", command = addHighlight), row=1, column=1)
-			tkgrid(tkbutton(buttons, text = " Close ", command = function(){tkdestroy(highlightbox); tkfocus(txt_edit)}), row=1, column=2)
+			tkgrid(tkbutton(buttons, text = " Close ", command = function(){
+				tkdestroy(highlightbox); tkfocus(txt_edit)}), row=1, column=2)
 		tkgrid(buttons, row=r, column=2)
 		r <- r + 1
 		tkgrid(ttklabel(highlightbox, text= "     "), row=r, column=2)
@@ -842,9 +873,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		tkgrid(website <- ttklabel(aboutbox, text = "For more information, visit: http://www.thomasleeper.com/software.html",
 									foreground="blue"), row=8, column=2)
 		tkgrid(ttklabel(aboutbox, text= "     "), row=9, column=2)
-		tkgrid(tkbutton(aboutbox, text = "   OK   ", command = function(){tkdestroy(aboutbox); tkfocus(txt_edit)}), row=10, column=2)
+		tkgrid(tkbutton(aboutbox, text = "   OK   ", command = function(){
+			tkdestroy(aboutbox); tkfocus(txt_edit)}), row=10, column=2)
 		tkgrid(ttklabel(aboutbox, text= "     "), row=11, column=2)
-		tkbind(website, "<ButtonPress>", function() browseURL("http://www.thomasleeper.com/software.html"))
+		tkbind(website, "<ButtonPress>", function()
+			browseURL("http://www.thomasleeper.com/software.html"))
 		tkfocus(aboutbox)
 	}
 	
