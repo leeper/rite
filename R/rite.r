@@ -415,8 +415,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				)
 				tkselect(nb2, 0)
 			}
-			tkconfigure(output, state="disabled")
 			tkmark.set(output,"insert","end")
+			tksee(output,"insert")
+			tkconfigure(output, state="disabled")
 			outputSaved <<- FALSE
 		}
 	}
