@@ -1,6 +1,6 @@
 # 2013-06-01
 import(tcltk)
-import(tcltk2)
+importFrom(tcltk2, tk2notebook, tk2notetab, tk2ctext)
 importFrom(utils, available.packages, install.packages)
 importFrom(RCurl, getURL, postForm)
 
