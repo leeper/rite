@@ -68,7 +68,9 @@ The use of highlighting in general can be regulated by the \code{highlight} para
 	
 	\code{<Ctrl-s>}: Save script as
 	
-	\code{<Ctrl-r>}: Run/evaluate line/selection
+	\code{<Ctrl-r>}: Run/evaluate line (or selection, if applicable)
+	
+	\code{<Control-Return>}: Run/evaluate line (or selection, if applicable)
 	
 	\code{<Ctrl-c>}: Copy
 	
