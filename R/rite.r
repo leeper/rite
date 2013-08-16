@@ -474,7 +474,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			if(!length(outfilename) || outfilename=="")
 				return()
 			chn <- tclopen(outfilename, "w")
+			tkconfigure(output, state="normal")
 			tclputs(chn, tclvalue(tkget(output,"0.0","end")))
+			tkconfigure(output, state="disabled")
 			tclclose(chn)
 			invisible(outfilename)
 		}
@@ -892,7 +894,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkconfigure(output, state="disabled")
 			}
 			tkadd(menuOutput, "command", label = "Copy Output", command = copyOutput, underline = 0)
-			tkadd(menuOutput, "command", label = "Save Output", command = saveOutput, underline = 0)
+			tkadd(menuOutput, "command", label = "Save Output",
+				command = function() saveOutput(outfilename=""), underline = 0)
 			tkadd(menuOutput, "command", label = "Clear Output", command = clearOutput, underline = 1)
 			tkadd(menuOutput, "separator")
 			copyMessage <- function(){
