@@ -11,5 +11,5 @@ citHeader("To cite package 'rite' in publications use:")
 		  textVersion =
 		  paste("Thomas J. Leeper (",
 				year,
-				"). rite: The Right Editor to Write R Scripts. ",
+				"). rite: The Right Editor to Write R. ",
 				vers, ".", sep=""))
