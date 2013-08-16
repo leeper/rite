@@ -361,10 +361,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkfocus(txt_edit)
 			}
 		}
-		out <- tryCatch(source(runtemp,print.eval=TRUE, echo=echo),
+		out <- withCallingHandlers(source(runtemp,print.eval=TRUE, echo=echo),
 			error = function(errmsg){
 				errmsg <- strsplit(as.character(errmsg),":")[[1]]
-				errmsg <- paste(errmsg[length(errmsg)],collapse=":")
+				errmsg <- paste(errmsg[-1],collapse=":")
 				if(catchOutput)
 					writeError(errmsg,"Error")
 				else
@@ -372,7 +372,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			},
 			warning = function(errmsg){
 				errmsg <- strsplit(as.character(errmsg),":")[[1]]
-				errmsg <- paste(errmsg[length(errmsg)],collapse=":")
+				errmsg <- paste(errmsg[-2],collapse=":")
 				if(catchOutput)
 					writeError(errmsg,"Warning")
 				else
@@ -380,7 +380,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			},
 			message = function(errmsg){
 				errmsg <- strsplit(as.character(errmsg),":")[[1]]
-				errmsg <- paste(errmsg[length(errmsg)],collapse=":")
+				errmsg <- paste(errmsg[-1],collapse=":")
 				if(catchOutput)
 					writeError(errmsg,"Message")
 				else
@@ -1411,7 +1411,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			invisible(FALSE)
 		}
 		else{
-			if(!verbose){
+			if(verbose==FALSE){
 				tkmessageBox(message="No syntax errors found")
 				tkfocus(txt_edit)
 			}
