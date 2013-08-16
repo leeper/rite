@@ -365,10 +365,17 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			error = function(errmsg){
 				errmsg <- strsplit(as.character(errmsg),":")[[1]]
 				errmsg <- paste(errmsg[-1],collapse=":")
-				if(catchOutput)
-					writeError(errmsg,"Error")
-				else
-					tkmessageBox(message = paste("Error:",errmsg), icon = "error")
+				#errbox <- tkmessageBox(message = paste("Error:",errmsg,"\nDo you want to continue evaluation?"),
+				#								icon = "error", type = "yesno", default = "no")
+				#if(tclvalue(errbox)=="no"){
+					if(catchOutput)
+						writeError(errmsg,"Error")
+					else
+						tkmessageBox(message = paste("Error:",errmsg), icon = "error")
+				#		print(errmsg)
+				#}
+				#else
+				#	invokeRestart("muffleWarning")
 			},
 			warning = function(errmsg){
 				errmsg <- strsplit(as.character(errmsg),":")[[1]]
