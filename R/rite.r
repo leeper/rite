@@ -347,10 +347,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	
 	## RUN FUNCTIONS ##
 	runCode <- function(code){
-		tryparse(verbose=TRUE)
-		runcon <- textConnection("runtemp",open="w")
-		writeLines(code,"runtemp")
-		close(runcon)
+		if(!tryparse(verbose=TRUE))
+			invisible()
+		runtemp <- tempfile()
+		writeLines(code,runtemp)
 		writeError <- function(errmsg, type, focus=TRUE){
 			tkconfigure(err_out, state="normal")
 			tkinsert(err_out,"end",paste(type,": ",errmsg,"\n",sep=""))
@@ -360,7 +360,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkfocus(txt_edit)
 			}
 		}
-		out <- tryCatch(source("runtemp",print.eval=TRUE, echo=echo),
+		out <- tryCatch(source(runtemp,print.eval=TRUE, echo=echo),
 			error = function(errmsg){
 				errmsg <- strsplit(as.character(errmsg),":")[[1]]
 				errmsg <- paste(errmsg[length(errmsg)],collapse=":")
@@ -422,6 +422,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			tkconfigure(output, state="disabled")
 			outputSaved <<- FALSE
 		}
+		unlink(runtemp)
 	}
    runLine <- function(){
 		if(autosave & (is.null(filename) || filename=="")){
@@ -1396,9 +1397,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			cat("\a")
 			invisible(FALSE)
 		}
-		else if(!verbose){
-			tkmessageBox(message="No syntax errors found")
-			tkfocus(txt_edit)
+		else{
+			if(!verbose){
+				tkmessageBox(message="No syntax errors found")
+				tkfocus(txt_edit)
+			}
 			invisible(TRUE)
 		}
 	}
