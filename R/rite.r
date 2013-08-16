@@ -370,8 +370,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				#if(tclvalue(errbox)=="no"){
 					if(catchOutput)
 						writeError(errmsg,"Error")
-					else
-						tkmessageBox(message = paste("Error:",errmsg), icon = "error")
+					#else
+					#	tkmessageBox(message = paste("Error:",errmsg), icon = "error")
 				#		print(errmsg)
 				#}
 				#else
@@ -382,16 +382,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				errmsg <- paste(errmsg[-1],collapse=":")
 				if(catchOutput)
 					writeError(errmsg,"Warning")
-				else
-					tkmessageBox(message = paste("Warning:",errmsg), icon = "warning")
+				#else
+				#	tkmessageBox(message = paste("Warning:",errmsg), icon = "warning")
 			},
 			message = function(errmsg){
 				errmsg <- strsplit(as.character(errmsg),":")[[1]]
 				errmsg <- paste(errmsg[-1],collapse=":")
 				if(catchOutput)
 					writeError(errmsg,"Message")
-				else
-					tkmessageBox(message = paste("Message:",errmsg), icon = "info")
+				#else
+				#	tkmessageBox(message = paste("Message:",errmsg), icon = "info")
 			},
 			interrupt = function(){
 				if(catchOutput)
