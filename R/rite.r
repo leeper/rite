@@ -349,6 +349,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	runCode <- function(code){
 		if(!tryparse(verbose=TRUE))
 			invisible()
+		search1 <- search()
 		runtemp <- tempfile()
 		writeLines(code,runtemp)
 		writeError <- function(errmsg, type, focus=TRUE){
@@ -423,6 +424,18 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			outputSaved <<- FALSE
 		}
 		unlink(runtemp)
+		if(FALSE){ ##### CONDITIONAL PACKAGE HIGHLIGHTING TODO ####################
+		search2 <- search()[!search() %in% search1]
+		if(length(search2)){
+			for(i in 1:length(search2)){
+				packagename <- strsplit(search2[i],":")[[1]][2]
+				funs <- objects(search2[i])
+				if(!inherits(funs,"try-error"))
+					.Tcl(paste("ctext::addHighlightClass ",.Tk.ID(txt_edit)," ",
+						packagename,"functions ","purple","  [list ",funs," ]",sep=""))
+			}
+		}
+		} ##########################################################################
 	}
    runLine <- function(){
 		if(autosave & (is.null(filename) || filename=="")){
