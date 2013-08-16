@@ -1015,13 +1015,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					command = function() knittxt(genmode="md2html.fragment", usefile=TRUE, usetxt=FALSE))
 					tkadd(menuFromFile, "separator")
 					tkadd(menuFromFile, "command", label = "pdflatex",
-						command = function() pdffromfile(texttopdf=FALSE, bibtex=FALSE), state="enabled")
+						command = function() pdffromfile(texttopdf=FALSE, bibtex=FALSE))
 					tkadd(menuFromFile, "command", label = "pdflatex+bibtex",
-						command = function() pdffromfile(texttopdf=FALSE, bibtex=TRUE), state="enabled")
+						command = function() pdffromfile(texttopdf=FALSE, bibtex=TRUE))
 					tkadd(menuFromFile, "command", label = "xelatex",
-						command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=FALSE), state="enabled")
+						command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=FALSE))
 					tkadd(menuFromFile, "command", label = "xelatex+bibtex",
-						command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=TRUE), state="enabled")
+						command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=TRUE))
 				tkadd(menuReport, "cascade", label = "Generate from file...", menu = menuFromFile, underline = 0)
 			tkadd(menuTop, "cascade", label = "Report Generation", menu = menuReport, underline = 0)
 	}
