@@ -372,7 +372,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			},
 			warning = function(errmsg){
 				errmsg <- strsplit(as.character(errmsg),":")[[1]]
-				errmsg <- paste(errmsg[-2],collapse=":")
+				errmsg <- paste(errmsg[-1],collapse=":")
 				if(catchOutput)
 					writeError(errmsg,"Warning")
 				else
@@ -1102,6 +1102,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			tkgrid.columnconfigure(out_tab2,2,weight=0)
 			tkgrid.rowconfigure(out_tab2,1,weight=1)
 
+			tktag.configure(err_out, "text", foreground="black", underline=0)
+			tktag.configure(err_out, "error", foreground="red", underline=0)
+			tktag.configure(err_out, "warning", foreground="purple", underline=0)
+			tktag.configure(err_out, "message", foreground="blue", underline=0)
+	
 		# pack right notebook
 		tkadd(pw, nb2, weight=1) # right pane
 	}
