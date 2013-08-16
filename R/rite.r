@@ -133,14 +133,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		tkwm.title(editor, wmtitle)
 	}
 	loadScript <- function(fname=NULL, locals=TRUE, gist=FALSE){
-		newScript()
+		if(is.null(fname))
+			newScript()
 		if(locals==TRUE){
-			if(is.null(filename) || is.na(filename) || filename %in% c(""))
-				fname <- tclvalue(tkgetOpenFile(title="Load Script",
-												filetypes=filetypelist))
-			if(!length(fname) || fname==""){
-				return()
+			if(is.null(fname)){
+				tkgeto <- tkgetOpenFile(title="Load Script",
+										filetypes=filetypelist)
+				fname <- tclvalue(tkgeto)
 			}
+			if(!length(fname) || fname=="")
+				invisible()
 			chn <- tclopen(fname, "r")
 			tkinsert(txt_edit, "end", tclvalue(tclread(chn)))
 			tclclose(chn)
@@ -472,7 +474,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 														title="Save Output",
 														filetypes=filetypelist))
 			if(!length(outfilename) || outfilename=="")
-				return()
+				invisible()
 			chn <- tclopen(outfilename, "w")
 			tkconfigure(output, state="normal")
 			tclputs(chn, tclvalue(tkget(output,"0.0","end")))
