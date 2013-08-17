@@ -997,7 +997,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				# update when slidify is on CRAN
 				#tkadd(menuMD, "command", label = "slidify md to HTML",
 				#	command = function() knittxt(genmode="slidify", usefile=FALSE, usetxt=TRUE))
-				#tkadd(menuMD, "command", label = "slidify and knit Rmd to HTML",
+				#tkadd(menuMD, "command", label = "knit Rmd and slidify to HTML",
 				#	command = function() knittxt(genmode="knit2slidify", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuReport, "cascade", label = "Markdown", menu = menuMD, underline = 0)
 			tkadd(menuReport, "separator")
@@ -1045,15 +1045,20 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					command = function() knittxt(genmode="md2html", usefile=TRUE, usetxt=FALSE))
 				tkadd(menuFromFile, "command", label = "Convert md to HTML fragment",
 					command = function() knittxt(genmode="md2html.fragment", usefile=TRUE, usetxt=FALSE))
-					tkadd(menuFromFile, "separator")
-					tkadd(menuFromFile, "command", label = "pdflatex",
-						command = function() pdffromfile(texttopdf=FALSE, bibtex=FALSE))
-					tkadd(menuFromFile, "command", label = "pdflatex+bibtex",
-						command = function() pdffromfile(texttopdf=FALSE, bibtex=TRUE))
-					tkadd(menuFromFile, "command", label = "xelatex",
-						command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=FALSE))
-					tkadd(menuFromFile, "command", label = "xelatex+bibtex",
-						command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=TRUE))
+				# update when slidify is on CRAN
+				#tkadd(menuMD, "command", label = "slidify md to HTML",
+				#	command = function() knittxt(genmode="slidify", usefile=TRUE, usetxt=FALSE))
+				#tkadd(menuMD, "command", label = "knit Rmd and slidify to HTML",
+				#	command = function() knittxt(genmode="knit2slidify", usefile=TRUE, usetxt=FALSE))
+				tkadd(menuFromFile, "separator")
+				tkadd(menuFromFile, "command", label = "pdflatex",
+					command = function() pdffromfile(texttopdf=FALSE, bibtex=FALSE))
+				tkadd(menuFromFile, "command", label = "pdflatex+bibtex",
+					command = function() pdffromfile(texttopdf=FALSE, bibtex=TRUE))
+				tkadd(menuFromFile, "command", label = "xelatex",
+					command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=FALSE))
+				tkadd(menuFromFile, "command", label = "xelatex+bibtex",
+					command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=TRUE))
 				tkadd(menuReport, "cascade", label = "Generate from file...", menu = menuFromFile, underline = 0)
 			tkadd(menuTop, "cascade", label = "Report Generation", menu = menuReport, underline = 0)
 	}
