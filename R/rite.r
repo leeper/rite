@@ -993,6 +993,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					command = function() knittxt(genmode="md2html.fragment", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuMD, "command", label = "knit Rmd to HTML",
 					command = function() knittxt(genmode="rmd2html", usefile=FALSE, usetxt=TRUE))
+				tkadd(menuMD, "separator")
+				# update when slidify is on CRAN
+				#tkadd(menuMD, "command", label = "slidify md to HTML",
+				#	command = function() knittxt(genmode="slidify", usefile=FALSE, usetxt=TRUE))
+				#tkadd(menuMD, "command", label = "slidify and knit Rmd to HTML",
+				#	command = function() knittxt(genmode="knit2slidify", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuReport, "cascade", label = "Markdown", menu = menuMD, underline = 0)
 			tkadd(menuReport, "separator")
 			#texstatus <- ifelse(!system("pdflatex -version",show.output.on.console=FALSE), "enabled","disabled")
