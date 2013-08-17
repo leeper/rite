@@ -356,7 +356,14 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		writeLines(code,runtemp)
 		writeError <- function(errmsg, type, focus=TRUE){
 			tkconfigure(err_out, state="normal")
-			tkinsert(err_out,"end",paste(type,": ",errmsg,"\n",sep=""))
+			if(type=="Error")
+				tkinsert(err_out,"end",paste(type,": ",errmsg,"\n",sep=""),("error"))
+			else if(type=="Warning")
+				tkinsert(err_out,"end",paste(type,": ",errmsg,"\n",sep=""),("warning"))
+			else if(type=="Message")
+				tkinsert(err_out,"end",paste(type,": ",errmsg,"\n",sep=""),("message"))
+			else
+				tkinsert(err_out,"end",paste(type,": ",errmsg,"\n",sep=""), ("text"))
 			tkconfigure(err_out, state="disabled")
 			if(focus){
 				tkselect(nb2, 1)
@@ -367,25 +374,21 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			error = function(errmsg){
 				errmsg <- strsplit(as.character(errmsg),": ")[[1]]
 				errmsg <- paste(errmsg[-1],collapse=":")
-				errbox <- tkmessageBox(message = paste("Error:",errmsg,"\nDo you want to continue evaluation?"),
-												icon = "error", type = "yesno", default = "no")
-				if(tclvalue(errbox)=="yes"){
-					if(catchOutput)
-						writeError(errmsg,"Error")
-				}
-				else
-					invokeRestart("discontinue")
+				if(catchOutput)
+					writeError(errmsg,"Error")
+				#errbox <- tkmessageBox(message = paste("Error:",errmsg,"\nDo you want to continue evaluation?"),
+				#						icon = "error", type = "yesno", default = "no")
+				#if(tclvalue(errbox)=="no")
+				#	invokeRestart("discontinue")
 			},
 			warning = function(errmsg){
 				errmsg <- strsplit(as.character(errmsg),": ")[[1]]
 				errmsg <- paste(errmsg[-1],collapse=":")
-				errbox <- tkmessageBox(message = paste("Warning:",errmsg,"\nDo you want to continue evaluation?"),
-												icon = "error", type = "yesno", default = "no")
-				if(tclvalue(errbox)=="yes"){
-					if(catchOutput)
+				if(catchOutput)
 						writeError(errmsg,"Warning")
-				}
-				else
+				errbox <- tkmessageBox(message = paste("Warning:",errmsg,"\nDo you want to continue evaluation?"),
+										icon = "error", type = "yesno", default = "no")
+				if(tclvalue(errbox)=="no")
 					invokeRestart("discontinue")
 			},
 			message = function(errmsg){
