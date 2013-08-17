@@ -53,10 +53,12 @@ ritesink <- function(..., evalenv=.GlobalEnv, fontFamily="Courier", fontSize=10)
 					warning = function(w){
 						tkinsert(output,"end",paste(w,"\n",collapse=""), ("warning"))
 						tksee(output,"end")
+						invisible()
 					},
 					message = function(m){
 						tkinsert(output,"end",paste(m,"\n",collapse=""), ("message"))
 						tksee(output,"end")
+						invisible()
 					}
 				)
 			if(any(grepl("unexpectedEOL",out))){

@@ -351,7 +351,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		if(!parsed)
 			return()
 		search1 <- search()
-		length2 <- length(osink)
+		if(catchOutput)
+			length2 <- length(osink)
 		runtemp <- tempfile()
 		writeLines(code,runtemp)
 		writeError <- function(errmsg, type, focus=TRUE){
