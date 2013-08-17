@@ -347,9 +347,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	
 	## RUN FUNCTIONS ##
 	runCode <- function(code){
-		if(!tryparse(verbose=TRUE))
-			invisible()
+		parsed <- tryparse(verbose=FALSE)
+		if(!parsed)
+			return()
 		search1 <- search()
+		length2 <- length(osink)
 		runtemp <- tempfile()
 		writeLines(code,runtemp)
 		writeError <- function(errmsg, type, focus=TRUE){
@@ -361,37 +363,38 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				tkfocus(txt_edit)
 			}
 		}
-		out <- withCallingHandlers(source(runtemp,print.eval=TRUE, echo=echo),
+		out <- withRestarts(withCallingHandlers(source(runtemp, print.eval=TRUE, echo=echo),
 			error = function(errmsg){
-				errmsg <- strsplit(as.character(errmsg),":")[[1]]
+				errmsg <- strsplit(as.character(errmsg),": ")[[1]]
 				errmsg <- paste(errmsg[-1],collapse=":")
-				#errbox <- tkmessageBox(message = paste("Error:",errmsg,"\nDo you want to continue evaluation?"),
-				#								icon = "error", type = "yesno", default = "no")
-				#if(tclvalue(errbox)=="no"){
+				errbox <- tkmessageBox(message = paste("Error:",errmsg,"\nDo you want to continue evaluation?"),
+												icon = "error", type = "yesno", default = "no")
+				if(tclvalue(errbox)=="yes"){
 					if(catchOutput)
 						writeError(errmsg,"Error")
-					#else
-					#	tkmessageBox(message = paste("Error:",errmsg), icon = "error")
-				#		print(errmsg)
-				#}
-				#else
-				#	invokeRestart("muffleWarning")
+				}
+				else
+					invokeRestart("discontinue")
 			},
 			warning = function(errmsg){
-				errmsg <- strsplit(as.character(errmsg),":")[[1]]
+				errmsg <- strsplit(as.character(errmsg),": ")[[1]]
 				errmsg <- paste(errmsg[-1],collapse=":")
-				if(catchOutput)
-					writeError(errmsg,"Warning")
-				#else
-				#	tkmessageBox(message = paste("Warning:",errmsg), icon = "warning")
+				errbox <- tkmessageBox(message = paste("Warning:",errmsg,"\nDo you want to continue evaluation?"),
+												icon = "error", type = "yesno", default = "no")
+				if(tclvalue(errbox)=="yes"){
+					if(catchOutput)
+						writeError(errmsg,"Warning")
+				}
+				else
+					invokeRestart("discontinue")
 			},
 			message = function(errmsg){
-				errmsg <- strsplit(as.character(errmsg),":")[[1]]
+				errmsg <- strsplit(as.character(errmsg),": ")[[1]]
 				errmsg <- paste(errmsg[-1],collapse=":")
 				if(catchOutput)
 					writeError(errmsg,"Message")
-				#else
-				#	tkmessageBox(message = paste("Message:",errmsg), icon = "info")
+				else
+					cat(errmsg)
 			},
 			interrupt = function(){
 				if(catchOutput)
@@ -399,21 +402,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 				else
 					tkmessageBox(message="Evaluation interrupted!", icon="error")
 			}
+		),
+		# a restart to 'discontinue' source(.)-ing
+		discontinue = function(){invisible()}
 		)
 		if(catchOutput){
 			# output to `output`
 			tkconfigure(output, state="normal")
-			if(out$visible){
-				tryCatch(tkinsert(output,"end",paste(paste(capture.output(out$value),collapse="\n"),"\n")),
-					error = function(e){
-						tkmessageBox(message=paste("Printing error:",e,"!"), icon="error")
-					},
-					interrupt = function(){
-						tkmessageBox(message="Printing interrupt!", icon="error")
-					}
-				)
-				tkselect(nb2, 0)
-			}
 			if(length(osink)>length2){
 				tryCatch(tkinsert(output,"end",paste(osink[(length2+1):length(osink)],"\n",collapse="")),
 					error = function(e){
@@ -431,6 +426,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			outputSaved <<- FALSE
 		}
 		unlink(runtemp)
+		# syntax highlighting for new packages
 		search2 <- search()[!search() %in% search1]
 		if(length(search2)>0){
 			for(i in 1:length(search2)){
@@ -1427,7 +1423,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			invisible(FALSE)
 		}
 		else{
-			if(verbose==FALSE){
+			if(verbose==TRUE){
 				tkmessageBox(message="No syntax errors found")
 				tkfocus(txt_edit)
 			}
