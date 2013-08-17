@@ -1155,9 +1155,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			command <- gsub(" ","",command)
 		helpresults <- help(command)
 		if(length(helpresults)>0)
-			runCode(paste("help(\"",command,"\")",sep=""))
+			help(command)
 		else
-			runCode(paste("help.search(\"",command,"\")",sep=""))
+			help.search(command)
 	}
 	tkbind(txt_edit, "<F1>", f1)
 	
