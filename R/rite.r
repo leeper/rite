@@ -351,8 +351,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 			chn <- tclopen(ritetmpfile, "w")
 			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
 			tclclose(chn)
-			scriptSaved <<- TRUE
-			tkwm.title(editor, wmtitle)
+			#scriptSaved <<- TRUE
+			#tkwm.title(editor, wmtitle)
 		}
 		else if(autosave & (!is.null(filename) && !filename=="")){
 			chn <- tclopen(filename, "w")
