@@ -347,6 +347,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 	
 	## RUN FUNCTIONS ##
 	runCode <- function(code){
+		if(autosave & (is.null(filename) || filename=="")){
+			chn <- tclopen(ritetmpfile, "w")
+			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
+			tclclose(chn)
+		}
+		else if(autosave & (!is.null(filename) && !filename=="")){
+			chn <- tclopen(filename, "w")
+			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
+			tclclose(chn)
+		}
 		parsed <- tryparse(verbose=FALSE)
 		if(!parsed)
 			return()
@@ -449,45 +459,15 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		}
 	}
    runLine <- function(){
-		if(autosave & (is.null(filename) || filename=="")){
-			chn <- tclopen(ritetmpfile, "w")
-			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
-			tclclose(chn)
-		}
-		else if(autosave & (!is.null(filename) && !filename=="")){
-			chn <- tclopen(filename, "w")
-			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
-			tclclose(chn)
-		}
 		code <- tclvalue(tkget(txt_edit, "insert linestart", "insert lineend"))
 		if(!code=="")
 			runCode(code)
 	}
 	runSelection <- function(){
-		if(autosave & (is.null(filename) || filename=="")){
-			chn <- tclopen(ritetmpfile, "w")
-			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
-			tclclose(chn)
-		}
-		else if(autosave & (!is.null(filename) && !filename=="")){
-			chn <- tclopen(filename, "w")
-			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
-			tclclose(chn)
-		}
 		if(!tclvalue(tktag.ranges(txt_edit,"sel"))=="")
 			runCode(tclvalue(tkget(txt_edit,"sel.first","sel.last")))
 	}
 	runAll <- function(){
-		if(autosave & (is.null(filename) || filename=="")){
-			chn <- tclopen(ritetmpfile, "w")
-			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
-			tclclose(chn)
-		}
-		else if(autosave & (!is.null(filename) && !filename=="")){
-			chn <- tclopen(filename, "w")
-			tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
-			tclclose(chn)
-		}
 		runCode(tclvalue(tkget(txt_edit,"1.0","end")))
 	}
 
