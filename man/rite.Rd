@@ -146,23 +146,21 @@ The use of highlighting in general can be regulated by the \code{highlight} para
 }
 
 \section{Report generation with knitr}{
-If \code{catchOutput=TRUE}, \code{rite} provides a number of report generation capabilities provided by \code{knitr}. Specifically, a \dQuote{Report Generation} menu becomes available that includes the following options. The first four options simply return the results of \code{knit} or \code{purl} to the output panel (without saving the results). Results can be saved using \dQuote{Save Output} from the \dQuote{Output} menu.
+If \code{catchOutput=TRUE} (or rite is loaded with \code{riteout}), \code{rite} provides a number of report generation capabilities provided by \code{knitr}. Specifically, a \dQuote{Report Generation} menu becomes available that includes the following options. By default, the available tools generate reports from the currently open script in rite, but all the tools can also be run on local files (which opens those files into rite). The general pattern of report generation behavior is to load the input file, display the output file in the \code{riteout} output tab, display any relevant processing information in the \code{riteout} message tab, and open the resulting output file (in the case of functions that produce PDFs or HTML files). The resulting output files can be saved using \dQuote{Save Output} from the \dQuote{Output} menu.
 
-\code{knit}: Runs \code{knit} on the contents of the script panel and returns them in the output panel.
+The following tools are available:
 
-\code{knit (from Sweave)}: Runs \code{Sweave2knitr} on the contents of the script panel and runs \code{knit} on the results, returning the output as above.
+\code{knit}: Runs \code{knit} on the contents of the script panel and returns them in the output panel. Optionally, an R markdown (Rmd) file can be converted directly to HTML and opened. And, optionally, an Rnw file (for knitr or Sweave) can be converted directly to PDF and opened. Support for converting Sweave documents to knitr format can prevent compatibility issues between the two formats.
 
-\code{purl}: Runs \code{purl} on the contents of the script panel and returns them in the output panel.
+\code{purl}: Runs \code{purl} on the contents of the script panel and returns them in the output panel. This is the knitr equivalent of Stangle, producing code-only output from the original document. Again, optionally, an Rnw file (for knitr or Sweave) can be converted directly to PDF and opened. Support for converting Sweave documents to knitr format can prevent compatibility issues between the two formats.
 
-\code{purl (from Sweave)}: Runs \code{Sweave2knitr} on the contents of the script panel and runs \code{purl} on the results, returning the output as above.
+\code{stitch}: Runs \code{stitch} on the contents of the script panel, embedding it into an LaTeX file (and opens the resulting PDF), markdown file (and opens the resulting HTML), or HTML file (and opens the resulting HTML), based on a simple template. This is helpful for converting an unformatted R script into a simple report.
 
-\code{knit to pdf}: Runs \code{knit} on the contents of the script panel, returning the results to the output panel (and saving them locally) before running \code{pdflatex} and \code{bibtex} on the results.
+\code{spin}: Runs \code{spin} on the contents of the script panel, which should be \href{http://yihui.name/knitr/demo/stitch/}{a specially formatted roxygen-style script}. The output is a knitr file, which can optionally be \code{knit} or simply displayed into the output tab.
 
-\code{knit to pdf (from Sweave)}: The same as \code{knit to pdf}, except running \code{Sweave2knitr} before processing, as above.
+\code{markdown}: Convert an R markdown document to either a full HTML document or an HTML fragment (without \code{header} and \code{body} tags) to embed, e.g., in a blog post.
 
-\code{pdflatex (from rite script)}: Runs \code{pdflatex} and \code{bibtex} on the contents of the script panel. If the script has not yet been saved, \code{rite} will prompt you to do so before proceeding. The log files are printed to the message panel.
-
-\code{pdflatex (from .tex file)}: Runs \code{pdflatex} and \code{bibtex} on a selected file, which does not need to be open in the script panel. The log files are printed to the message panel.
+\code{LaTeX} and \code{XeLaTeX}: Run LaTeX or XeLaTeX and, optionally, BibTex as a system call. knitr compiles LaTeX to PDF via DVI using the functionality supplied by the \code{tools} package, so these report generation tools provide functionality for .tex scripts that are not compatible with DVI.
 
 }
 %\value{}
@@ -170,5 +168,15 @@ If \code{catchOutput=TRUE}, \code{rite} provides a number of report generation c
 \author{Thomas J. Leeper}
 %\note{}
 %\seealso{}
-%\examples{\dontrun{rite(catchOutput=TRUE)}}
+\examples{
+\dontrun{
+# run the simple script editor
+rite()
+}
+
+\dontrun{
+# run the script editor with output tools
+riteout()
+}
+}
 \keyword{ IO }
