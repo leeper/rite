@@ -26,14 +26,20 @@ riteout(...)
 \details{
 Create, edit, and save R scripts (or any text-based file) and, optionally, sink output to an output viewer rather than the R console.
 
-Scripts can be loaded, appended, referenced (via \code{source}) in the current script, and can be saved.
+Scripts can be loaded, appended, referenced (via \code{source}) in the current script, and can be saved. As of rite version 0.3, scripts can also be saved to and loaded from anonymous GitHub \href{https://gist.github.com/}{gists} to facilitate code sharing.
 
-Scripts can be run by selection, line, or the entire contents of the script editor from the \dQuote{Run} menu. Scripts can also be run from the context menu (via a right mouse click) or with \code{<Control-r>}. \code{<F8>} runs the entire script, whereas \code{<F7>} checks for parsing errors in the entire script without evaluating it.
+Scripts can be run by selection, line, or the entire contents of the script editor from the \dQuote{Run} menu. Scripts can also be run from the context menu (via a right mouse click) or with \code{<Control-r>} or \code{<Control-Return>} to run a selection or the current line. \code{<F8>} runs the entire script, whereas \code{<F7>} checks for parsing errors in the entire script without evaluating it (all code is parsed before running, automatically).
 
-\code{riteout} is a wrapper for \code{rite} that defaults to \code{catchOutput=TRUE}.
+Command completion is now fully supported by pressing \code{<Shift-Tab>} or \code{<F2>} (but encounters some problems with functions named with periods). If a function is complete and followed by an open parenetheses (e.g., \code{data.frame(}, the command completion keys bring up a selectable list named arguments for the function. If a dataframe or environment name is complete and followed by a dollar sign (e.g., \code{mydf$}), the command completion keys bring up a list of named elements in the dataframe or environment.
+
+\code{riteout} is a wrapper for \code{rite} that defaults to \code{catchOutput=TRUE}, which provides access to various report generation tools, described in detail below.
 }
 
 \section{Syntax highlighting}{
+rite supports syntax highlighting for R (by default) and, optionally, a number of other R-related languages LaTeX, \href{http://www.rstudio.com/ide/docs/authoring/using_markdown}{R-flavored markdown}, XML and HTML, \href{http://yihui.name/knitr/demo/stitch/}{roxygen}, \href{http://cran.r-project.org/web/packages/brew/index.html}{brew}, and restructured text (reST).
+
+Functions and other objects from loaded packages are highlighted by default on-the-fly.
+
 By default, the following colors are used for syntax highlighting:
   \code{Normal text (normal)}: {\dQuote{black}}
   \code{Editor background (background)}: {\dQuote{white}}
