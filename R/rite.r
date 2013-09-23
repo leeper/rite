@@ -1073,7 +1073,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		tkgrid(edit_scr, sticky="nsew", column=2, row=1)
 		tkgrid.columnconfigure(edit_tab1,1,weight=1)
 		tkgrid.columnconfigure(edit_tab1,2,weight=0)
-		tkgrid.rowconfigure(edit_tab1,1,weight=1)		
+		tkgrid.rowconfigure(edit_tab1,1,weight=1)
 	# pack left notebook
 	tkadd(pw, nb1, weight=1) # left pane
 
