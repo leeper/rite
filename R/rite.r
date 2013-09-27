@@ -866,26 +866,25 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 		if(catchOutput){
 			tkadd(menuRun, "command", label="List all objects", command=function()
 				tkinsert(output,"end",capture.output(ls(envir=evalenv))))
+		} else{
+			tkadd(menuRun, "command", label="List all objects", command=function()
+				print(ls(envir=evalenv)))
+		}
 			tkadd(menuRun, "command", label="Remove all objects", command=function() {
 				check <- tkmessageBox(message = "Are you sure?", icon = "question", type = "yesno", default = "no")
 				if(tclvalue(check)=="yes"){
 					rm(list=ls(all.names=TRUE,envir=evalenv),envir=evalenv)
 					tkmessageBox(message="All objects removed")
 				}	})
+		if(catchOutput){
 			tkadd(menuRun, "command", label="List search path", command=function()
 				tkinsert(output,"end",capture.output(search())))
-			#tkadd(menuRun, "separator")
-			#tkadd(menuRun, "command", label="Install package(s)", command=function()
-			#	install.packages())
-			#tkadd(menuRun, "command", label="Update package(s)", command=function()
-			#	update.packages(ask='graphics',checkBuilt=TRUE))
 		} else {
-			tkadd(menuRun, "command", label="List all objects", command=function()
-				print(ls(envir=evalenv)))
-			tkadd(menuRun, "command", label="Remove all objects", command=function()
-				rm(list=ls(all.names=TRUE,envir=evalenv),envir=evalenv))
 			tkadd(menuRun, "command", label="List search path", command=function()
 				print(search()))
+		}
+			tkadd(menuRun, "command", label="Remove all objects", command=function()
+				rm(list=ls(all.names=TRUE,envir=evalenv),envir=evalenv))
 			tkadd(menuRun, "separator")
 			tkadd(menuRun, "command", label="Install package(s)", command=function()
 				install.packages())
@@ -978,7 +977,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 					command = function() knittxt(genmode="md2html.fragment", usefile=FALSE, usetxt=TRUE))
 				tkadd(menuMD, "command", label = "knit Rmd to HTML",
 					command = function() knittxt(genmode="rmd2html", usefile=FALSE, usetxt=TRUE))
-				tkadd(menuMD, "separator")
+				# tkadd(menuMD, "separator")
 				# update when slidify is on CRAN
 				#tkadd(menuMD, "command", label = "slidify md to HTML",
 				#	command = function() knittxt(genmode="slidify", usefile=FALSE, usetxt=TRUE))
