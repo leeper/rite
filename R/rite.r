@@ -1762,7 +1762,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 }
 
 riteout <- function(...)
-    rite(catchOutput=TRUE,...)
+    rite(catchOutput=TRUE, ...)
 
 if(getRversion() >= "2.15.1")
     utils::globalVariables(c("osink", "riteoutcon"))

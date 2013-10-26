@@ -1,6 +1,8 @@
 # CHANGES to rite 0.3 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
+* From v0.2.41, the `echo` parameter now defaults to `TRUE`.
+* The value of `tab` can now be used to specify the amount of space inserted when pressing `<TAB>`. See documentation.
 * Added the ability to load/append/reference a remote file either via printing a `source` call or a multi-line command using **RCurl** and `source`.
 * Added support for loading from and (anonymously) saving to Github gists.
 * Added support for the **knitr** functions `stitch` and `spin`, as well as markdown conversion to the Report Generation menu; reorganized the menu accordingly.
