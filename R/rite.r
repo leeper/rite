@@ -713,10 +713,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 clearError()
                 tkconfigure(err_out, state="normal")
                 tkmark.set(err_out, "insert", "end")
-                if(textype=="latex")
+                if(textype=="latex"){
                     tex1 <- system(paste("pdflatex",filetopdf), intern=TRUE)
-                else
+                    #tex1 <- tools::texi2pdf(filetopdf, clean=TRUE)
+                } else {
                     tex1 <- system(paste("xelatex",filetopdf), intern=TRUE)
+                }
                 tkselect(nb2, 1)
                 tkfocus(txt_edit)
                 tkinsert(err_out, "insert", paste(tex1,collapse="\n"))
