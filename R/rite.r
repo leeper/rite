@@ -351,7 +351,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     }
     
     ## RUN FUNCTIONS ##
-    runCode <- function(code){
+    runCode <- function(code, chunks=FALSE){
         if(autosave & (is.null(filename) || filename=="")){
             chn <- tclopen(ritetmpfile, "w")
             tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
@@ -366,9 +366,21 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             scriptSaved <<- TRUE
             tkwm.title(editor, wmtitle)
         }
-        parsed <- tryparse(verbose=FALSE)
-        if(!parsed)
-            return()
+        if(chunks){
+            if(!require(knitr)){
+                install <- try(install.packages("knitr"), silent=TRUE)
+                if(inherits(install, "try-error")){
+                    tkmessageBox(message="knitr not installed and not installable")
+                    return()
+                }
+            }
+            code <- knitr::purl(text=code, quiet=TRUE)
+        }
+        else{
+            parsed <- tryparse(verbose=FALSE)
+            if(!parsed)
+                return()
+        }
         search1 <- search()
         if(catchOutput)
             length2 <- length(osink)
@@ -467,7 +479,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             }
         }
     }
-   runLine <- function(){
+    runLine <- function(){
         code <- tclvalue(tkget(txt_edit, "insert linestart", "insert lineend"))
         if(!code=="")
             runCode(code)
@@ -479,7 +491,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     runAll <- function(){
         runCode(tclvalue(tkget(txt_edit,"1.0","end")))
     }
+    runAllChunks <- function(){
+        runCode(tclvalue(tkget(txt_edit,"1.0","end")), chunks=TRUE)
+    }
 
+    
     ## OUTPUT FUNCTIONS ##
     if(catchOutput){
         saveOutput <- function(outfilename="") {
@@ -867,6 +883,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         tkadd(menuRun, "command", label = "Run Line", command = runLine, underline = 4)
         tkadd(menuRun, "command", label = "Run Selection", command = runSelection, underline = 4)
         tkadd(menuRun, "command", label = "Run All", command = runAll, underline = 4)
+        tkadd(menuRun, "command", label = "Run Code Chunks (All)", command = runAllChunks, underline = 4)
         tkadd(menuRun, "separator")
         if(catchOutput){
             tkadd(menuRun, "command", label="List all objects", command=function()
