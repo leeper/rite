@@ -1,6 +1,6 @@
 rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 fontFamily="Courier", fontSize=10, orientation="horizontal",
-                highlight="r", color=NULL, autosave=TRUE, echo=FALSE, ...){    
+                highlight="r", color=NULL, autosave=TRUE, echo=FALSE, tab='\t', ...){    
     ## STARTUP OPTIONS ##
     filename <- filename # script filename (if loaded or saved)
     scriptSaved <- TRUE # a logical for whether current edit file is saved
@@ -866,31 +866,26 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         if(catchOutput){
             tkadd(menuRun, "command", label="List all objects", command=function()
                 tkinsert(output,"end",capture.output(ls(envir=evalenv))))
-        } else{
-            tkadd(menuRun, "command", label="List all objects", command=function()
-                print(ls(envir=evalenv)))
-        }
-            tkadd(menuRun, "command", label="Remove all objects", command=function() {
-                check <- tkmessageBox(message = "Are you sure?", icon = "question", type = "yesno", default = "no")
-                if(tclvalue(check)=="yes"){
-                    rm(list=ls(all.names=TRUE,envir=evalenv),envir=evalenv)
-                    tkmessageBox(message="All objects removed")
-                }    })
-        if(catchOutput){
             tkadd(menuRun, "command", label="List search path", command=function()
                 tkinsert(output,"end",capture.output(search())))
-        } else {
+        }
+        else {
+            tkadd(menuRun, "command", label="List all objects", command=function()
+                print(ls(envir=evalenv)))
             tkadd(menuRun, "command", label="List search path", command=function()
                 print(search()))
         }
-            tkadd(menuRun, "command", label="Remove all objects", command=function()
-                rm(list=ls(all.names=TRUE,envir=evalenv),envir=evalenv))
-            tkadd(menuRun, "separator")
-            tkadd(menuRun, "command", label="Install package(s)", command=function()
-                install.packages())
-            tkadd(menuRun, "command", label="Update package(s)", command=function()
-                update.packages(ask='graphics',checkBuilt=TRUE))
-        }
+        tkadd(menuRun, "command", label="Remove all objects", command=function() {
+            check <- tkmessageBox(message = "Are you sure?", icon = "question", type = "yesno", default = "no")
+            if(tclvalue(check)=="yes"){
+                rm(list=ls(all.names=TRUE,envir=evalenv),envir=evalenv)
+                tkmessageBox(message="All objects removed")
+            }    })
+        tkadd(menuRun, "separator")
+        tkadd(menuRun, "command", label="Install package(s)", command=function()
+            install.packages())
+        tkadd(menuRun, "command", label="Update package(s)", command=function()
+            update.packages(ask='graphics',checkBuilt=TRUE))
         #tkadd(menuRun, "separator")
         #tkadd(menuRun, "command", label = "Interrupt", command = function(){pskill(Sys.getpid(),SIGINT) }, underline = 0)
         #tkadd(menuRun, "command", label = "Interrupt", command = function() tkdestroy(txt_edit), underline = 0)
@@ -1452,8 +1447,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         tkbind(output, "<Control-l>", clearOutput)
         tkbind(txt_edit, "<Control-L>", clearOutput)
         tkbind(output, "<Control-L>", clearOutput)
-    }
-    else{
+    } else {
         tkbind(txt_edit, "<Control-l>", function() {cat(rep("\n",50),collapse="")})
         tkbind(txt_edit, "<Control-L>", function() {cat(rep("\n",50),collapse="")})
     }
@@ -1528,22 +1522,14 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     tkbind(txt_edit, "<Control-U>", multiuntab)
     
     tabreturn <- function(){
-        # detect tab(s)
-        tab1 <- tclvalue(tkget(txt_edit, "insert linestart", "insert linestart+1char"))
-        tabs <- 0
-        if(tab1=="\t"){
-            tabs <- tabs + 1
-            more <- TRUE
-            while(more){
-                tab2 <- tclvalue(tkget(txt_edit,     paste("insert linestart+",tabs,"char",sep=""),
-                                                    paste("insert linestart+",tabs+1,"char",sep="")))
-                if(tab2=="\t")
-                    tabs <- tabs + 1
-                else
-                    more <- FALSE
-            }
-        }
-        tkinsert(txt_edit, "insert ", paste("\n",paste(rep("\t",tabs),collapse=""),sep=""))
+        # detect tab(s) and other whitespace
+        thisline <- tclvalue(tkget(txt_edit, "insert linestart", "insert lineend"))
+        spaces <- gregexpr('[[:space:]]',thisline)[[1]]
+        leadn <- which(spaces==seq_along(strsplit(thisline,'')[[1]]))
+        lead <- substring(thisline,range(leadn)[1],range(leadn)[2])
+        if(is.na(lead))
+            lead <- ''
+        tkinsert(txt_edit, "insert ", paste("\n",lead,sep=""))
         tksee(txt_edit, "insert")
     }
     tkbind(txt_edit, "<Return>", expression(tabreturn, break))
