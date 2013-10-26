@@ -165,7 +165,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 									regmatches(entry, regexpr("[0-9a-f]+$", entry)), sep = "")
 					}
 				}
-				content <- try(RCurl::getURL(entry,ssl.verifypeer=FALSE,followlocation=TRUE))
+				content <- try(RCurl::getURL(entry,ssl.verifypeer=0L,followlocation=1L))
 				if(!inherits(content,"try-error")){
 					tkinsert(txt_edit, "end", content)
 					scriptSaved <<- FALSE
@@ -303,14 +303,14 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 						tkinsert(txt_edit, "insert", paste(
 							"library(RCurl)\n",
 							"writeLines(getURL('",entry,
-								"',\n\tssl.verifypeer=FALSE,followlocation=TRUE),\n\ttemp_file <- tempfile())\n",
+								"',\n\tssl.verifypeer=0L,followlocation=1L),\n\ttemp_file <- tempfile())\n",
 							"source(temp_file)\n",
 							"unlink(temp_file)\n",sep=""))
 					else
 						tkinsert(txt_edit, "insert", paste("source(\"",entry,"\")\n",sep=""))
 				}
 				else{
-					content <- try(RCurl::getURL(entry,ssl.verifypeer=FALSE,followlocation=TRUE))
+					content <- try(RCurl::getURL(entry,ssl.verifypeer=OL,followlocation=1L))
 					if(!inherits(content,"try-error"))
 						tkinsert(txt_edit, "insert", content)
 					else
