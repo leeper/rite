@@ -12,6 +12,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         editenv <- new.env()
         evalenv <- editenv
     }
+    # handle tab value
+    if(is.null(tab))
+        tab <- '\t'
+    else if(is.numeric(tab))
+        tab <- paste(rep(' ',round(tab)),collapse='')
     hcolors <- list(normal = "black", # txt_edit normal font color
                     background = "white", # txt_edit background color
                     functions = "purple",
@@ -1481,54 +1486,63 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         insertpos2 <- paste(insertpos[1],".",as.numeric(insertpos[2])+1,sep="")
         selrange <- tclvalue(tktag.ranges(txt_edit,"sel"))
         if(selrange=="")
-            tkinsert(txt_edit, paste(insertpos[1],".0",sep=""), "\t")
+            tkinsert(txt_edit, 'insert', tab)
         else{
-            selrange <- floor(as.numeric(strsplit(selrange," ")[[1]]))
-            if(selrange[1]==selrange[2])
-                tkinsert(txt_edit, paste(selrange[1],".0 linestart"), "\t")
+            selrange2 <- floor(as.numeric(strsplit(selrange," ")[[1]]))
+            if(selrange2[1]==selrange2[2])
+                tkinsert(txt_edit, 'insert', tab)
             else{
-                for(i in selrange[1]:selrange[2])
-                    tkinsert(txt_edit, paste(i,".0 linestart",sep=""), "\t")
+                for(i in selrange2[1]:selrange2[2])
+                    tkinsert(txt_edit, paste(i,".0 linestart",sep=""), tab)
             }
+            tktag.add(txt_edit,"sel",paste(selrange2[1],'.0',sep=''), paste(selrange2[2],".0 lineend",sep=''))
         }
-        tkmark.set(txt_edit, "insert", insertpos2)
+        #tkmark.set(txt_edit, 'insert', paste('insert+',nchar(tab),'char',sep=''))
     }
     multiuntab <- function(){
         insertpos <- strsplit(tclvalue(tkindex(txt_edit,"insert")),".", fixed=TRUE)[[1]]
         insertpos2 <- paste(insertpos[1],".",as.numeric(insertpos[2])-1,sep="")
         selrange <- tclvalue(tktag.ranges(txt_edit,"sel"))
-        if(!selrange==""){
-            selrange <- round(as.numeric(strsplit(selrange," ")[[1]]),0)
-            for(i in selrange[1]:selrange[2]){
-                pos <- paste(i,".0 linestart",sep="")
-                check <- tclvalue(tkget(txt_edit, pos, paste(pos,"+1char",sep="")))
-                if(check=="\t")
-                    tkdelete(txt_edit, pos, paste(pos,"+1char",sep=""))
-            }
-            tkmark.set(txt_edit, "insert", insertpos2)
+        if(selrange==""){
+            check <- tclvalue(tkget(txt_edit, "insert linestart", "insert linestart+1char"))
+            if(grepl('^[[:space:]]+',check)[[1]])
+                tkdelete(txt_edit, "insert linestart", "insert linestart+1char")
         }
         else{
-            check <- tclvalue(tkget(txt_edit, "insert linestart", "insert linestart+1char"))
-            if(check=="\t"){
-                tkmark.set(txt_edit, "insert", "insert linestart")
-                tkdelete(txt_edit, "insert linestart", "insert linestart+1char")
-                tkmark.set(txt_edit, "insert", insertpos2)
+            selrange2 <- round(as.numeric(strsplit(selrange," ")[[1]]),0)
+            for(i in selrange2[1]:selrange2[2]){
+                pos <- paste(i,".0 linestart",sep="")
+                check <- tclvalue(tkget(txt_edit, pos, paste(pos,"+1char",sep="")))
+                if(grepl('^[[:space:]]+',check)[[1]])
+                    tkdelete(txt_edit, pos, paste(pos,"+1char",sep=""))
             }
+            tktag.add(txt_edit,"sel",paste(selrange2[1],'.0',sep=''), paste(selrange2[2],".0 lineend",sep=''))
+            #tkmark.set(txt_edit, "insert", insertpos2)
         }
     }
     tkbind(txt_edit, "<Control-i>", expression(multitab, break))
     tkbind(txt_edit, "<Control-I>", expression(multitab, break))
-    tkbind(txt_edit, "<Control-u>", multiuntab)
-    tkbind(txt_edit, "<Control-U>", multiuntab)
+    tkbind(txt_edit, "<Tab>", expression(multitab, break))
+    tkbind(txt_edit, "<Shift-Tab>", expression(multiuntab, break))
+    tkbind(txt_edit, "<Control-u>", expression(multiuntab, break))
+    tkbind(txt_edit, "<Control-U>", expression(multiuntab, break))
     
     tabreturn <- function(){
         # detect tab(s) and other whitespace
         thisline <- tclvalue(tkget(txt_edit, "insert linestart", "insert lineend"))
         spaces <- gregexpr('[[:space:]]',thisline)[[1]]
-        leadn <- which(spaces==seq_along(strsplit(thisline,'')[[1]]))
-        lead <- substring(thisline,range(leadn)[1],range(leadn)[2])
-        if(is.na(lead))
+        if(spaces[1]==-1)
             lead <- ''
+        else{
+            linechars <- strsplit(thisline,'')[[1]]
+            leadn <- which(spaces[1:length(linechars)]==seq_along(linechars))
+            if(!is.na(leadn[1]))
+                lead <- substring(thisline,range(leadn)[1],range(leadn)[2])
+            else
+                lead <- ''
+            if(is.na(lead))
+                lead <- ''
+        }
         tkinsert(txt_edit, "insert ", paste("\n",lead,sep=""))
         tksee(txt_edit, "insert")
     }
