@@ -27,7 +27,7 @@ sinkstop(quiet = TRUE)
 \details{
 These functions make use of a couple of different R features to build a color-coded output window for the R console. While the console is limited to displaying output in monochrome plain text, the rite sink allows multi-colored output and messages to be piped to a single widget that highlights errors, warning, and messages. Unlike a traditional sink, rite sink is a tcl/tk widget that updates output as commands and messages occur. Accomplishing this requires the use of \code{sink}, task callbacks, and a custom error handler. (This is similar to the R2HTML package.) 
 
-\code{sinkstart} starts the sink and \code{sinkstop} stops the sink and cleans up.
+\code{sinkstart} starts the sink and \code{sinkstop} stops the sink and cleans up. Closing the sink widget invisibly calls \code{sinkstop}.
 }
 \value{NULL}
 \references{
