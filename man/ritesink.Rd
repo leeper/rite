@@ -1,22 +1,47 @@
 \name{ritesink}
-\alias{ritesink}
+\alias{sinkstart}
+\alias{sinkstop}
 \title{ritesink}
 \description{An experimental tcl/tk output widget}
 \usage{
-ritesink(evalenv=.GlobalEnv, fontFamily="Courier", fontSize=10)
+sinkstart(echo = TRUE, splitsink = FALSE,
+          fontFamily = 'Courier', fontSize = 10,
+          col.bg='white', col.call='black', col.result='black',
+          col.err='red', col.warn='purple', col.msg='blue')
+
+sinkstop(quiet = TRUE)
 }
 \arguments{
-  \item{evalenv}{The environment in which the script should be evaluated, e.g., \code{.GlobalEnv}. If \code{NULL}, the default is a hidden environment, internal to \code{rite} meaning that, e.g., variables created/modified in \code{rite} are not accessible via the console.}
+  \item{echo}{A logical indicating whether calls should be output to the sink. Default is \code{TRUE}.}
+  \item{split}{A logical indicating whether output (but not messages) should be split between the console and the sink. Default is \code{FALSE}.}
   \item{fontFamily}{The font family used in rite. Default is \dQuote{\code{Courier}}. Available fonts can be retrieved by \code{.Tcl("font families")}.}
   \item{fontSize}{The font size used in rite. Default is \code{10}.}
+  \item{col.bg}{A character string indicating a tcl/tk color for the background color of the sink.}
+  \item{col.call}{A character string indicating a tcl/tk color for the evaluated R calls (only visible if \code{echo=TRUE}..}
+  \item{col.result}{A character string indicating a tcl/tk color for standard output.}
+  \item{col.err}{A character string indicating a tcl/tk color for errors.}
+  \item{col.warn}{A character string indicating a tcl/tk color for warnings.}
+  \item{col.msg}{A character string indicating a tcl/tk color for messages.}
+  \item{quiet}{A logical indicating whether to suppress confirmation that everything is cleaned up. Default is \code{TRUE}.}
 }
 \details{
-The beginnings of an experimental widget for displaying R output with highlighting. Not really ready for primetime yet.
+These functions make use of a couple of different R features to build a color-coded output window for the R console. While the console is limited to displaying output in monochrome plain text, the rite sink allows multi-colored output and messages to be piped to a single widget that highlights errors, warning, and messages. Unlike a traditional sink, rite sink is a tcl/tk widget that updates output as commands and messages occur. Accomplishing this requires the use of \code{sink}, task callbacks, and a custom error handler. (This is similar to the R2HTML package.) 
+
+\code{sinkstart} starts the sink and \code{sinkstop} stops the sink and cleans up.
 }
-%\value{}
-%\references{}
+\value{NULL}
+\references{
+\href{http://developer.r-project.org/TaskHandlers.pdf}{Top-level Task Callbacks in R}
+
+\href{http://cran.r-project.org/web/packages/R2HTML/index.html}{R2HTML package}
+}
 \author{Thomas J. Leeper}
 %\note{}
 %\seealso{}
-%\examples{\dontrun{ritesink()}}
+\examples{
+\dontrun{
+sinkstart() # open the sink
+sinkstop() # close and clean up
+}
+}
 \keyword{ IO }
