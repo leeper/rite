@@ -8,8 +8,11 @@ sinkstart <- function(
     if('outsink' %in% getTaskCallbackNames())
         stop('ritesink is already active')
     
-    if(!exists('riteenv'))
-        assign('riteenv', new.env(parent = .GlobalEnv), .GlobalEnv)
+    if(!exists('riteenv')){
+        #riteenv <- new.env(parent = as.environment('package:rite'))
+        assignInMyNamespace('riteenv', new.env())
+        #assign('riteenv', new.env(parent = .GlobalEnv), .GlobalEnv)
+    }
     riteenv$echo <- echo
     riteenv$split <- split
     
@@ -195,7 +198,7 @@ sinkstop <- function(quiet = TRUE){
     # remove `riteenv`
     if(!"thesink" %in% ls(riteenv)){
         riteenv <- NULL
-        rm(riteenv, envir=.GlobalEnv)
+        rm(riteenv, envir=asNamespace('package:rite'))
         if(quiet)
             message('rite sink closed and removed')
     }
