@@ -9,8 +9,7 @@ sinkstart <- function(
         stop('ritesink is already active')
     
     if(!exists('riteenv'))
-        assign('riteenv', new.env(parent = .GlobalEnv), as.environment('package:rite'))
-        #assign('riteenv', new.env(parent = .GlobalEnv), .GlobalEnv)
+        assign('riteenv', new.env(parent = .GlobalEnv), .GlobalEnv)
     riteenv$echo <- echo
     riteenv$split <- split
     
