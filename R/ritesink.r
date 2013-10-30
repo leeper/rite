@@ -32,7 +32,7 @@ sinkstart <- function(
             if(visible && ok){
                 if(riteenv$echo){
                     tkinsert(riteenv$output, 'insert', paste('>',e,'\n'), ('call'))
-                    i <- paste(last,'\n',collapse='\n',sep='')
+                    i <- paste(last,'\n',collapse='')
                     tkinsert(riteenv$output, 'insert', i, ('result'))
                 }
                 else{
