@@ -4,6 +4,10 @@ sinkstart <- function(
     col.bg='white', col.call='black', col.result='black',
     col.err='red', col.warn='purple', col.msg='blue')
 {
+    require(tcltk)
+    if('outsink' %in% getTaskCallbackNames())
+        stop('ritesink is already active')
+    
     if(!exists('riteenv'))
         assign('riteenv', new.env(parent = .GlobalEnv), .GlobalEnv)
     riteenv$echo <- echo
@@ -68,7 +72,7 @@ sinkstart <- function(
                 }
                 else if(any(grepl('Warning',fromerr))){
                     tkinsert(riteenv$output,'insert',
-                        paste(fromerr,'\n',collapse=''), ('warning'))
+                        paste(fromerr,collapse='\n'), ('warning'))
                 }
                 else{
                     tkinsert(riteenv$output,'insert',
@@ -80,11 +84,7 @@ sinkstart <- function(
             TRUE
         }
     }
-        
-    if(!'outsink' %in% getTaskCallbackNames())
-        addTaskCallback(outsink(), name='outsink')
-    else
-        stop('ritesink is already active')
+    addTaskCallback(outsink(), name='outsink')
         
     if(!'thesink' %in% ls(riteenv)){
         riteenv$thesink <- tktoplevel(borderwidth=0)
@@ -118,7 +118,7 @@ sinkstart <- function(
         tkgrid.rowconfigure(riteenv$thesink,1,weight=1)
         
         # tags/fonts
-        if(!exists(riteenv$defaultfont))
+        if(!exists('riteenv$defaultfont'))
             riteenv$defaultfont <- tkfont.create(family=fontFamily, size=fontSize)
         tktag.configure(riteenv$output, 'call',
             foreground=col.call,
@@ -128,7 +128,7 @@ sinkstart <- function(
             foreground=col.result,
             font=riteenv$defaultfont,
             underline=0)
-        if(!exists(riteenv$boldfont))
+        if(!exists('riteenv$boldfont'))
             riteenv$boldfont <- tkfont.create(family=fontFamily, size=fontSize, weight='bold')
         tktag.configure(riteenv$output, 'error',
             foreground=col.err,
@@ -163,15 +163,22 @@ sinkstart <- function(
 }
 
 sinkstop <- function(quiet = TRUE){
+    # reset options defaults
     options('show.error.messages'=TRUE) # default TRUE
     options('error'=NULL) # default NULL
     options('width'=80) # default 80
+    
+    # stop sinks
     if(!sink.number()==0)
         sink()
     if(!sink.number('message')==2)
         sink(type='message')
+    
+    # remove call back
     if('outsink' %in% getTaskCallbackNames())
         removeTaskCallback('outsink')
+    
+    # close connections
     if(riteenv$otmp %in% showConnections()){
         thiscon <- rownames(showConnections())[which(riteenv$otmp==showConnections()[,1])]
         close(getConnection(thiscon))
@@ -184,7 +191,16 @@ sinkstop <- function(quiet = TRUE){
     # remove temporary sink files
     unlink(riteenv$otmp)
     unlink(riteenv$etmp)
-    if(quiet)
+    
+    # remove `riteenv`
+    if(!"thesink" %in% ls(riteenv)){
+        riteenv <- NULL
+        rm(riteenv, envir=.GlobalEnv)
+        if(quiet)
+            message('rite sink closed and removed')
+    }
+    else if(quiet)
         message('rite sink closed')
+    
     invisible(NULL)
 }
