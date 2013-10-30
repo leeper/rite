@@ -117,21 +117,40 @@ sinkstart <- function(
         tkgrid.columnconfigure(riteenv$thesink,2,weight=0)
         tkgrid.rowconfigure(riteenv$thesink,1,weight=1)
         
-        # tags
-        tktag.configure(riteenv$output, 'call', foreground=col.call, underline=0)
-        tktag.configure(riteenv$output, 'result', foreground=col.result, underline=0)
+        # tags/fonts
+        if(!exists(riteenv$defaultfont))
+            riteenv$defaultfont <- tkfont.create(family=fontFamily, size=fontSize)
+        tktag.configure(riteenv$output, 'call',
+            foreground=col.call,
+            font=riteenv$defaultfont,
+            underline=0)
+        tktag.configure(riteenv$output, 'result',
+            foreground=col.result,
+            font=riteenv$defaultfont,
+            underline=0)
+        if(!exists(riteenv$boldfont))
+            riteenv$boldfont <- tkfont.create(family=fontFamily, size=fontSize, weight='bold')
         tktag.configure(riteenv$output, 'error',
             foreground=col.err,
-            font=tkfont.create(family=fontFamily, size=fontSize, weight='bold'),
+            font=riteenv$boldfont,
             underline=0)
         tktag.configure(riteenv$output, 'warning',
             foreground=col.warn,
-            font=tkfont.create(family=fontFamily, size=fontSize, weight='bold'),
+            font=riteenv$boldfont,
             underline=0)
         tktag.configure(riteenv$output, 'message',
             foreground=col.msg,
-            font=tkfont.create(family=fontFamily, size=fontSize, weight='bold'),
+            font=riteenv$boldfont,
             underline=0)
+        
+        # bind option('width') to window resize
+        resize <- function(){
+            w <- tkwinfo('width',riteenv$output)
+            m <- tkfont.measure(riteenv$defaultfont,'m')
+            nw <- round((as.numeric(w)-20)/as.numeric(m))
+            options(width=nw)
+        }
+        tkbind(riteenv$thesink, '<Configure>', resize)
         
         # add context menu and key bindings here
         ## clear, copy, cut, paste, etc. on the sink
@@ -146,6 +165,7 @@ sinkstart <- function(
 sinkstop <- function(quiet = TRUE){
     options('show.error.messages'=TRUE) # default TRUE
     options('error'=NULL) # default NULL
+    options('width'=80) # default 80
     if(!sink.number()==0)
         sink()
     if(!sink.number('message')==2)
@@ -168,5 +188,3 @@ sinkstop <- function(quiet = TRUE){
         message('rite sink closed')
     invisible(NULL)
 }
-
-# 
