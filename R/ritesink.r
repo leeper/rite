@@ -197,8 +197,9 @@ sinkstop <- function(quiet = TRUE){
     
     # remove `riteenv`
     if(!"thesink" %in% ls(riteenv)){
-        riteenv <- NULL
-        rm(riteenv, envir=asNamespace('package:rite'))
+        #riteenv <- NULL
+        #rm(riteenv, envir=asNamespace('package:rite'))
+        rm(riteenv, envir=.GlobalEnv)
         if(quiet)
             message('rite sink closed and removed')
     }
