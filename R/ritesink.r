@@ -165,8 +165,61 @@ sinkstart <- function(
         }
         tkbind(riteenv$thesink, '<Configure>', resize)
         
-        # add context menu and key bindings here
-        ## clear, copy, cut, paste, etc. on the sink
+        # context menu (and associated functions and bindings)
+        selectAll <- function(){
+            tktag.add(riteenv$output,"sel","0.0","end")
+            tkmark.set(riteenv$output,"insert","end")
+        }
+        tkbind(riteenv$output, "<Control-A>", expression(selectAll, break))
+        tkbind(riteenv$output, "<Control-a>", expression(selectAll, break))
+        copyText <- function(docut=FALSE){
+            selrange <- strsplit(tclvalue(tktag.ranges(riteenv$output,"sel"))," ")[[1]]
+            if(!tclvalue(tktag.ranges(riteenv$output,"sel"))==""){
+                tkclipboard.clear()
+                tkclipboard.append(tclvalue(tkget(riteenv$output, selrange[1], selrange[2])))
+                if(docut==TRUE)
+                    tkdelete(riteenv$output, selrange[1], selrange[2])
+            }
+            else {
+                selectAll()
+                copyText()
+            }
+        }
+        pasteText <- function(){
+            if("windows"==.Platform$OS.type)
+                cbcontents <- readLines("clipboard")
+            else if("unix"==Sys.getenv("OS"))
+                cbcontents <- readLines(pipe("pbpaste"))
+            else
+                cbcontents <- ""
+            tkinsert(riteenv$output, "insert", paste(cbcontents,collapse="\n"))
+        }
+        clearSink <- function() tkdelete(riteenv$output, '1.0', 'end')
+        tkbind(riteenv$output, "<Control-L>", expression(clearSink, break))
+        tkbind(riteenv$output, "<Control-l>", expression(clearSink, break))
+        
+        contextMenu <- tkmenu(riteenv$output, tearoff = FALSE)
+            tkadd(contextMenu, "command", label = "Clear All <Ctrl-L>",
+                command = clearSink)
+            tkadd(contextMenu, "separator")
+            tkadd(contextMenu, "command", label = "Select All <Ctrl-A>",
+                command = selectAll)
+            tkadd(contextMenu, "command", label = "Copy <Ctrl-C>",
+                command = copyText)
+            tkadd(contextMenu, "command", label = "Cut <Ctrl-X>",
+                command = function() copyText(docut=TRUE))
+            tkadd(contextMenu, "command", label = "Paste <Ctrl-V>",
+                command = pasteText)
+        rightClick <- function(x, y) {
+            rootx <- as.integer(tkwinfo("rootx", riteenv$output))
+            rooty <- as.integer(tkwinfo("rooty", riteenv$output))
+            xTxt <- as.integer(x) + rootx
+            yTxt <- as.integer(y) + rooty
+            tkmark.set(riteenv$output,"insert",paste("@",xTxt,",",yTxt,sep=""))
+            .Tcl(paste("tk_popup", .Tcl.args(contextMenu, xTxt, yTxt)))
+        }
+        tkbind(riteenv$output, "<Button-3>", rightClick)
+    
     }
     
     options('show.error.messages'=FALSE) # default TRUE
