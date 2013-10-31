@@ -28,18 +28,22 @@ sinkstart <- function(
     riteenv$lengthe <- paste(scan(riteenv$errsink, what='character', sep='\n', quiet=TRUE),collapse='\n')
     
     # error handler
-    riteenv$errhandler <- function()
-        tkinsert(riteenv$output,'insert',geterrmessage(), ('error'))
+    riteenv$errhandler <- function(){
+        tkinsert(riteenv$output,'insert',paste('\n',geterrmessage(),sep=''), ('error'))
+        tksee(riteenv$output, 'insert')
+        invisible(NULL)
+    }
         
     # callback function
     outsink <- function() {
         function(expr, value, ok, visible) {
             e <- as.character(as.expression(expr))
-            last <- capture.output(.Last.value)
+            last <- paste(capture.output(.Last.value),collapse='\n')
             if(visible && ok){
                 if(riteenv$echo){
-                    tkinsert(riteenv$output, 'insert', paste('>',e,'\n'), ('call'))
-                    i <- paste(last,'\n',collapse='')
+                    tkinsert(riteenv$output, 'insert', paste('\n>',e,'\n'), ('call'))
+                    #i <- paste(last,'\n',collapse='')
+                    i <- last
                     # handle `simpleError` etc. that trigger callback
                     if(grepl("simpleError",i))
                         tkinsert(riteenv$output, 'insert', i, ('error'))
@@ -53,10 +57,11 @@ sinkstart <- function(
                         tkinsert(riteenv$output, 'insert', i, ('result'))
                 }
                 else{
-                    i <- paste(last,'\n\n',sep='')
+                    #i <- paste(last,'\n',sep='')
+                    i <- last
                     tkinsert(riteenv$output, 'insert', i, ('result'))
                 }
-                riteenv$lengtho <- paste(scan(riteenv$otmp, what='character', sep='\n', quiet=TRUE),collapse='\n')
+                #riteenv$lengtho <- paste(scan(riteenv$otmp, what='character', sep='\n', quiet=TRUE),collapse='\n')
             }
             else if(visible && !ok) # !ok doesn't happen
                 tkinsert(riteenv$output,'insert','Error\n', ('error'))
@@ -70,14 +75,14 @@ sinkstart <- function(
             if(!identical(osink, riteenv$lengtho) && length(osink)>0){
                 fromout <- substr(osink,nchar(riteenv$lengtho)+1,nchar(osink))
                 if(last=='NULL'){
-                    tkinsert(riteenv$output,'insert',   
+                    tkinsert(riteenv$output,'insert',
                         paste(fromout,collapse='\n'), ('result'))
                 }
                 riteenv$lengtho <- osink
             }
             # Error sink (for `warning` and `message`)
             esink <- paste(scan(riteenv$etmp, what='character', sep='\n', quiet=TRUE),collapse='\n')
-            if(!identical(esink, riteenv$lengthe) && length(osink)>0){
+            if(!identical(esink, riteenv$lengthe) && length(esink)>0){
                 fromerr <- substr(esink,nchar(riteenv$lengthe)+1,nchar(esink))
                 if(any(grepl('error',fromerr))){
                     tkinsert(riteenv$output,'insert',
