@@ -40,7 +40,17 @@ sinkstart <- function(
                 if(riteenv$echo){
                     tkinsert(riteenv$output, 'insert', paste('>',e,'\n'), ('call'))
                     i <- paste(last,'\n',collapse='')
-                    tkinsert(riteenv$output, 'insert', i, ('result'))
+                    # handle `simpleError` etc. that trigger callback
+                    if(grepl("simpleError",i))
+                        tkinsert(riteenv$output, 'insert', i, ('error'))
+                    else if(grepl("simpleWarning",i))
+                        tkinsert(riteenv$output, 'insert', i, ('warning'))
+                    else if(grepl("simpleMessage",i))
+                        tkinsert(riteenv$output, 'insert', i, ('message'))
+                    else if(grepl("simpleCondition",i))
+                        tkinsert(riteenv$output, 'insert', i, ('message'))
+                    else
+                        tkinsert(riteenv$output, 'insert', i, ('result'))
                 }
                 else{
                     i <- paste(last,'\n\n',sep='')
