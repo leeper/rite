@@ -57,7 +57,7 @@ sinkstart <- function(
                         tkinsert(riteenv$output, 'insert', last, ('result'))
                 }
                 else{
-                    tkinsert(riteenv$output, 'insert', last, ('result'))
+                    tkinsert(riteenv$output, 'insert', paste('\n',last,sep=''), ('result'))
                 }
                 riteenv$lengtho <- paste(scan(riteenv$otmp, what='character',
                                         sep='\n', quiet=TRUE),collapse='\n')
@@ -67,6 +67,8 @@ sinkstart <- function(
             else if(!visible && !ok) # !ok doesn't happen
                 tkinsert(riteenv$output,'insert','Non-printing error\n', ('error'))
             else {
+                if(riteenv$echo)
+                    tkinsert(riteenv$output, 'insert', paste('\n>',e,'\n'), ('call'))
                 # Output sink (for `cat` and `print`)
                 osink <- paste(scan(riteenv$otmp, what='character',
                                 sep='\n', quiet=TRUE),collapse='\n')
