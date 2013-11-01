@@ -20,16 +20,18 @@ sinkstart <- function(
     riteenv$stdsink <- file(riteenv$otmp <- tempfile(),'w+')
     sink(riteenv$stdsink, split=split, type='output') # output
     writeLines('# rite output sink', riteenv$stdsink)
-    riteenv$lengtho <- paste(scan(riteenv$stdsink, what='character', sep='\n', quiet=TRUE),collapse='\n')
+    riteenv$lengtho <- paste(scan(riteenv$stdsink, what='character',
+                                sep='\n', quiet=TRUE),collapse='\n')
     
     riteenv$errsink <- file(riteenv$etmp <- tempfile(),'w+')
     sink(riteenv$errsink, type='message') # message
     writeLines('# rite error sink', riteenv$errsink)
-    riteenv$lengthe <- paste(scan(riteenv$errsink, what='character', sep='\n', quiet=TRUE),collapse='\n')
+    riteenv$lengthe <- paste(scan(riteenv$errsink, what='character',
+                                sep='\n', quiet=TRUE),collapse='\n')
     
     # error handler
     riteenv$errhandler <- function(){
-        tkinsert(riteenv$output,'insert',paste('\n',geterrmessage(),sep=''), ('error'))
+        tkinsert(riteenv$output,'insert',paste('\n', geterrmessage(), sep=''), ('error'))
         tksee(riteenv$output, 'insert')
         invisible(NULL)
     }
@@ -42,59 +44,56 @@ sinkstart <- function(
             if(visible && ok){
                 if(riteenv$echo){
                     tkinsert(riteenv$output, 'insert', paste('\n>',e,'\n'), ('call'))
-                    #i <- paste(last,'\n',collapse='')
-                    i <- last
                     # handle `simpleError` etc. that trigger callback
-                    if(grepl("simpleError",i))
-                        tkinsert(riteenv$output, 'insert', i, ('error'))
-                    else if(grepl("simpleWarning",i))
-                        tkinsert(riteenv$output, 'insert', i, ('warning'))
-                    else if(grepl("simpleMessage",i))
-                        tkinsert(riteenv$output, 'insert', i, ('message'))
-                    else if(grepl("simpleCondition",i))
-                        tkinsert(riteenv$output, 'insert', i, ('message'))
+                    if(grepl("simpleError", last))
+                        tkinsert(riteenv$output, 'insert', last, ('error'))
+                    else if(grepl("simpleWarning", last))
+                        tkinsert(riteenv$output, 'insert', last, ('warning'))
+                    else if(grepl("simpleMessage", last))
+                        tkinsert(riteenv$output, 'insert', last, ('message'))
+                    else if(grepl("simpleCondition", last))
+                        tkinsert(riteenv$output, 'insert', last, ('message'))
                     else
-                        tkinsert(riteenv$output, 'insert', i, ('result'))
+                        tkinsert(riteenv$output, 'insert', last, ('result'))
                 }
                 else{
-                    #i <- paste(last,'\n',sep='')
-                    i <- last
-                    tkinsert(riteenv$output, 'insert', i, ('result'))
+                    tkinsert(riteenv$output, 'insert', last, ('result'))
                 }
-                #riteenv$lengtho <- paste(scan(riteenv$otmp, what='character', sep='\n', quiet=TRUE),collapse='\n')
+                riteenv$lengtho <- paste(scan(riteenv$otmp, what='character',
+                                        sep='\n', quiet=TRUE),collapse='\n')
             }
             else if(visible && !ok) # !ok doesn't happen
                 tkinsert(riteenv$output,'insert','Error\n', ('error'))
             else if(!visible && !ok) # !ok doesn't happen
                 tkinsert(riteenv$output,'insert','Non-printing error\n', ('error'))
-            #else
-            #    tkinsert(riteenv$output,'insert','ok\n', ('message')) # print confirm 'ok' on non-printing calls
-            
-            # Output sink (for `cat`)
-            osink <- paste(scan(riteenv$otmp, what='character', sep='\n', quiet=TRUE),collapse='\n')
-            if(!identical(osink, riteenv$lengtho) && length(osink)>0){
-                fromout <- substr(osink,nchar(riteenv$lengtho)+1,nchar(osink))
-                if(last=='NULL'){
-                    tkinsert(riteenv$output,'insert',
-                        paste(fromout,collapse='\n'), ('result'))
+            else {
+                # Output sink (for `cat` and `print`)
+                osink <- paste(scan(riteenv$otmp, what='character',
+                                sep='\n', quiet=TRUE),collapse='\n')
+                if(!identical(osink, riteenv$lengtho) && length(osink)>0){
+                    fromout <- substr(osink, nchar(riteenv$lengtho)+1, nchar(osink))
+                    tkinsert(riteenv$output, 'insert',
+                        paste(fromout, collapse='\n'), ('result'))
+                    riteenv$lengtho <- osink
                 }
-                riteenv$lengtho <- osink
+                #tkinsert(riteenv$output,'insert','ok\n', ('message')) # print confirm 'ok' on non-printing calls
             }
             # Error sink (for `warning` and `message`)
-            esink <- paste(scan(riteenv$etmp, what='character', sep='\n', quiet=TRUE),collapse='\n')
+            esink <- paste(scan(riteenv$etmp, what='character',
+                            sep='\n', quiet=TRUE),collapse='\n')
             if(!identical(esink, riteenv$lengthe) && length(esink)>0){
                 fromerr <- substr(esink,nchar(riteenv$lengthe)+1,nchar(esink))
-                if(any(grepl('error',fromerr))){
-                    tkinsert(riteenv$output,'insert',
-                        paste(fromerr,'\n',collapse='\n'), ('error'))
+                if(any(grepl('error', fromerr))){
+                    tkinsert(riteenv$output, 'insert',
+                        paste(fromerr, '\n', collapse='\n'), ('error'))
                 }
-                else if(any(grepl('Warning',fromerr))){
-                    tkinsert(riteenv$output,'insert',
-                        paste(fromerr,collapse='\n'), ('warning'))
+                else if(any(grepl('Warning', fromerr))){
+                    tkinsert(riteenv$output, 'insert',
+                        paste(fromerr, collapse='\n'), ('warning'))
                 }
                 else{
-                    tkinsert(riteenv$output,'insert',
-                        paste(fromerr,collapse='\n'), ('message'))
+                    tkinsert(riteenv$output, 'insert',
+                        paste(fromerr, collapse='\n'), ('message'))
                 }
                 riteenv$lengthe <- esink
             }
@@ -109,9 +108,9 @@ sinkstart <- function(
         exitsink <- function() {
             tkdestroy(riteenv$thesink)
             if('windows'==.Platform$OS.type)
-                    bringToTop(-1)
+                bringToTop(-1)
             if(!sink.number()==0)
-                        sink()
+                sink()
             if(!sink.number('message')==2)
                 sink(type='message')
             rm(thesink, output, scr, stdsink, errsink, envir = riteenv)
