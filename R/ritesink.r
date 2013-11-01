@@ -233,6 +233,9 @@ sinkstart <- function(
 }
 
 sinkstop <- function(quiet = TRUE){
+    # check for active sink
+    if(!exists('riteenv'))
+        stop('sink already closed and removed')
     # reset options defaults
     options('show.error.messages'=TRUE) # default TRUE
     options('error'=NULL) # default NULL
