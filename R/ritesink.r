@@ -168,5 +168,3 @@ sinkstop <- function(quiet = TRUE){
         message('rite sink closed')
     invisible(NULL)
 }
-
-# 
