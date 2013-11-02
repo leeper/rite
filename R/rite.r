@@ -1,6 +1,6 @@
 rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 fontFamily="Courier", fontSize=10, orientation="horizontal",
-                highlight="r", color=NULL, autosave=TRUE, echo=TRUE, tab='\t', ...){    
+                highlight="r", color=NULL, autosave=TRUE, echo=TRUE, tab='\t', comment='#', ...){    
     ## STARTUP OPTIONS ##
     filename <- filename # script filename (if loaded or saved)
     scriptSaved <- TRUE # a logical for whether current edit file is saved
@@ -1518,21 +1518,23 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     
     toggleComment <- function(){
         checkandtoggle <- function(pos){
-            check <- tclvalue(tkget(txt_edit, pos, paste(pos,"+2char",sep="")))
-            if(check=="# ")
-                tkdelete(txt_edit, pos, paste(pos,"+2char",sep=""))
-            else if(substring(check,1,1)=="#")
-                tkdelete(txt_edit, pos, paste(pos,"+1char",sep=""))
+            n <- nchar(comment)
+            if(tclvalue(tkget(txt_edit, pos, paste(pos,"+",n+1,"char",sep="")))==paste(comment," ",sep=""))
+                tkdelete(txt_edit, pos, paste(pos,"+",n+1,"char",sep=""))
+            else if(tclvalue(tkget(txt_edit, pos, paste(pos,"+",n,"char",sep="")))==comment)
+                tkdelete(txt_edit, pos, paste(pos,"+",n,"char",sep=""))
             else{
                 tkmark.set(txt_edit,"insert",pos)
-                tkinsert(txt_edit, "insert", "# ")
+                tkinsert(txt_edit, "insert", paste(comment," ",sep=""))
             }
         }
         selrange <- tclvalue(tktag.ranges(txt_edit,"sel"))
         if(!selrange==""){
-            selrange <- round(as.numeric(strsplit(selrange," ")[[1]]),0)
-            for(i in selrange[1]:(selrange[2]-1))
+            selrange <- floor(as.numeric(strsplit(selrange," ")[[1]]))
+            print(selrange)
+            for(i in selrange[1]:selrange[2])
                 checkandtoggle(paste(i,".0 linestart",sep=""))
+            tktag.add(txt_edit,"sel",paste(selrange[1],'.0',sep=''), paste(selrange[2],".0 lineend",sep=''))
         }
         else
             checkandtoggle("insert linestart")

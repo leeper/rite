@@ -6,7 +6,7 @@
 \usage{
 rite(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
      fontFamily="Courier", fontSize=10, orientation="horizontal", 
-	 highlight="r", color=NULL, autosave=TRUE, echo=TRUE, tab='\t', ...)
+	 highlight="r", color=NULL, autosave=TRUE, echo=TRUE, tab='\t', comment='#', ...)
 
 riteout(...)
 }
@@ -21,7 +21,8 @@ riteout(...)
   \item{color}{Either \code{NULL}, or a named list specifying Tcl/Tk colors for highlighting. See details below.}
   \item{autosave}{A logical specifying whether the script should automatically be saved whenever any of the script is run. Default is \code{TRUE}. Note: if \code{filename} is \code{NULL}, the result is saved in the current R session's temporary directory and will be deleted when the R session terminates normally.}
   \item{echo}{Whether the R calls should be copied to output during \code{source} (only when \code{catchOutput=FALSE}). Default is \code{TRUE}.}
-  \item{tab}{A character string indicating what next should be inserted when the \code{<TAB>} key is pressed. Default is the \code{\\t} character. Alternatively, a numeric value (e.g., \code{4}) is treated as a number of spaces.}
+  \item{tab}{A character string indicating what text should be inserted when the \code{<TAB>} key is pressed. Default is the \code{\\t} character. Alternatively, a numeric value (e.g., \code{4}) is treated as a number of spaces.}
+  \item{tab}{A character string indicating what text should be used for commenting. Default is the hash/pound character.}
   \item{...}{Ignored by \code{rite}. Used by \code{riteout} to pass arguments to \code{rite}.}
 }
 \details{
