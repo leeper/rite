@@ -1308,7 +1308,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             tkbind(fnContextMenu, "<Shift-Tab>", function() tkunpost(fnContextMenu))
         }
     }
-    tkbind(txt_edit, "<Shift-Tab>", commandCompletion)
+    #tkbind(txt_edit, "<Shift-Tab>", commandCompletion)
     tkbind(txt_edit, "<F2>", commandCompletion)
     
     casevar <- tclVar(1)
