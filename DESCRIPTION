@@ -1,6 +1,6 @@
 Package: rite
-Version: 0.2.42
-Date: 2013-10-29
+Version: 0.2.43
+Date: 2013-10-31
 Title: The Right Editor to Write R
 Author: Thomas J. Leeper
 Maintainer: Thomas J. Leeper <thosjleeper@gmail.com>
