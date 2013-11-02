@@ -39,7 +39,8 @@ sinkstart <- function(
     # callback function
     outsink <- function() {
         function(expr, value, ok, visible) {
-            e <- as.character(as.expression(expr))
+            #e <- as.character(as.expression(expr))
+            e <- deparse(expr)
             if(ok){
                 if(riteenv$echo)
                     tkinsert(riteenv$output, 'insert', paste('\n>',e), ('call'))
