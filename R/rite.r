@@ -147,9 +147,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 fname <- tclvalue(tkgeto)
             }
             if(!length(fname) || fname=="")
-                invisible()
+                return()
             chn <- tclopen(fname, "r")
-            tkinsert(txt_edit, "end", tclvalue(tclread(chn)))
+            .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'end', tclvalue(tclread(chn))))
             tclclose(chn)
             scriptSaved <<- TRUE
             filename <<- fname
@@ -172,7 +172,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 }
                 content <- try(RCurl::getURL(entry,ssl.verifypeer=0L,followlocation=1L))
                 if(!inherits(content,"try-error")){
-                    tkinsert(txt_edit, "end", content)
+                    .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'end', content))
                     scriptSaved <<- FALSE
                 }
                 else
@@ -283,7 +283,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     tkinsert(txt_edit, "insert", paste("source(\"",filename,"\")\n",sep=""))
                 else{
                     chn <- tclopen(filename, "r")
-                    tkinsert(txt_edit, "insert", tclvalue(tclread(chn)))
+                    .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'insert', tclvalue(tclread(chn))))
                     tclclose(chn)
                 }
                 scriptSaved <<- FALSE
@@ -317,7 +317,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 else{
                     content <- try(RCurl::getURL(entry,ssl.verifypeer=OL,followlocation=1L))
                     if(!inherits(content,"try-error"))
-                        tkinsert(txt_edit, "insert", content)
+                        .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'insert', content))
                     else
                         tkmessageBox(message="Script not loaded!", icon="error")
                 }
@@ -1531,7 +1531,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         selrange <- tclvalue(tktag.ranges(txt_edit,"sel"))
         if(!selrange==""){
             selrange <- floor(as.numeric(strsplit(selrange," ")[[1]]))
-            print(selrange)
             for(i in selrange[1]:selrange[2])
                 checkandtoggle(paste(i,".0 linestart",sep=""))
             tktag.add(txt_edit,"sel",paste(selrange[1],'.0',sep=''), paste(selrange[2],".0 lineend",sep=''))
