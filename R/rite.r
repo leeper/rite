@@ -1138,29 +1138,47 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 
     ## KEY BINDINGS ##
     f1 <- function(){
-        if(!tclvalue(tktag.ranges(txt_edit,"sel"))=="")
+        iwordstart <- tclvalue(tkindex(txt_edit,"insert-1char wordstart"))
+        iwordend <- tclvalue(tkindex(txt_edit,"insert-1char wordend"))
+        sel <- tclvalue(tktag.ranges(txt_edit,"sel"))
+        if(!sel=="")
             command <- tclvalue(tkget(txt_edit,"sel.first","sel.last"))
-        else {
-            command <- tclvalue(tkget(txt_edit, "insert wordstart", "insert wordend"))
-            if(command %in% c("","\n","("))
-                command <- tclvalue(tkget(txt_edit, "insert-1char wordstart", "insert-1char wordend"))
-            if(    command=="." |
-                tclvalue(tkget(txt_edit, "insert wordstart-1char", "insert wordstart"))=="." |
-                tclvalue(tkget(txt_edit, "insert wordend", "insert wordend+1char"))==".")
-                command <- tclvalue(tkget(txt_edit, "insert wordstart-2char wordstart", "insert wordend+2char wordend"))
-            command <- gsub("[()=]","",command)
+        else{
+            # periods
+            if(tclvalue(tkget(txt_edit, iwordstart, iwordend))=='.'){
+                iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
+                iwordend <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordend')))
+            }
+            # preceding periods
+            if(tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.')
+                iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
+            if(tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.')
+                iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
+            if(tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.')
+                iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
+            # following periods
+            if(tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.')
+                iwordend <- tclvalue(tkindex(txt_edit, paste(iwordend,'+2char wordend')))
+            if(tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.')
+                iwordend <- tclvalue(tkindex(txt_edit, paste(iwordend,'+2char wordend')))
+            if(tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.')
+                iwordend <- tclvalue(tkindex(txt_edit, paste(iwordend,'+2char wordend')))
+            command <- tclvalue(tkget(txt_edit, iwordstart, iwordend))
         }
         if(command %in% c("","\n","\t"," ",")","]","}","=",".",",","%"))
             return()
-        else if(command %in% c("[","(","*","/","+","-","^","$","{","~"))
+        else if(command %in% c("[","(","*","/","+","-","^","$","{","~",
+                                "function","if","else","for","in",
+                                "repeat","while","break","next"))
             command <- paste("`",command,"`",sep="")
         else
             command <- gsub(" ","",command)
         helpresults <- help(command)
         if(length(helpresults)>0)
-            help(command)
+            print(helpresults)
         else
-            help.search(command)
+            print(help.search(command))
+        invisible(NULL)
     }
     tkbind(txt_edit, "<F1>", f1)
     
