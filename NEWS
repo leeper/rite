@@ -1,13 +1,14 @@
 # CHANGES to rite 0.3 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
+* Open script and include script commands now use the ctext widget's `fastinsert` command to improve load times (without immediately highlighting script contents).
 * From v0.2.41, the `echo` parameter now defaults to `TRUE`.
 * The value of `tab` can now be used to specify the amount of space inserted when pressing `<TAB>`. See documentation.
 * Added the ability to load/append/reference a remote file either via printing a `source` call or a multi-line command using **RCurl** and `source`.
 * Added support for loading from and (anonymously) saving to Github gists.
 * Added support for the **knitr** functions `stitch` and `spin`, as well as markdown conversion to the Report Generation menu; reorganized the menu accordingly.
 * A new function `riteout` provides a shorter name wrapper for `rite(catchOutput=TRUE)`.
-* A new function `ritesink` provides an experimental (and primitive) tk widget for displaying color-coded R output.
+* A new function function `sinkstart` provides an experimental tk widget for displaying color-coded R output. The sink can be toggled using `sinkstop` (to keep the widget open but pause the sink) or closed entirely by exiting the widget.
 * Default syntax highlighting now includes only `"r"` rather than `c("r","latex")` as in **rite** (<=0.2).
 * Added preliminary syntax highlighting support for xml/html tags and comments, rnw in-line code chunks, rtex code chunks, brew, reST, roxygen, and markdown code chunks.
 * Support for "objects" operations found on the RGui Misc menu have been added to the Run menu.
@@ -15,6 +16,7 @@
 * Added support for option `autosave` to automatically save the script. See documentation.
 
 ## BUG FIXES ##
+* Several bugs - related to handling of periods and other naming irregularities - were corrected in the handling of F2 command completion and F1 help functions.
 * New versions of libcurl (>7.28) deprecate boolean values for options (e.g., SSL_VERIFYPEER and SSL_FOLLOWLOCATION). This has been updated. Everything is backwards compatible to earlier versions of libcurl.
 * Changed the underlying scripting function from an `eval(parse(text=...))` construction to `source` to provide a more robust scripting tool that also allows for a more console-like output (when not in `riteout`).
 * Fixed error on package load with `library` and added support for automatic syntax highlighting when packages are loaded with `require`.
