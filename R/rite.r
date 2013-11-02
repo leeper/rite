@@ -1186,18 +1186,40 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         iwordstart <- tclvalue(tkindex(txt_edit,"insert-1char wordstart"))
         iwordend <- tclvalue(tkindex(txt_edit,"insert-1char wordend"))
         sel <- tclvalue(tktag.ranges(txt_edit,"sel"))
-        if(!sel=="")
+        if(!sel==""){
+            iwordstart <- strsplit(sel," ")[[1]][1]
+            iwordend <- strsplit(sel," ")[[1]][2]
             command <- sel
-        else
+        }
+        else{
+            if(tclvalue(tkget(txt_edit, iwordstart, iwordend))=="("){
+                # parentheses
+                iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
+            }
+            else if(tclvalue(tkget(txt_edit, iwordstart, iwordend))=="$"){
+                # dollar signs
+                iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
+            }
+            else if(tclvalue(tkget(txt_edit, iwordstart, iwordend))=='.'){
+                # periods
+                iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
+                iwordend <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordend')))
+            }
+            # preceding periods
+            if(tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.')
+                iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
+            if(tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.')
+                iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
+            if(tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.')
+                iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
+            # following periods
+            if(tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.')
+                iwordend <- tclvalue(tkindex(txt_edit, paste(iwordend,'+2char wordend')))
+            if(tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.')
+                iwordend <- tclvalue(tkindex(txt_edit, paste(iwordend,'+2char wordend')))
+            if(tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.')
+                iwordend <- tclvalue(tkindex(txt_edit, paste(iwordend,'+2char wordend')))
             command <- tclvalue(tkget(txt_edit, iwordstart, iwordend))
-        tkmark.set(txt_edit, "temp", "insert-2char")
-        if(command=="(")
-            command <- paste(tclvalue(tkget(txt_edit, "temp wordstart", "temp wordend")),"(",sep="")
-        else if(command=="$")
-            command <- paste(tclvalue(tkget(txt_edit, "temp wordstart", "temp wordend")),"$",sep="")
-        if(tclvalue(tkget(txt_edit, "temp wordstart-1char", "temp wordstart"))=="."){
-            tkmark.set(txt_edit, "temp", "temp wordstart-2char")
-            command <- paste(tclvalue(tkget(txt_edit, "temp wordstart", "temp wordend")),command,sep=".")
         }
         fnlist <- vector(mode="character")
         #if(command %in% c("\n","\t"," ","(",")","[","]","{","}","=",",","*","/","+","-","^","%","$","<",">"))
@@ -1231,7 +1253,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             if(length(fnlist<15))
                 fnlist <- unique(c(fnlist, apropos(command)))
             insertCommand <- function(x){
-                tkdelete(txt_edit, "temp wordstart", iwordend)
+                tkdelete(txt_edit, iwordstart, iwordend)
                 tkinsert(txt_edit, "insert", fnlist[x])
             }
         }
