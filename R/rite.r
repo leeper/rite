@@ -201,6 +201,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkgrid(OKbutton, row=1, column=2)
                 tkgrid(Cancelbutton, row=1, column=3)
             tkgrid(buttons)
+            tkbind(urlentry, "<Return>", processEntry)
             tkfocus(gistDialog)
         }
     }
@@ -346,6 +347,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkgrid(OKbutton, row=1, column=2)
                 tkgrid(Cancelbutton, row=1, column=3)
             tkgrid(buttons)
+            tkbind(urlentry, "<Return>", processEntry)
             tkfocus(gistDialog)
         }
     }
@@ -1511,6 +1513,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     
     tkbind(txt_edit, "<Control-s>", saveScript)
     tkbind(txt_edit, "<Control-S>", saveScript)
+    
+    tkbind(txt_edit, "<Control-n>", newScript)
+    tkbind(txt_edit, "<Control-N>", newScript)
     
     tkbind(txt_edit, "<Control-o>", expression(loadScript(fname=NULL), break))
     tkbind(txt_edit, "<Control-O>", expression(loadScript(fname=NULL), break))
