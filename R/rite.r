@@ -1608,6 +1608,40 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     }
     tkbind(txt_edit, "<Return>", expression(tabreturn, break))
     
+    togglehome <- function(){
+        insertpos <- strsplit(tclvalue(tkindex(txt_edit,"insert")),".", fixed=TRUE)[[1]]
+        if(insertpos[2]=='0'){
+            thisline <- tclvalue(tkget(txt_edit, "insert linestart", "insert lineend"))
+            firstchar <- regexpr('[[:alnum:]]',thisline)[1]
+            if(!is.null(firstchar) && length(firstchar)>0 && !firstchar==-1)
+                tkmark.set(txt_edit,'insert',paste(insertpos[1],firstchar-1,sep='.'))
+        }
+        else
+            tkmark.set(txt_edit,'insert','insert linestart')
+        tksee(txt_edit, 'insert')
+        # handle selection
+        selrange <- tclvalue(tktag.ranges(txt_edit,"sel"))
+        if(!selrange==''){
+            selrange <- strsplit(selrange,' ')[[1]]
+            tktag.remove(txt_edit,'sel',selrange[1],selrange[2])
+            if(strsplit(selrange[1],'.',fixed=TRUE)[[1]][1]==insertpos[1])
+                tktag.add(txt_edit,"sel",'insert',selrange[2])
+            if(strsplit(selrange[2],'.',fixed=TRUE)[[1]][1]==insertpos[1])
+                tktag.add(txt_edit,"sel",selrange[1],'insert')
+        }
+    }
+    tkbind(txt_edit, "<Home>", expression(togglehome, break))
+    ctrlhome <- function(){
+        tkmark.set(txt_edit,'insert','1.0')
+        tksee(txt_edit, 'insert')
+    }
+    tkbind(txt_edit, "<Control-Home>", expression(ctrlhome, break))
+    shifthome <- function(){
+        tktag.add(txt_edit,"sel",'insert linestart','insert')
+        togglehome()
+    }
+    tkbind(txt_edit, "<Shift-Home>", expression(shifthome, break))
+    
     ### CONTEXT MENU ###
     selectAllEdit <- function(){
         tktag.add(txt_edit,"sel","0.0","end")
