@@ -1,8 +1,8 @@
 sinkstart <- function(
     echo=TRUE, split=FALSE,
     fontFamily='Courier', fontSize=10,
-    col.bg='white', col.call='black', col.result='black',
-    col.err='red', col.warn='purple', col.msg='blue')
+    col.bg='white', col.call=c('black',col.bg), col.result=c('black',col.bg),
+    col.err=c('red',col.bg), col.warn=c('purple',col.bg), col.msg=c('blue',col.bg))
 {
     require(tcltk)
     if('outsink' %in% getTaskCallbackNames())
@@ -15,6 +15,38 @@ sinkstart <- function(
     }
     riteenv$echo <- echo
     riteenv$split <- split
+    
+    # setup colors
+    if(is.null(col.bg) || is.na(col.bg) || col.bg=='')
+        col.bg <- 'white'
+    if(length(col.bg)>1){
+        col.bg <- col.bg[1]
+        warning('More than one color specified for background. Only first is used.')
+    }
+    if(is.null(col.call))
+        col.call <- c('black',col.bg)
+    if(is.null(col.result))
+        col.result <- col.call
+    if(is.null(col.err))
+        col.err <- c('red',col.bg)
+    if(is.null(col.warn))
+        col.warn <- c('purple',col.bg)
+    if(is.null(col.msg))
+        col.msg <- c('blue',col.bg)
+    if(length(col.call)==1)
+        col.call <- c(col.call,col.bg)
+    if(length(col.result)==1)
+        col.result <- c(col.result,col.bg)
+    if(length(col.err)==1)
+        col.err <- c(col.err,col.bg)
+    if(length(col.warn)==1)
+        col.warn <- c(col.warn,col.bg)
+    if(length(col.msg)==1)
+        col.msg <- c(col.msg,col.bg)
+    if(col.bg==col.call[1])
+        stop('Background and call foreground colors are the same')
+    if(col.bg==col.result[1])
+        stop('Background and result foreground colors are the same')
     
     # sinks
     riteenv$stdsink <- file(riteenv$otmp <- tempfile(),'w+')
@@ -117,7 +149,7 @@ sinkstart <- function(
         riteenv$scr <- tkscrollbar(riteenv$thesink, 
                         repeatinterval=25,
                         command=function(...){ tkyview(riteenv$output,...) })
-        riteenv$output <- tktext(riteenv$thesink, bg=col.bg, fg=col.result, undo='true',
+        riteenv$output <- tktext(riteenv$thesink, bg=col.bg, fg=col.result[1], undo='true',
                                    yscrollcommand=function(...) tkset(riteenv$scr,...),
                                    font=tkfont.create(family=fontFamily, size=fontSize))
         tcl('wm', 'attributes', riteenv$thesink, topmost=TRUE)
@@ -131,25 +163,30 @@ sinkstart <- function(
         if(!exists('riteenv$defaultfont'))
             riteenv$defaultfont <- tkfont.create(family=fontFamily, size=fontSize)
         tktag.configure(riteenv$output, 'call',
-            foreground=col.call,
+            foreground=col.call[1],
+            background=col.call[2],
             font=riteenv$defaultfont,
             underline=0)
         tktag.configure(riteenv$output, 'result',
-            foreground=col.result,
+            foreground=col.result[1],
+            background=col.result[2],
             font=riteenv$defaultfont,
             underline=0)
         if(!exists('riteenv$boldfont'))
             riteenv$boldfont <- tkfont.create(family=fontFamily, size=fontSize, weight='bold')
         tktag.configure(riteenv$output, 'error',
-            foreground=col.err,
+            foreground=col.err[1],
+            background=col.err[2],
             font=riteenv$boldfont,
             underline=0)
         tktag.configure(riteenv$output, 'warning',
-            foreground=col.warn,
+            foreground=col.warn[1],
+            background=col.warn[2],
             font=riteenv$boldfont,
             underline=0)
         tktag.configure(riteenv$output, 'message',
-            foreground=col.msg,
+            foreground=col.msg[1],
+            background=col.msg[2],
             font=riteenv$boldfont,
             underline=0)
         

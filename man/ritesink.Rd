@@ -6,8 +6,9 @@
 \usage{
 sinkstart(echo = TRUE, splitsink = FALSE,
           fontFamily = 'Courier', fontSize = 10,
-          col.bg='white', col.call='black', col.result='black',
-          col.err='red', col.warn='purple', col.msg='blue')
+          col.bg = 'white', col.call = c('black',col.bg),
+          col.result = c('black',col.bg), col.err = c('red',col.bg),
+          col.warn = c('purple',col.bg), col.msg = c('blue',col.bg))
 
 sinkstop(quiet = TRUE)
 }
@@ -16,18 +17,18 @@ sinkstop(quiet = TRUE)
   \item{split}{A logical indicating whether output (but not messages) should be split between the console and the sink. Default is \code{FALSE}.}
   \item{fontFamily}{The font family used in rite. Default is \dQuote{\code{Courier}}. Available fonts can be retrieved by \code{.Tcl("font families")}.}
   \item{fontSize}{The font size used in rite. Default is \code{10}.}
-  \item{col.bg}{A character string indicating a tcl/tk color for the background color of the sink.}
-  \item{col.call}{A character string indicating a tcl/tk color for the evaluated R calls (only visible if \code{echo=TRUE}..}
-  \item{col.result}{A character string indicating a tcl/tk color for standard output.}
-  \item{col.err}{A character string indicating a tcl/tk color for errors.}
-  \item{col.warn}{A character string indicating a tcl/tk color for warnings.}
-  \item{col.msg}{A character string indicating a tcl/tk color for messages.}
+  \item{col.bg}{A one-element character string indicating a tcl/tk color for the background color of the sink. A list of available tcl/tk colors can be found here: \url{http://www.tcl.tk/man/tcl8.5/TkCmd/colors.htm}.}
+  \item{col.call}{A two-element character vector indicating tcl/tk colors for the foreground and background, respectively, of evaluated R calls (only visible if \code{echo=TRUE}..}
+  \item{col.result}{A two-element character vector indicating tcl/tk colors for the foreground and background, respectively, of standard output.}
+  \item{col.err}{A two-element character vector indicating tcl/tk colors for the foreground and background, respectively, of errors.}
+  \item{col.warn}{A two-element character vector indicating tcl/tk colors for the foreground and background, respectively, of warnings.}
+  \item{col.msg}{A two-element character vector indicating tcl/tk colors for the foreground and background, respectively, of messages.}
   \item{quiet}{A logical indicating whether to suppress confirmation that everything is cleaned up. Default is \code{TRUE}.}
 }
 \details{
 These functions make use of a couple of different R features to build a color-coded output window for the R console. While the console is limited to displaying output in monochrome plain text, the rite sink allows multi-colored output and messages to be piped to a single widget that highlights errors, warning, and messages. Unlike a traditional sink, rite sink is a tcl/tk widget that updates output as commands and messages occur. Accomplishing this requires the use of \code{sink}, task callbacks, and a custom error handler. (This is similar to the R2HTML package.) 
 
-\code{sinkstart} starts the sink and \code{sinkstop} stops the sink and cleans up. Closing the sink widget invisibly calls \code{sinkstop}.
+\code{sinkstart} starts the sink and \code{sinkstop} stops the sink without destroying the widget. Closing the sink widget invisibly calls \code{sinkstop} and cleans up. The sink can be turned on and off repeatedly without closing the widget.
 }
 \value{NULL}
 \references{
@@ -41,7 +42,7 @@ These functions make use of a couple of different R features to build a color-co
 \examples{
 \dontrun{
 sinkstart() # open the sink
-sinkstop() # close and clean up
+sinkstop() # close the sink
 }
 }
 \keyword{ IO }
