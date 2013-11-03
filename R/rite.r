@@ -1129,14 +1129,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 else if(lastchar==')')
                     check <- '('
                 found <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search","-backwards",check,startpos,"0.0")))
-                print(lastchar)
             }
             }
         }
         editModified <- function(){
             scriptSaved <<- FALSE
             tkwm.title(editor, paste("*",wmtitle))
-            checkbrackets()
+            #checkbrackets()
         }
         tkbind(txt_edit, "<<Modified>>", editModified)
         tkgrid(txt_edit, sticky="nsew", column=1, row=1)
