@@ -41,18 +41,18 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     brewtemplate = "black",
                     restchunks = "blue"
                     )
-    filetypelist <- paste(    "{{R Script} {.R}}",
-                            "{{brew} {.brew}}",
-                            "{{HTML} {.html}}",
-                            "{{R HTML} {.Rhtml}}",
-                            "{{Markdown} {.md}}",
-                            "{{R markdown} {.Rmd}}",
-                            "{{reST} {.rst}}",
-                            "{{R reST} {.Rrst}}",
-                            "{{Sweave} {.Rnw}}",
-                            "{{TeX} {.tex}}",
-                            "{{R TeX} {.Rtex}}",
-                            "{{Text} {.txt}}",
+    filetypelist <- paste(  "{{R Script} {*.R}}",
+                            "{{brew} {*.brew}}",
+                            "{{HTML} {*.html}}",
+                            "{{R HTML} {*.Rhtml}}",
+                            "{{Markdown} {*.md}}",
+                            "{{R markdown} {*.Rmd}}",
+                            "{{reST} {*.rst}}",
+                            "{{R reST} {*.Rrst}}",
+                            "{{Sweave} {*.Rnw}}",
+                            "{{TeX} {*.tex}}",
+                            "{{R TeX} {*.Rtex}}",
+                            "{{Text file} {*.txt}}",
                             "{{All files} {*.*}}",
                         sep=" ")
     defaultfiletype <- "{{R Script} {.R}}"
@@ -221,7 +221,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     saveAsScript <- function() {
         fname <- tclvalue(tkgetSaveFile(initialdir=getwd(),
                                         title="Save Script As",
-                                        filetypes=filetypelist))
+                                        filetypes=filetypelist,
+                                        defaultextension='.R'))
         if(!length(fname) || fname==""){
             filename <<- ""
             return()

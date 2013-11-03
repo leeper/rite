@@ -16,6 +16,7 @@
 * Added support for option `autosave` to automatically save the script. See documentation.
 
 ## BUG FIXES ##
+* Fixed bug in SaveAs that was not appending file extensions. (#48)
 * Several bugs - related to handling of periods and other naming irregularities - were corrected in the handling of F2 command completion and F1 help functions.
 * New versions of libcurl (>7.28) deprecate boolean values for options (e.g., SSL_VERIFYPEER and SSL_FOLLOWLOCATION). This has been updated. Everything is backwards compatible to earlier versions of libcurl.
 * Changed the underlying scripting function from an `eval(parse(text=...))` construction to `source` to provide a more robust scripting tool that also allows for a more console-like output (when not in `riteout`).
