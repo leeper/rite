@@ -1084,9 +1084,59 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         txt_edit <- tk2ctext(edit_tab1, bg=hcolors$background, fg=hcolors$normal, undo="true",
                                 yscrollcommand=function(...) tkset(edit_scr,...),
                                 font=tkfont.create(family=fontFamily, size=fontSize))
+        checkbrackets <- function(){
+            startpos <- 'insert'
+            insertpos <- tkindex(txt_edit,"insert")
+            lastchar <- tclvalue(tkget(txt_edit, "insert-1char", "insert"))
+            if(FALSE){
+            if(lastchar %in% c('{','[','(')){
+                if(lastchar=='{')
+                    check <- '}'
+                else if(lastchar=='[')
+                    check <- ']'
+                else if(lastchar=='(')
+                    check <- ')'
+                counter <- 1
+                while(counter > 0){
+                    foundcheck <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search","-forwards",check,startpos,"end")))
+                    if(foundcheck=='')
+                        counter <- 0
+                    else if(foundcheck==check){
+                        counter2 <- TRUE
+                        while(counter2){
+                            foundbracket <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search","-forwards",lastchar,startpos,foundcheck)))
+                            if(!foundbracket==''){
+                                counter <- counter+1
+                                startpos <- foundbracket
+                            }
+                            else
+                                counter2 <- FALSE
+                        }
+                        counter <- counter-1
+                        startpos <- foundcheck
+                    }
+                }
+                if(!foundcheck==''){
+                    tktag.add(txt_edit,'tmpbracketclose',foundcheck,paste(foundcheck,'+1char'))
+                    tktag.remove(txt_edit,'tmpbracketclose',foundcheck,paste(foundcheck,'+1char'))
+                }
+            }
+            if(lastchar %in% c('}',']',')')){
+                if(lastchar=='}')
+                    check <- '{'
+                else if(lastchar==']')
+                    check <- '['
+                else if(lastchar==')')
+                    check <- '('
+                found <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search","-backwards",check,startpos,"0.0")))
+                print(lastchar)
+            }
+            }
+        }
         editModified <- function(){
             scriptSaved <<- FALSE
             tkwm.title(editor, paste("*",wmtitle))
+            checkbrackets()
         }
         tkbind(txt_edit, "<<Modified>>", editModified)
         tkgrid(txt_edit, sticky="nsew", column=1, row=1)
@@ -1096,7 +1146,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         tkgrid.rowconfigure(edit_tab1,1,weight=1)
     # pack left notebook
     tkadd(pw, nb1, weight=1) # left pane
-
+    
+    tktag.configure(txt_edit,'tmpbracketclose', foreground='white', background='black', underline=0)
+    
     if(catchOutput){
         nb2 <- tk2notebook(pw, tabs = c("Output", "Message"))#, "Plot")) # right pane
             # output
@@ -1655,6 +1707,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         togglehome()
     }
     tkbind(txt_edit, "<Shift-Home>", expression(shifthome, break))
+    
     
     ### CONTEXT MENU ###
     selectAllEdit <- function(){
