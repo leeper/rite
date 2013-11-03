@@ -1130,7 +1130,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             tktag.configure(err_out, "error", foreground="red", underline=0)
             tktag.configure(err_out, "warning", foreground="purple", underline=0)
             tktag.configure(err_out, "message", foreground="blue", underline=0)
-    
+            
+            # bind option('width') to window resize
+            resize <- function(){
+                w <- tkwinfo('width',output)
+                m <- tkfont.measure(tkfont.create(family=fontFamily,size=fontSize),'m')
+                nw <- round((as.numeric(w)-20)/as.numeric(m))
+                options(width=nw)
+            }
+            tkbind(output, '<Configure>', resize)
+        
         # pack right notebook
         tkadd(pw, nb2, weight=1) # right pane
     }
