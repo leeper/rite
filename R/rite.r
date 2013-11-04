@@ -1085,10 +1085,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         txt_edit <- tk2ctext(edit_tab1, bg=hcolors$background, fg=hcolors$normal, undo="true",
                                 yscrollcommand=function(...) tkset(edit_scr,...),
                                 font=tkfont.create(family=fontFamily, size=fontSize))
-        tktag.configure(txt_edit,'tmpbracketclose', foreground='white', background='black', underline=0)
+        # check for bracket commpletion
+        tktag.configure(txt_edit,'tmpbracketclose', foreground='red',
+            font=tkfont.create(family=fontFamily, size=fontSize, weight='bold'))
         checkbrackets <- function(){
             startpos <- 'insert'
-            insertpos <- tkindex(txt_edit,"insert")
+            insertpos <- tclvalue(tkindex(txt_edit,"insert"))
             lastchar <- tclvalue(tkget(txt_edit, "insert-1char", "insert"))
             if(lastchar %in% c('{','[','(')){
                 if(lastchar=='{'){
@@ -1103,47 +1105,89 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     check <- ')'
                 counter <- 1
                 while(counter > 0){
-                    foundcheck <- lastcheck <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search","-forwards",check,startpos,"end")))
+                    foundcheck <- lastcheck <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search",
+                                                        "-forwards",check,startpos,"end")))
                     if(foundcheck=='')
                         counter <- 0
                     else{
                         counter2 <- TRUE
                         while(counter2){
-                            foundbracket <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search","-forwards",lastchar,startpos,foundcheck)))
+                            foundbracket <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search",
+                                                    "-forwards",lastchar,startpos,foundcheck)))
                             if(foundbracket=='')
                                 counter2 <- FALSE
                             else {
                                 counter <- counter+1
-                                startpos <- foundbracket
+                                startpos <- paste(foundbracket,'+1char',sep='')
                             }
                         }
                         counter <- counter-1
-                        startpos <- paste(foundcheck,'+1char')
+                        startpos <- paste(foundcheck,'+1char',sep='')
                     }
                 }
                 if(lastcheck=='')
                     return()
                 else{
                     tktag.add(txt_edit,'tmpbracketclose',lastcheck,paste(lastcheck,'+1char'))
-                    tktag.remove(txt_edit,'tmpbracketclose',lastcheck,paste(lastcheck,'+1char'))
+                    tktag.raise(txt_edit,'tmpbracketclose','brackets')
+                    tktag.add(txt_edit,'tmpbracketclose',paste(insertpos,'-1char'),insertpos)
                 }
             }
             if(lastchar %in% c('}',']',')')){
-                if(lastchar=='}')
-                    check <- '{'
-                else if(lastchar==']')
-                    check <- '['
+                if(lastchar=='}'){
+                    lastchar <- '\\}'
+                    check <- '\\{'
+                }
+                else if(lastchar==']'){
+                    lastchar <- '\\]'
+                    check <- '\\['
+                }
                 else if(lastchar==')')
                     check <- '('
-                found <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search","-backwards",check,startpos,"0.0")))
+                startpos <- paste(startpos,'-1char',sep='')
+                counter <- 1
+                while(counter > 0){
+                    foundcheck <- lastcheck <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search",
+                                                "-backwards",check,startpos,"1.0")))
+                    if(foundcheck=='')
+                        counter <- 0
+                    else{
+                        counter2 <- TRUE
+                        while(counter2){
+                            foundbracket <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search",
+                                                "-backwards",lastchar,startpos,foundcheck)))
+                            if(foundbracket=='')
+                                counter2 <- FALSE
+                            else {
+                                counter <- counter+1
+                                startpos <- paste(foundbracket,'-1char',sep='')
+                            }
+                        }
+                        counter <- counter-1
+                        startpos <- paste(foundcheck,'-1char',sep='')
+                    }
+                }
+                if(lastcheck=='')
+                    return()
+                else{
+                    tktag.add(txt_edit,'tmpbracketclose',lastcheck,paste(lastcheck,'+1char'))
+                    tktag.add(txt_edit,'tmpbracketclose',paste(insertpos,'-1char'),insertpos)
+                }
             }
         }
+        editkeypress <- function(){
+            tktag.remove(txt_edit,'tmpbracketclose', '1.0', 'end')
+            checkbrackets()
+        }
+        tkbind(txt_edit, "<Key>", editkeypress) # change this to arrow keys?
+        
         editModified <- function(){
             scriptSaved <<- FALSE
             tkwm.title(editor, paste("*",wmtitle))
-            #checkbrackets()
+            editkeypress()
         }
         tkbind(txt_edit, "<<Modified>>", editModified)
+        
         tkgrid(txt_edit, sticky="nsew", column=1, row=1)
         tkgrid(edit_scr, sticky="nsew", column=2, row=1)
         tkgrid.columnconfigure(edit_tab1,1,weight=1)
