@@ -948,6 +948,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkadd(menuKnit, "separator")
                 tkadd(menuKnit, "command", label = "knit Rmd to HTML",
                     command = function() knittxt(genmode="rmd2html", usefile=FALSE, usetxt=TRUE))
+                #tkadd(menuKnit, "command", label = "knit and Slidify",
+                #    command = function() knittxt(genmode="knit2slidify", usefile=FALSE, usetxt=TRUE))
                 tkadd(menuKnit, "separator")
                 tkadd(menuKnit, "command", label = "knit to pdf",
                     command = function() knitpdf(genmode="knit", usefile=FALSE, usetxt=TRUE))
@@ -992,6 +994,14 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rrst"))
                 tkadd(menuReport, "cascade", label = "Spin", menu = menuSpin)
             tkadd(menuReport, "separator")
+            #menuSlidify <- tkmenu(menuReport, tearoff = FALSE)
+                #tkadd(menuSlidify, "command", label = "Slidify",
+                #    command = function() knittxt(genmode="slidify", usefile=FALSE, usetxt=TRUE))
+                #tkadd(menuSlidify, "command", label = "knit and Slidify",
+                #    command = function() knittxt(genmode="knit2slidify", usefile=FALSE, usetxt=TRUE))
+                #tkadd(menuSlidify, "command", label = "Open Slidify template",
+                #    command = function() {newScript(); ??? }) # DO THIS
+            #tkadd(menuReport, "separator")
             menuMD <- tkmenu(menuReport, tearoff = FALSE)
                 tkadd(menuMD, "command", label = "Convert md to HTML",
                     command = function() knittxt(genmode="md2html", usefile=FALSE, usetxt=TRUE))
@@ -1000,10 +1010,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkadd(menuMD, "command", label = "knit Rmd to HTML",
                     command = function() knittxt(genmode="rmd2html", usefile=FALSE, usetxt=TRUE))
                 # tkadd(menuMD, "separator")
-                # update when slidify is on CRAN
-                #tkadd(menuMD, "command", label = "slidify md to HTML",
+                #tkadd(menuMD, "command", label = "Slidify",
                 #    command = function() knittxt(genmode="slidify", usefile=FALSE, usetxt=TRUE))
-                #tkadd(menuMD, "command", label = "knit Rmd and slidify to HTML",
+                #tkadd(menuMD, "command", label = "knit and Slidify",
                 #    command = function() knittxt(genmode="knit2slidify", usefile=FALSE, usetxt=TRUE))
                 tkadd(menuReport, "cascade", label = "Markdown", menu = menuMD, underline = 0)
             tkadd(menuReport, "separator")

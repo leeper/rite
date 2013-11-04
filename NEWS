@@ -1,6 +1,7 @@
 # CHANGES to rite 0.3 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
+* Added support for bracket-completion highlighting. The tk ctext widget already highlighted when brackets were originally righthand closed, but now brackets are highlighted when typed or traversed. (#20)
 * Open script and include script commands now use the ctext widget's `fastinsert` command to improve load times (without immediately highlighting script contents).
 * From v0.2.41, the `echo` parameter now defaults to `TRUE`.
 * The value of `tab` can now be used to specify the amount of space inserted when pressing `<TAB>`. See documentation.
