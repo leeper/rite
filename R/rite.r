@@ -130,7 +130,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             else if(tclvalue(exit)=="no"){}
             else{
                 tkfocus(txt_edit)
-                return()
+                return(1)
             }
         }
         tkdelete(txt_edit,"0.0","end")
@@ -138,6 +138,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         scriptSaved <<- TRUE
         wmtitle <<- packagetitle
         tkwm.title(editor, wmtitle)
+        return(0)
     }
     getRawGistURL <- function(entry){
         if (is.numeric(entry) || grepl("^[0-9a-f]+$", entry)) {
@@ -160,8 +161,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     }
     
     loadScript <- function(fname=NULL, locals=TRUE, gist=FALSE){
-        if(is.null(fname))
-            newScript()
+        if(is.null(fname)){
+            if(newScript())
+                return(1)
+        }
         if(locals==TRUE){
             if(is.null(fname)){
                 tkgeto <- tkgetOpenFile(title="Load Script",
