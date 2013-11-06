@@ -317,7 +317,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                         tkinsert(txt_edit, "insert", paste("source(\"",entry,"\")\n",sep=""))
                 }
                 else{
-                    content <- try(RCurl::getURL(entry,ssl.verifypeer=OL,followlocation=1L))
+                    content <- try(RCurl::getURL(entry,ssl.verifypeer=0L,followlocation=1L))
                     if(!inherits(content,"try-error"))
                         .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'insert', content))
                     else

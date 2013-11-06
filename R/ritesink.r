@@ -4,7 +4,6 @@ sinkstart <- function(
     col.bg='white', col.call=c('black',col.bg), col.result=c('black',col.bg),
     col.err=c('red',col.bg), col.warn=c('purple',col.bg), col.msg=c('blue',col.bg))
 {
-    require(tcltk)
     if('outsink' %in% getTaskCallbackNames())
         stop('ritesink is already active')
     
@@ -331,3 +330,6 @@ sinkstop <- function(quiet = TRUE){
     
     invisible(NULL)
 }
+
+if(getRversion() >= "2.15.1")
+    utils::globalVariables(c('thesink', 'output', 'scr', 'stdsink', 'errsink', 'riteenv'))

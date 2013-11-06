@@ -4,7 +4,7 @@
 \title{ritesink}
 \description{An experimental tcl/tk output widget}
 \usage{
-sinkstart(echo = TRUE, splitsink = FALSE,
+sinkstart(echo = TRUE, split = FALSE,
           fontFamily = 'Courier', fontSize = 10,
           col.bg = 'white', col.call = c('black',col.bg),
           col.result = c('black',col.bg), col.err = c('red',col.bg),
@@ -31,6 +31,19 @@ These functions make use of a couple of different R features to build a color-co
 \code{sinkstart} starts the sink and \code{sinkstop} stops the sink without destroying the widget. Closing the sink widget invisibly calls \code{sinkstop} and cleans up. The sink can be turned on and off repeatedly without closing the widget.
 }
 \value{NULL}
+\section{Shortcut keys in widget}{
+	\code{<Ctrl-c>}: Copy
+	
+	\code{<Ctrl-x>}: Cut
+	
+	\code{<Ctrl-p>}: Paste
+	
+	\code{<Ctrl-a>}: Select all
+	
+	\code{<Ctrl-s>}: Save output
+	
+	\code{<Ctrl-l>}: Clear output
+}
 \references{
 \href{http://developer.r-project.org/TaskHandlers.pdf}{Top-level Task Callbacks in R}
 
