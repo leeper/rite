@@ -132,8 +132,6 @@ sinkstart <- function(
         riteenv$thesink <- tktoplevel(borderwidth=0)
         exitsink <- function() {
             tkdestroy(riteenv$thesink)
-            if('windows'==.Platform$OS.type)
-                bringToTop(-1)
             if(!sink.number()==0)
                 sink()
             if(!sink.number('message')==2)
@@ -200,9 +198,22 @@ sinkstart <- function(
         tkbind(riteenv$thesink, '<Configure>', resize)
         
         # context menu (and associated functions and bindings)
+        saveSink <- function(){
+            outfilename <- tclvalue(tkgetSaveFile(initialdir=getwd(),
+                            title='Save Output',
+                            filetypes=paste('{{Text file} {*.txt}} {{All files} {*.*}}'),
+                            defaultextension='.txt'))
+            if(!length(outfilename) || outfilename=="")
+                invisible()
+            chn <- tclopen(outfilename, 'w')
+            tclputs(chn, tclvalue(tkget(riteenv$output,'0.0','end')))
+            tclclose(chn)
+        }
+        tkbind(riteenv$output, '<Control-S>', expression(saveSink, break))
+        tkbind(riteenv$output, '<Control-s>', expression(saveSink, break))
         selectAll <- function(){
-            tktag.add(riteenv$output,"sel","0.0","end")
-            tkmark.set(riteenv$output,"insert","end")
+            tktag.add(riteenv$output,'sel','0.0','end')
+            tkmark.set(riteenv$output,'insert','end')
         }
         tkbind(riteenv$output, "<Control-A>", expression(selectAll, break))
         tkbind(riteenv$output, "<Control-a>", expression(selectAll, break))
@@ -233,6 +244,8 @@ sinkstart <- function(
         tkbind(riteenv$output, "<Control-l>", expression(clearSink, break))
         
         contextMenu <- tkmenu(riteenv$output, tearoff = FALSE)
+            tkadd(contextMenu, "command", label = "Save <Ctrl-S>",
+                command = saveSink)
             tkadd(contextMenu, "command", label = "Clear All <Ctrl-L>",
                 command = clearSink)
             tkadd(contextMenu, "separator")
