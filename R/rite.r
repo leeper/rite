@@ -1047,6 +1047,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkadd(menuFromFile, "command", label = "xelatex+bibtex",
                     command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=TRUE))
                 tkadd(menuReport, "cascade", label = "Generate from file...", menu = menuFromFile, underline = 0)
+            tkadd(menuReport, "separator")
+            openreports <- tclVar(1)
+            tkadd(menuReport, 'checkbutton', label='Open finished reports', onvalue=1L, variable=openreports)
             tkadd(menuTop, "cascade", label = "Report Generation", menu = menuReport, underline = 0)
     }
     menuHelp <- tkmenu(menuTop, tearoff = FALSE)
