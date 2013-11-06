@@ -1424,7 +1424,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             xTxt <- rootx + wordnchar
             yTxt <- rooty + lheight*nl
             tkpost(fnContextMenu, xTxt, yTxt)
-            tkbind(fnContextMenu, "<Shift-Tab>", function() tkunpost(fnContextMenu))
+            tkbind(fnContextMenu, "<Button-3>", function() tkunpost(fnContextMenu))
         }
     }
     #tkbind(txt_edit, "<Shift-Tab>", commandCompletion)
