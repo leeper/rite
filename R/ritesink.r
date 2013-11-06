@@ -244,6 +244,15 @@ sinkstart <- function(
                 command = function() copyText(docut=TRUE))
             tkadd(contextMenu, "command", label = "Paste <Ctrl-V>",
                 command = pasteText)
+            tkadd(contextMenu, "separator")
+            tkadd(contextMenu, "command",
+                label = paste("Toggle echo on/off"),
+                command = function(){
+                    if(riteenv$echo)
+                        riteenv$echo <- FALSE
+                    else
+                        riteenv$echo <- TRUE
+                })
         rightClick <- function(x, y) {
             rootx <- as.integer(tkwinfo("rootx", riteenv$output))
             rooty <- as.integer(tkwinfo("rooty", riteenv$output))
@@ -253,6 +262,7 @@ sinkstart <- function(
             .Tcl(paste("tk_popup", .Tcl.args(contextMenu, xTxt, yTxt)))
         }
         tkbind(riteenv$output, "<Button-3>", rightClick)
+        tkbind(contextMenu, "<Button-3>", function() tkunpost(contextMenu))
     
     }
     
