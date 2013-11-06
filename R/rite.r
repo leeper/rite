@@ -122,7 +122,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     ## FILE MENU FUNCTIONS ##
     newScript <- function(){
         if(!scriptSaved){
-            exit <- tkmessageBox(message = "Do you want to save the current script?", icon = "question", type = "yesnocancel", default = "yes")            
+            exit <- tkmessageBox(message = "Do you want to save the current script?",
+                                 icon = "question", type = "yesnocancel",
+                                 default = "yes")
             if(tclvalue(exit)=="yes")
                 saveScript()
             else if(tclvalue(exit)=="no"){}
@@ -137,6 +139,26 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         wmtitle <<- packagetitle
         tkwm.title(editor, wmtitle)
     }
+    getRawGistURL <- function(entry){
+        if (is.numeric(entry) || grepl("^[0-9a-f]+$", entry)) {
+            entry <- paste("https://api.github.com/gists/", entry, sep = "")
+        }
+        else if (grepl("((^https://)|^)gist.github.com/([^/]+/)?[0-9a-f]+$", entry)) {
+            entry <- paste("https://api.github.com/gists/",
+                        regmatches(entry, regexpr("[0-9a-f]+$", entry)), sep = "")
+        }
+        else
+            return(NULL)
+        content <- try(RCurl::getURL(entry,ssl.verifypeer=0L,followlocation=1L))
+        if(!inherits(content,"try-error")){
+            tmp <- regmatches(content, gregexpr('"raw_url": ?"(.*?\\.[[:alpha:]]*)"', content))[[1]]
+            rawurl <- sapply(tmp,function(x) strsplit(x,'"')[[1]][4])
+            return(rawurl)
+        }
+        else
+            return(NULL)
+    }
+    
     loadScript <- function(fname=NULL, locals=TRUE, gist=FALSE){
         if(is.null(fname))
             newScript()
@@ -161,22 +183,20 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkdestroy(gistDialog)
                 entry <- tclvalue(entry)
                 if(gist){
-                    # load from gist ( code adapted from httr::source_gist )
-                    if (is.numeric(entry) || grepl("^[0-9a-f]+$", entry)) {
-                        entry <- paste("https://raw.github.com/gist/", entry, sep = "")
+                    rawurl <- getRawGistURL(entry)
+                    if(is.null(rawurl)){
+                        tkmessageBox(message="Gist not loaded!", icon="error")
+                        return()
                     }
-                    else if (grepl("((^https://)|^)gist.github.com/([^/]+/)?[0-9a-f]+$", entry)) {
-                        entry <- paste("https://raw.github.com/gist/",
-                                    regmatches(entry, regexpr("[0-9a-f]+$", entry)), sep = "")
-                    }
+                    else if(length(rawurl)>1)
+                        tkmessageBox(message="More than one file found in Gist. Only first is used.", icon='info')
+                    texttoinsert <- try(RCurl::getURL(rawurl[1],ssl.verifypeer=0L,followlocation=1L))
                 }
-                content <- try(RCurl::getURL(entry,ssl.verifypeer=0L,followlocation=1L))
-                if(!inherits(content,"try-error")){
-                    .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'end', content))
-                    scriptSaved <<- FALSE
+                else{
+                    texttoinsert <- try(RCurl::getURL(entry,ssl.verifypeer=0L,followlocation=1L))
                 }
-                else
-                    tkmessageBox(message="Gist not loaded!", icon="error")
+                .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'end', texttoinsert))
+                scriptSaved <<- FALSE
             }
             gistDialog <- tktoplevel()
             if(gist)
@@ -295,14 +315,18 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             processEntry <- function() {
                 tkdestroy(gistDialog)
                 entry <- tclvalue(entry)
-                if(gist) {
-                    # load from gist ( code adapted from httr::source_gist )
-                    if (is.numeric(entry) || grepl("^[0-9a-f]+$", entry)) {
-                        entry <- paste("https://raw.github.com/gist/", entry, sep = "")
+                if(gist){
+                    if(grepl("((^https://)|^)gist.github.com/([^/]+/)?[0-9a-f]+$", entry))
+                        entry <- regmatches(entry, regexpr("[0-9a-f]+$", entry))
+                    #if(is.numeric(entry) || grepl("^[0-9a-f]+$", entry))
+                    entry <- getRawGistURL(entry)
+                    if(is.null(entry)){
+                        tkmessageBox(message="Gist not loaded!", icon="error")
+                        return()
                     }
-                    else if (grepl("((^https://)|^)gist.github.com/([^/]+/)?[0-9a-f]+$", entry)) {
-                        entry <- paste("https://raw.github.com/gist/",
-                                    regmatches(entry, regexpr("[0-9a-f]+$", entry)), sep = "")
+                    else if(length(entry)>1){
+                        tkmessageBox(message="More than one file found in Gist. Only first is used.", icon='info')
+                        entry <- entry[1]
                     }
                 }
                 if(refonly){

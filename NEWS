@@ -1,6 +1,7 @@
 # CHANGES to rite 0.3 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
+* Attempting to open or append a multi-file Gist will cause only the first file to be opened and result in a warning.
 * Added support for bracket-completion highlighting. The tk ctext widget already highlighted when brackets were originally righthand closed, but now brackets are highlighted when typed or traversed. (#20)
 * Open script and include script commands now use the ctext widget's `fastinsert` command to improve load times (without immediately highlighting script contents).
 * From v0.2.41, the `echo` parameter now defaults to `TRUE`.
@@ -17,6 +18,7 @@
 * Added support for option `autosave` to automatically save the script. See documentation.
 
 ## BUG FIXES ##
+* Updated imports of Github Gists to correctly retrieve file content from raw URLs. (#60)
 * Fixed a bug that prevented the command completion context menu from destroying on Ubuntu. The menu can be closed with a right-button mouse click. (#53)
 * Fixed bug in SaveAs that was not appending file extensions. (#48)
 * Several bugs - related to handling of periods and other naming irregularities - were corrected in the handling of F2 command completion and F1 help functions.
