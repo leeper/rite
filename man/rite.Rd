@@ -32,7 +32,7 @@ Scripts can be loaded, appended, referenced (via \code{source}) in the current s
 
 Scripts can be run by selection, line, or the entire contents of the script editor from the \dQuote{Run} menu. Scripts can also be run from the context menu (via a right mouse click) or with \code{<Control-r>} or \code{<Control-Return>} to run a selection or the current line. \code{<F8>} runs the entire script, whereas \code{<F7>} checks for parsing errors in the entire script without evaluating it (all code is parsed before running, automatically).
 
-Command completion is now fully supported by pressing \code{<F2>} (but encounters some problems with functions named with periods). If a function is complete and followed by an open parenetheses (e.g., \code{data.frame(}, the command completion keys bring up a selectable list named arguments for the function. If a dataframe or environment name is complete and followed by a dollar sign (e.g., \code{mydf$}), the command completion keys bring up a list of named elements in the dataframe or environment.
+Command completion is now fully supported by pressing \code{<F2>} (a right mouse button click on the menu will close it if no selection is desired). If a function is complete and followed by an open parenetheses (e.g., \code{data.frame(}, the command completion keys bring up a selectable list named arguments for the function. If a dataframe or environment name is complete and followed by a dollar sign (e.g., \code{mydf$}), the command completion keys bring up a list of named elements in the dataframe or environment.
 
 \code{riteout} is a wrapper for \code{rite} that defaults to \code{catchOutput=TRUE}, which provides access to various report generation tools, described in detail below.
 }
@@ -126,7 +126,7 @@ The use of highlighting in general can be regulated by the \code{highlight} para
 	
 	\code{<F1>}: Open help for current function, if a known function (based on cursor position); or the results of help.search()
 	
-	\code{<F2>}: Open command completion context menu (based on cursor position)
+	\code{<F2>}: Open command completion context menu (based on cursor position). A right-button mouse click closes the context menu if no selection is desired (not necessary on all platforms).
 	
 	\code{<F3>}: Find
 	
