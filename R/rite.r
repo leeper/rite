@@ -1,5 +1,5 @@
 rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
-                fontFamily="Courier", fontSize=10, orientation="horizontal",
+                fontFamily="Courier", fontSize=10, orientation="horizontal", fastinsert=FALSE,
                 highlight="r", color=NULL, autosave=TRUE, echo=TRUE, tab='\t', comment='#', ...){    
     ## STARTUP OPTIONS ##
     filename <- filename # script filename (if loaded or saved)
@@ -177,7 +177,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     tkinsert(txt_edit, "insert", paste("source(\"",filename,"\")\n",sep=""))
                 else{
                     chn <- tclopen(fname, "r")
-                    .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'insert', tclvalue(tclread(chn))))
+                    if(fastinsert)
+                        .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'insert', tclvalue(tclread(chn))))
+                    else
+                        tkinsert(txt_edit, "insert", tclvalue(tclread(chn)))
                     tclclose(chn)
                 }
                 if(new){
@@ -221,8 +224,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 }
                 else{
                     content <- try(RCurl::getURL(entry,ssl.verifypeer=0L,followlocation=1L))
-                    if(!inherits(content,"try-error"))
-                        .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'insert', content))
+                    if(!inherits(content,"try-error")){
+                        if(fastinsert)
+                            .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'insert', content))
+                        else
+                            tkinsert(txt_edit, "insert", content)
+                    }
                     else
                         tkmessageBox(message="Script not loaded!", icon="error")
                 }
