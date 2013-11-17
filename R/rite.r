@@ -859,8 +859,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 setwd(tkdir)
             }, underline = 7)
         tkadd(menuFile, "separator")
-        #if(!catchOutput)
-        #    tkadd(menuFile, "command", label = "Open another rite", command = function() {rite(c(as.list(environment()),list(...))) }, underline = 0)
+        # if(!catchOutput){
+            # tkadd(menuFile, "command", label = "Open another rite", command = function() {
+                # eval(rite(c(as.list(environment()),list(...))), .GlobalEnv)
+            # }, underline = 0)
+        # }
         tkadd(menuFile, "command", label = "Close rite", command = exitWiz, underline = 0)
         tkadd(menuFile, "separator")
         tkadd(menuFile, "command", label = "Quit R", command = function() {exitWiz(); quit()}, underline = 0)
