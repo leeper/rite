@@ -106,9 +106,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             }
         }
         if(catchOutput){
-            sink(NULL, type="output")
+            if(!sink.number()==0)
+                sink(type="output")
             close(outsink)
-            sink(NULL, type="message")
+            if(!sink.number('message')==2)
+                sink(type="message")
             close(errsink)
             close(ritecat)
             cat <<- base::cat
@@ -545,11 +547,21 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 txtvalue <- NULL
                 inputvalue <- filename
             }
+            
             if(genmode=="knit")
                 knit_out <- try(knit(input=inputvalue, text=txtvalue))
             else if(genmode=="purl")
                 knit_out <- try(purl(input=inputvalue, text=txtvalue))
             else if(genmode=="sweave"){
+                require(tools)
+                if(!is.null(usetxt)){
+                    saveScript()
+                    knit_out <- Sweave(file=filename, quiet=TRUE)
+                }
+                else
+                    knit_out <- Sweave(file=inputvalue, quiet=TRUE)
+            }
+            else if(genmode=="knitsweave"){
                 sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
                 if(inherits(sweave_out, "try-error")){
                     tkmessageBox(message="Could not convert Sweave to knitr!")
@@ -697,27 +709,30 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 clearError()
                 tkconfigure(err_out, state="normal")
                 tkmark.set(err_out, "insert", "end")
-                if(textype=="latex"){
-                    tex1 <- system(paste("pdflatex",filetopdf), intern=TRUE)
-                    #tex1 <- tools::texi2pdf(filetopdf, clean=TRUE)
-                } else {
-                    tex1 <- system(paste("xelatex",filetopdf), intern=TRUE)
-                }
-                tkselect(nb2, 1)
-                tkfocus(txt_edit)
-                tkinsert(err_out, "insert", paste(tex1,collapse="\n"))
-                if(is.null(attributes(tex1)$status) && bibtex==TRUE){
-                    tex2 <- system(paste("bibtex",filetopdf), intern=TRUE)
-                    tkinsert(err_out, "insert", paste(tex2,collapse="\n"))
-                    if(is.null(attributes(tex2)$status)){
-                        tex3 <- system(paste("pdflatex",filetopdf), intern=TRUE)
-                        tkinsert(err_out, "insert", paste(tex3,collapse="\n"))
-                        if(is.null(attributes(tex3)$status)){
-                            tex4 <- system(paste("pdflatex",filetopdf), intern=TRUE)
-                            tkinsert(err_out, "insert", paste(tex4,collapse="\n"))
+                if(textype %in% c('latex','xelatex')){
+                    if(textype=="latex"){
+                        tex1 <- system(paste("pdflatex",filetopdf), intern=TRUE)
+                    } else {
+                        tex1 <- system(paste("xelatex",filetopdf), intern=TRUE)
+                    }
+                    tkselect(nb2, 1)
+                    tkfocus(txt_edit)
+                    tkinsert(err_out, "insert", paste(tex1,collapse="\n"))
+                    if(is.null(attributes(tex1)$status) && bibtex==TRUE){
+                        tex2 <- system(paste("bibtex",filetopdf), intern=TRUE)
+                        tkinsert(err_out, "insert", paste(tex2,collapse="\n"))
+                        if(is.null(attributes(tex2)$status)){
+                            tex3 <- system(paste("pdflatex",filetopdf), intern=TRUE)
+                            tkinsert(err_out, "insert", paste(tex3,collapse="\n"))
+                            if(is.null(attributes(tex3)$status)){
+                                tex4 <- system(paste("pdflatex",filetopdf), intern=TRUE)
+                                tkinsert(err_out, "insert", paste(tex4,collapse="\n"))
+                            }
                         }
                     }
                 }
+                else if(textype=="texi2pdf")
+                    tex1 <- tools::texi2pdf(filetopdf, clean=TRUE)
                 if(fstem %in% list.files()){
                     if(as.numeric(tclvalue(openreports))){
                         tkinsert(err_out, "insert", "\n\nOpening pdf ",fstem,"...\n\n")
@@ -729,7 +744,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkconfigure(err_out, state="disabled")
             }
         }
-        knitpdf <- function(textype="latex",...){
+        knitpdf <- function(textype="texi2pdf",...){
             if(!scriptSaved)
                 saveScript()
             knit_out <- knittxt(...)
@@ -931,8 +946,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             menuKnit <- tkmenu(menuReport, tearoff = FALSE)
                 tkadd(menuKnit, "command", label = "knit",
                     command = function() knittxt(genmode="knit", usefile=FALSE, usetxt=TRUE), underline = 0)
-                tkadd(menuKnit, "command", label = "knit (from Sweave source)",
+                tkadd(menuKnit, "command", label = "Sweave",
                     command = function() knittxt(genmode="sweave", usefile=FALSE, usetxt=TRUE))
+                tkadd(menuKnit, "command", label = "knit (from Sweave source)",
+                    command = function() knittxt(genmode="knitsweave", usefile=FALSE, usetxt=TRUE))
                 tkadd(menuKnit, "separator")
                 tkadd(menuKnit, "command", label = "knit Rmd to HTML",
                     command = function() knittxt(genmode="rmd2html", usefile=FALSE, usetxt=TRUE))
@@ -941,8 +958,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkadd(menuKnit, "separator")
                 tkadd(menuKnit, "command", label = "knit to pdf",
                     command = function() knitpdf(genmode="knit", usefile=FALSE, usetxt=TRUE))
-                tkadd(menuKnit, "command", label = "knit to pdf (from Sweave source)",
+                tkadd(menuKnit, "command", label = "Sweave to pdf",
                     command = function() knitpdf(genmode="sweave", usefile=FALSE, usetxt=TRUE))
+                tkadd(menuKnit, "command", label = "knit to pdf (from Sweave source)",
+                    command = function() knitpdf(genmode="knitsweave", usefile=FALSE, usetxt=TRUE))
                 tkadd(menuReport, "cascade", label = "Knit", menu = menuKnit, underline = 0)
             menuPurl <- tkmenu(menuReport, tearoff = FALSE)
                 tkadd(menuPurl, "command", label = "purl",
@@ -1023,6 +1042,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     command = function() knittxt(genmode="knit", usefile=TRUE, usetxt=FALSE), underline = 0)
                 tkadd(menuFromFile, "command", label = "purl",
                     command = function() knittxt(genmode="purl", usefile=TRUE, usetxt=FALSE), underline = 0)
+                tkadd(menuFromFile, "command", label = "Sweave",
+                    command = function() knittxt(genmode="sweave", usefile=TRUE, usetxt=FALSE), underline = 0)
                 tkadd(menuFromFile, "command", label = "knit Rmd to HTML",
                     command = function() knittxt(genmode="rmd2html", usefile=TRUE, usetxt=FALSE))
                 tkadd(menuFromFile, "separator")
@@ -1771,12 +1792,14 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     tkbind(txt_edit, "<Control-A>", expression(selectAllEdit, break))
     tkbind(txt_edit, "<Control-a>", expression(selectAllEdit, break))
     
-    selectAllOutput <- function(){
-        tktag.add(output,"sel","0.0","end")
-        tkmark.set(output,"insert","end")
+    if(catchOutput){
+        selectAllOutput <- function(){
+            tktag.add(output,"sel","0.0","end")
+            tkmark.set(output,"insert","end")
+        }
+        tkbind(output, "<Control-A>", expression(selectAllOutput, break))
+        tkbind(output, "<Control-a>", expression(selectAllOutput, break))
     }
-    tkbind(output, "<Control-A>", expression(selectAllOutput, break))
-    tkbind(output, "<Control-a>", expression(selectAllOutput, break))
     
     copyText <- function(docut=FALSE){
         selrange <- strsplit(tclvalue(tktag.ranges(txt_edit,"sel"))," ")[[1]]
