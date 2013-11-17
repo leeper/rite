@@ -657,10 +657,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     chn <- tclopen(knit_out, "r")
                     tkinsert(output, "end", tclvalue(tclread(chn)))
                     tclclose(chn)
-                    if(genmode %in% c("md2html","rmd2html","stitch.rhtml","stitch.rmd"))
-                        browseURL(knit_out)
-                    else if(genmode=="stitch.rnw")
-                        browseURL(knit_out_pdf)
+                    if(as.numeric(tclvalue(openreports))){
+                        if(genmode %in% c("md2html","rmd2html","stitch.rhtml","stitch.rmd"))
+                            browseURL(knit_out)
+                        else if(genmode=="stitch.rnw")
+                            browseURL(knit_out_pdf)
+                    }
                 }
                 else if(genmode=="spin")
                     tkinsert(output, "end", paste(knit_out,collapse="\n"))
@@ -717,8 +719,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     }
                 }
                 if(fstem %in% list.files()){
-                    tkinsert(err_out, "insert", "\n\nOpening pdf ",fstem,"...\n\n")
-                    system2(getOption("pdfviewer"),fstem)
+                    if(as.numeric(tclvalue(openreports))){
+                        tkinsert(err_out, "insert", "\n\nOpening pdf ",fstem,"...\n\n")
+                        system2(getOption("pdfviewer"),fstem)
+                    }
                 }
                 else
                     tkmessageBox(message="PDF not created!", icon="error")
