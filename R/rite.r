@@ -1350,6 +1350,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     tkinsert(txt_edit, "insert", fnlist[x])
             }
         }
+        else if(substring(command,nchar(command),nchar(command)) %in% c("'",'"')){
+            fnlist <- try(list.files(),silent=TRUE)
+            if(!inherits(fnlist,"try-error")) {
+                insertCommand <- function(x)
+                    tkinsert(txt_edit, "insert", fnlist[x])
+            }
+        }
         else{
             insertpos <- strsplit(tclvalue(tkindex(txt_edit,"insert")),".", fixed=TRUE)[[1]]
             fnlist <- apropos(paste("^", command,sep=""))
