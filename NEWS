@@ -1,6 +1,8 @@
 # CHANGES to rite 0.3 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
+* The rite output widget now has editing enabled.
+* A checkbox on the Report Generation menu now controls whether PDF and HTML output files are opened after report generation. (#47)
 * Attempting to open or append a multi-file Gist will cause only the first file to be opened and result in a warning.
 * Added support for bracket-completion highlighting. The tk ctext widget already highlighted when brackets were originally righthand closed, but now brackets are highlighted when typed or traversed. (#20)
 * Open script and include script commands now use the ctext widget's `fastinsert` command to improve load times (without immediately highlighting script contents).

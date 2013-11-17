@@ -425,7 +425,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         )
         if(catchOutput){
             # output to `output`
-            tkconfigure(output, state="normal")
+            #tkconfigure(output, state="normal")
             if(length(osink)>length2){
                 tryCatch(tkinsert(output,"end",paste(osink[(length2+1):length(osink)],"\n",collapse="")),
                     error = function(e){
@@ -439,7 +439,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             }
             tkmark.set(output,"insert","end")
             tksee(output,"insert")
-            tkconfigure(output, state="disabled")
+            #tkconfigure(output, state="disabled")
             outputSaved <<- FALSE
         }
         unlink(runtemp)
@@ -488,16 +488,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             if(!length(outfilename) || outfilename=="")
                 invisible()
             chn <- tclopen(outfilename, "w")
-            tkconfigure(output, state="normal")
+            #tkconfigure(output, state="normal")
             tclputs(chn, tclvalue(tkget(output,"0.0","end")))
-            tkconfigure(output, state="disabled")
+            #tkconfigure(output, state="disabled")
             tclclose(chn)
             invisible(outfilename)
         }
         clearOutput <- function(){
-            tkconfigure(output, state="normal")
+            #tkconfigure(output, state="normal")
             tkdelete(output,"0.0","end")
-            tkconfigure(output, state="disabled")
+            #tkconfigure(output, state="disabled")
             tkselect(nb2, 0)
         }
         clearError <- function(){
@@ -652,7 +652,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkinsert(err_out, "end", "Report finished!")
                 tkconfigure(err_out, state="disabled")
                 clearOutput()
-                tkconfigure(output, state="normal")
+                #tkconfigure(output, state="normal")
                 if(usefile || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd")){
                     chn <- tclopen(knit_out, "r")
                     tkinsert(output, "end", tclvalue(tclread(chn)))
@@ -668,7 +668,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     tkinsert(output, "end", paste(knit_out,collapse="\n"))
                 else
                     tkinsert(output, "end", knit_out)
-                tkconfigure(output, state="disabled")
+                #tkconfigure(output, state="disabled")
                 tkselect(nb2, 0)
                 tkfocus(txt_edit)
                 invisible(knit_out)
@@ -908,10 +908,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     if(catchOutput){
         menuOutput <- tkmenu(menuTop, tearoff = FALSE)
             copyOutput <- function(){
-                tkconfigure(output, state="normal")
+                #tkconfigure(output, state="normal")
                 tkclipboard.clear()
                 tkclipboard.append(tclvalue(tkget(output, "0.0", "end")))
-                tkconfigure(output, state="disabled")
+                #tkconfigure(output, state="disabled")
             }
             tkadd(menuOutput, "command", label = "Copy Output", command = copyOutput, underline = 0)
             tkadd(menuOutput, "command", label = "Save Output",
@@ -1206,7 +1206,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             outModified <- function()
                 outputSaved <<- FALSE
             tkbind(output, "<<Modified>>", outModified)
-            tkconfigure(output, state="disabled")
+            #tkconfigure(output, state="disabled")
             tkgrid(output, column=1, row=1, sticky="nsew")
             tkgrid(out_scr, column=2, row=1, sticky="nsew")
             tkgrid.columnconfigure(out_tab1,1,weight=1)
@@ -1770,6 +1770,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     }
     tkbind(txt_edit, "<Control-A>", expression(selectAllEdit, break))
     tkbind(txt_edit, "<Control-a>", expression(selectAllEdit, break))
+    
+    selectAllOutput <- function(){
+        tktag.add(output,"sel","0.0","end")
+        tkmark.set(output,"insert","end")
+    }
+    tkbind(output, "<Control-A>", expression(selectAllOutput, break))
+    tkbind(output, "<Control-a>", expression(selectAllOutput, break))
     
     copyText <- function(docut=FALSE){
         selrange <- strsplit(tclvalue(tktag.ranges(txt_edit,"sel"))," ")[[1]]
