@@ -541,6 +541,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             sink(knitsink2, type="message") # sink stderr
             
             if(usetxt){
+                saveScript()
                 txtvalue <- tclvalue(tkget(txt_edit,"0.0","end"))
                 inputvalue <- NULL
             }
@@ -959,21 +960,18 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkadd(menuKnit, "separator")
                 tkadd(menuKnit, "command", label = "knit to pdf",
                     command = function(){
-                        saveScript()
-                        k <- knittxt(genmode="knit", usefile=TRUE, usetxt=FALSE)
-                        pdffromfile(filetopdf=filename)
+                        k <- knittxt(genmode="knit", usefile=FALSE, usetxt=TRUE)
+                        pdffromfile(filetopdf=k)
                     })
                 tkadd(menuKnit, "command", label = "Sweave to pdf",
                     command = function(){
-                        saveScript()
-                        k <- knittxt(genmode="sweave", usefile=TRUE, usetxt=FALSE)
-                        pdffromfile(filetopdf=filename)
+                        k <- knittxt(genmode="sweave", usefile=FALSE, usetxt=TRUE)
+                        pdffromfile(filetopdf=k)
                     })
                 tkadd(menuKnit, "command", label = "knit to pdf (from Sweave source)",
                     command = function(){
-                        saveScript()
-                        k <- knittxt(genmode="knitsweave", usefile=TRUE, usetxt=FALSE)
-                        pdffromfile(filetopdf=filename)
+                        k <- knittxt(genmode="knitsweave", usefile=FALSE, usetxt=TRUE)
+                        pdffromfile(filetopdf=k)
                     })
                 tkadd(menuReport, "cascade", label = "Knit", menu = menuKnit, underline = 0)
             menuPurl <- tkmenu(menuReport, tearoff = FALSE)
