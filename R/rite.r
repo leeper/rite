@@ -961,7 +961,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkadd(menuKnit, "command", label = "knit to pdf",
                     command = function(){
                         k <- knittxt(genmode="knit", usefile=FALSE, usetxt=TRUE)
-                        pdffromfile(filetopdf=k)
+                        pdffromfile(filetopdf=filename)
                     })
                 tkadd(menuKnit, "command", label = "Sweave to pdf",
                     command = function(){
@@ -971,7 +971,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkadd(menuKnit, "command", label = "knit to pdf (from Sweave source)",
                     command = function(){
                         k <- knittxt(genmode="knitsweave", usefile=FALSE, usetxt=TRUE)
-                        pdffromfile(filetopdf=k)
+                        pdffromfile(filetopdf=filename)
                     })
                 tkadd(menuReport, "cascade", label = "Knit", menu = menuKnit, underline = 0)
             menuPurl <- tkmenu(menuReport, tearoff = FALSE)
