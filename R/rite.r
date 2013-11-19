@@ -266,7 +266,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     }
     saveScript <- function(){
         if(is.null(filename) || !length(filename) || filename=="")
-            saveAsScript()
+            return(saveAsScript())
         else{
             chn <- tclopen(filename, "w")
             tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
@@ -275,6 +275,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             wmtitle <<- packagetitle
             wmtitle <<- paste(filename,"-",wmtitle)
             tkwm.title(editor, wmtitle)
+            return(0)
         }
     }
     saveAsScript <- function() {
@@ -284,7 +285,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                                         defaultextension='.R'))
         if(!length(fname) || fname==""){
             filename <<- ""
-            return()
+            return(1)
         }
         else{
             chn <- tclopen(fname, "w")
@@ -295,6 +296,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             wmtitle <<- packagetitle
             wmtitle <<- paste(fname,"-",wmtitle)
             tkwm.title(editor, wmtitle)
+            return(0)
         }
     }
     saveGist <- function(browse=FALSE) {
@@ -554,12 +556,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 knit_out <- try(purl(input=inputvalue, text=txtvalue))
             else if(genmode=="sweave"){
                 require(tools)
-                if(!is.null(usetxt)){
-                    saveScript()
-                    knit_out <- Sweave(file=filename, quiet=TRUE)
-                }
-                else
+                if(is.null(txtvalue))
                     knit_out <- Sweave(file=inputvalue, quiet=TRUE)
+                else if(!saveScript())
+                    knit_out <- Sweave(file=filename, quiet=TRUE)
+                else {
+                    tkconfigure(err_out, state="normal")
+                    tkinsert(err_out, "end", "script not saved.")
+                    tkconfigure(err_out, state="disabled")
+                    return()
+                }
             }
             else if(genmode=="knitsweave"){
                 sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
@@ -665,7 +671,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkconfigure(err_out, state="disabled")
                 clearOutput()
                 #tkconfigure(output, state="normal")
-                if(usefile || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd")){
+                if(usefile || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd","sweave")){
                     chn <- tclopen(knit_out, "r")
                     tkinsert(output, "end", tclvalue(tclread(chn)))
                     tclclose(chn)
@@ -686,7 +692,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 invisible(knit_out)
             }
         }
-        pdffromfile <- function(filetopdf=NULL, texttopdf=FALSE, textype="latex", bibtex=TRUE){
+        pdffromfile <- function(filetopdf=NULL, texttopdf=FALSE, textype="texi2pdf", bibtex=TRUE){
+            require(tools)
             if(texttopdf){
                 if(!scriptSaved)
                     saveScript()
@@ -706,7 +713,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 }
                 fstem <- substring(basename(filetopdf),1,regexpr("\\.[[:alnum:]]+$",basename(filetopdf))-1)
                 fstem <- paste(fstem,".pdf",sep="")
-                clearError()
+                #clearError()
                 tkconfigure(err_out, state="normal")
                 tkmark.set(err_out, "insert", "end")
                 if(textype %in% c('latex','xelatex')){
@@ -731,8 +738,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                         }
                     }
                 }
-                else if(textype=="texi2pdf")
-                    tex1 <- tools::texi2pdf(filetopdf, clean=TRUE)
+                else if(textype=="texi2pdf"){
+                    tex1 <- texi2pdf(filetopdf, clean=TRUE)
+                }
                 if(fstem %in% list.files()){
                     if(as.numeric(tclvalue(openreports))){
                         tkinsert(err_out, "insert", "\n\nOpening pdf ",fstem,"...\n\n")
@@ -743,13 +751,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     tkmessageBox(message="PDF not created!", icon="error")
                 tkconfigure(err_out, state="disabled")
             }
-        }
-        knitpdf <- function(textype="texi2pdf",...){
-            if(!scriptSaved)
-                saveScript()
-            knit_out <- knittxt(...)
-            if(!inherits(knit_out,"try-error"))
-                pdffromfile(filetopdf=filename, textype=textype)
         }
     }
     
@@ -957,11 +958,23 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 #    command = function() knittxt(genmode="knit2slidify", usefile=FALSE, usetxt=TRUE))
                 tkadd(menuKnit, "separator")
                 tkadd(menuKnit, "command", label = "knit to pdf",
-                    command = function() knitpdf(genmode="knit", usefile=FALSE, usetxt=TRUE))
+                    command = function(){
+                        saveScript()
+                        k <- knittxt(genmode="knit", usefile=TRUE, usetxt=FALSE)
+                        pdffromfile(filetopdf=filename)
+                    })
                 tkadd(menuKnit, "command", label = "Sweave to pdf",
-                    command = function() knitpdf(genmode="sweave", usefile=FALSE, usetxt=TRUE))
+                    command = function(){
+                        saveScript()
+                        k <- knittxt(genmode="sweave", usefile=TRUE, usetxt=FALSE)
+                        pdffromfile(filetopdf=filename)
+                    })
                 tkadd(menuKnit, "command", label = "knit to pdf (from Sweave source)",
-                    command = function() knitpdf(genmode="knitsweave", usefile=FALSE, usetxt=TRUE))
+                    command = function(){
+                        saveScript()
+                        k <- knittxt(genmode="knitsweave", usefile=TRUE, usetxt=FALSE)
+                        pdffromfile(filetopdf=filename)
+                    })
                 tkadd(menuReport, "cascade", label = "Knit", menu = menuKnit, underline = 0)
             menuPurl <- tkmenu(menuReport, tearoff = FALSE)
                 tkadd(menuPurl, "command", label = "purl",
@@ -1043,7 +1056,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkadd(menuFromFile, "command", label = "purl",
                     command = function() knittxt(genmode="purl", usefile=TRUE, usetxt=FALSE), underline = 0)
                 tkadd(menuFromFile, "command", label = "Sweave",
-                    command = function() knittxt(genmode="sweave", usefile=TRUE, usetxt=FALSE), underline = 0)
+                    command = function() 
+                        pdffromfile(filetopdf=knittxt(genmode="sweave", usefile=TRUE, usetxt=FALSE)),
+                    underline = 0)
                 tkadd(menuFromFile, "command", label = "knit Rmd to HTML",
                     command = function() knittxt(genmode="rmd2html", usefile=TRUE, usetxt=FALSE))
                 tkadd(menuFromFile, "separator")
