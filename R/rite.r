@@ -545,7 +545,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 txtvalue <- tclvalue(tkget(txt_edit,"0.0","end"))
                 inputvalue <- NULL
             }
-            else if(use=='currentfile'){
+            else if(use=='current'){
                 saveScript()
                 txtvalue <- NULL
                 inputvalue <- filename
@@ -655,46 +655,56 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             sink(type="message")
             close(knitsink1)
             close(knitsink2)
-            tkselect(nb2, 1)
-            tkconfigure(err_out, state="normal")
-            tkinsert(err_out, "end", paste(ksink1,collapse="\n"))
-            tkinsert(err_out, "end", paste(ksink2,collapse="\n"))
+            if(catchOutput){
+                tkselect(nb2, 1)
+                tkconfigure(err_out, state="normal")
+                tkinsert(err_out, "end", paste(ksink1,collapse="\n"))
+                tkinsert(err_out, "end", paste(ksink2,collapse="\n"))
+                tkconfigure(err_out, state="disabled")
+                tkfocus(txt_edit)
+            }
             rm(ksink1) # cleanup
             rm(ksink2) # cleanup
-            tkconfigure(err_out, state="disabled")
             sink(errsink, type="message")
-            tkfocus(txt_edit)
             if(inherits(knit_out,"try-error")){
-                tkconfigure(err_out, state="normal")
-                tkinsert(err_out, "end", "Report generation failed!")
-                tkconfigure(err_out, state="disabled")
+                if(catchOutput){
+                    tkconfigure(err_out, state="normal")
+                    tkinsert(err_out, "end", "Report generation failed!")
+                    tkconfigure(err_out, state="disabled")
+                }
+                else
+                    message('Report generation failed!')
                 tkmessageBox(message=paste("Report generation failed:\n",knit_out))
                 invisible(knit_out)
             }
             else{
-                tkconfigure(err_out, state="normal")
-                tkinsert(err_out, "end", "Report finished!")
-                tkconfigure(err_out, state="disabled")
-                clearOutput()
-                #tkconfigure(output, state="normal")
-                if(use=='file' || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd","sweave")){
-                    chn <- tclopen(knit_out, "r")
-                    tkinsert(output, "end", tclvalue(tclread(chn)))
-                    tclclose(chn)
-                    if(as.numeric(tclvalue(openreports))){
-                        if(genmode %in% c("md2html","rmd2html","stitch.rhtml","stitch.rmd"))
-                            browseURL(knit_out)
-                        else if(genmode=="stitch.rnw")
-                            browseURL(knit_out_pdf)
+                if(catchOutput){
+                    tkconfigure(err_out, state="normal")
+                    tkinsert(err_out, "end", "Report finished!")
+                    tkconfigure(err_out, state="disabled")
+                    clearOutput()
+                    #tkconfigure(output, state="normal")
+                    if(use %in% c('current','file') || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd","sweave")){
+                        chn <- tclopen(knit_out, "r")
+                        tkinsert(output, "end", tclvalue(tclread(chn)))
+                        tclclose(chn)
+                        if(as.numeric(tclvalue(openreports))){
+                            if(genmode %in% c("md2html","rmd2html","stitch.rhtml","stitch.rmd"))
+                                browseURL(knit_out)
+                            else if(genmode=="stitch.rnw")
+                                browseURL(knit_out_pdf)
+                        }
                     }
+                    else if(genmode=="spin")
+                        tkinsert(output, "end", paste(knit_out,collapse="\n"))
+                    else
+                        tkinsert(output, "end", knit_out)
+                    #tkconfigure(output, state="disabled")
+                    tkselect(nb2, 0)
+                    tkfocus(txt_edit)
                 }
-                else if(genmode=="spin")
-                    tkinsert(output, "end", paste(knit_out,collapse="\n"))
                 else
-                    tkinsert(output, "end", knit_out)
-                #tkconfigure(output, state="disabled")
-                tkselect(nb2, 0)
-                tkfocus(txt_edit)
+                    message('Report finished!')
                 invisible(knit_out)
             }
         }
@@ -723,11 +733,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkconfigure(err_out, state="normal")
                 tkmark.set(err_out, "insert", "end")
                 if(textype %in% c('latex','xelatex')){
-                    if(textype=="latex"){
+                    if(textype=="latex")
                         tex1 <- system(paste("pdflatex",filetopdf), intern=TRUE)
-                    } else {
+                    else
                         tex1 <- system(paste("xelatex",filetopdf), intern=TRUE)
-                    }
                     tkselect(nb2, 1)
                     tkfocus(txt_edit)
                     tkinsert(err_out, "insert", paste(tex1,collapse="\n"))
@@ -744,9 +753,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                         }
                     }
                 }
-                else if(textype=="texi2pdf"){
+                else if(textype=="texi2pdf")
                     tex1 <- texi2pdf(filetopdf, clean=TRUE)
-                }
                 if(fstem %in% list.files()){
                     if(as.numeric(tclvalue(openreports))){
                         tkinsert(err_out, "insert", "\n\nOpening pdf ",fstem,"...\n\n")
