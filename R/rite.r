@@ -1048,18 +1048,20 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkadd(menuReport, "cascade", label = "Markdown", menu = menuMD, underline = 0)
             tkadd(menuReport, "separator")
             #texstatus <- ifelse(!system("pdflatex -version",show.output.on.console=FALSE), "enabled","disabled")
-            menuLatex <- tkmenu(menuReport, tearoff = FALSE)
-                tkadd(menuLatex, "command", label = "pdflatex",
-                    command = function() pdffromfile(texttopdf=TRUE, bibtex=FALSE))
-                tkadd(menuLatex, "command", label = "pdflatex+bibtex",
-                    command = function() pdffromfile(texttopdf=TRUE, bibtex=TRUE))
-                tkadd(menuReport, "cascade", label = "LaTeX", menu = menuLatex, underline = 0)
-            menuXetex <- tkmenu(menuReport, tearoff = FALSE)
-                tkadd(menuXetex, "command", label = "xelatex",
+            menuTex <- tkmenu(menuReport, tearoff = FALSE)
+                tkadd(menuTex, "command", label = "Compile LaTeX PDF",
+                    command = function() pdffromfile(texttopdf=TRUE))
+                tkadd(menuTex, "separator")
+                tkadd(menuTex, "command", label = "pdflatex",
+                    command = function() pdffromfile(texttopdf=TRUE, textype='latex', bibtex=FALSE))
+                tkadd(menuTex, "command", label = "pdflatex+bibtex",
+                    command = function() pdffromfile(texttopdf=TRUE, textype='latex', bibtex=TRUE))
+                tkadd(menuTex, "separator")
+                tkadd(menuTex, "command", label = "xelatex",
                     command = function() pdffromfile(texttopdf=TRUE, textype="xelatex", bibtex=FALSE))
-                tkadd(menuXetex, "command", label = "xelatex+bibtex",
+                tkadd(menuTex, "command", label = "xelatex+bibtex",
                     command = function() pdffromfile(texttopdf=TRUE, textype="xelatex", bibtex=TRUE))
-                tkadd(menuReport, "cascade", label = "XeLaTeX", menu = menuXetex, underline = 0)
+                tkadd(menuReport, "cascade", label = "TeX", menu = menuTex, underline = 0)
             tkadd(menuReport, "separator")
             menuFromFile <- tkmenu(menuReport, tearoff = FALSE)
                 tkadd(menuFromFile, "command", label = "knit",
@@ -1101,10 +1103,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 #tkadd(menuMD, "command", label = "knit Rmd and slidify to HTML",
                 #    command = function() knittxt(genmode="knit2slidify", use='file'))
                 tkadd(menuFromFile, "separator")
+                tkadd(menuFromFile, "command", label = "Compile LaTeX PDF",
+                    command = function() pdffromfile(texttopdf=TRUE))
                 tkadd(menuFromFile, "command", label = "pdflatex",
-                    command = function() pdffromfile(texttopdf=FALSE, bibtex=FALSE))
+                    command = function() pdffromfile(texttopdf=FALSE, textype='latex', bibtex=FALSE))
                 tkadd(menuFromFile, "command", label = "pdflatex+bibtex",
-                    command = function() pdffromfile(texttopdf=FALSE, bibtex=TRUE))
+                    command = function() pdffromfile(texttopdf=FALSE, textype='latex', bibtex=TRUE))
                 tkadd(menuFromFile, "command", label = "xelatex",
                     command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=FALSE))
                 tkadd(menuFromFile, "command", label = "xelatex+bibtex",
