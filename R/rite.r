@@ -512,7 +512,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         }
         
         # convert script to .tex or tangles with knitr
-        knittxt <- function(genmode="knit", usetxt=TRUE, usefile=FALSE, spinformat=NULL){
+        knittxt <- function(genmode="knit", use='text', spinformat=NULL){
             if(!require(knitr)){
                 install <- try(install.packages("knitr"), silent=TRUE)
                 if(inherits(install, "try-error")){
@@ -540,12 +540,17 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             sink(knitsink1, type="output") # sink stdout
             sink(knitsink2, type="message") # sink stderr
             
-            if(usetxt){
+            if(use=='text'){
                 saveScript()
                 txtvalue <- tclvalue(tkget(txt_edit,"0.0","end"))
                 inputvalue <- NULL
             }
-            else if(usefile){
+            else if(use=='currentfile'){
+                saveScript()
+                txtvalue <- NULL
+                inputvalue <- filename
+            }
+            else if(use=='file'){
                 loadScript()
                 txtvalue <- NULL
                 inputvalue <- filename
@@ -672,7 +677,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkconfigure(err_out, state="disabled")
                 clearOutput()
                 #tkconfigure(output, state="normal")
-                if(usefile || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd","sweave")){
+                if(use=='file' || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd","sweave")){
                     chn <- tclopen(knit_out, "r")
                     tkinsert(output, "end", tclvalue(tclread(chn)))
                     tclclose(chn)
@@ -947,69 +952,69 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         menuReport <- tkmenu(menuTop, tearoff = FALSE)
             menuKnit <- tkmenu(menuReport, tearoff = FALSE)
                 tkadd(menuKnit, "command", label = "knit",
-                    command = function() knittxt(genmode="knit", usefile=FALSE, usetxt=TRUE), underline = 0)
+                    command = function() knittxt(genmode="knit", use='text'), underline = 0)
                 tkadd(menuKnit, "command", label = "Sweave",
-                    command = function() knittxt(genmode="sweave", usefile=FALSE, usetxt=TRUE))
+                    command = function() knittxt(genmode="sweave", use='text'))
                 tkadd(menuKnit, "command", label = "knit (from Sweave source)",
-                    command = function() knittxt(genmode="knitsweave", usefile=FALSE, usetxt=TRUE))
+                    command = function() knittxt(genmode="knitsweave", use='text'))
                 tkadd(menuKnit, "separator")
                 tkadd(menuKnit, "command", label = "knit Rmd to HTML",
-                    command = function() knittxt(genmode="rmd2html", usefile=FALSE, usetxt=TRUE))
+                    command = function() knittxt(genmode="rmd2html", use='text'))
                 #tkadd(menuKnit, "command", label = "knit and Slidify",
                 #    command = function() knittxt(genmode="knit2slidify", usefile=FALSE, usetxt=TRUE))
                 tkadd(menuKnit, "separator")
                 tkadd(menuKnit, "command", label = "knit to pdf",
                     command = function(){
-                        k <- knittxt(genmode="knit", usefile=FALSE, usetxt=TRUE)
+                        k <- knittxt(genmode="knit", use='current')
                         pdffromfile(filetopdf=paste(tools::file_path_sans_ext(k),"tex",sep="."))
                     })
                 tkadd(menuKnit, "command", label = "Sweave to pdf",
                     command = function(){
-                        k <- knittxt(genmode="sweave", usefile=FALSE, usetxt=TRUE)
+                        k <- knittxt(genmode="sweave", use='text')
                         pdffromfile(filetopdf=k)
                     })
                 tkadd(menuKnit, "command", label = "knit to pdf (from Sweave source)",
                     command = function(){
-                        k <- knittxt(genmode="knitsweave", usefile=FALSE, usetxt=TRUE)
+                        k <- knittxt(genmode="knitsweave", use='current')
                         pdffromfile(filetopdf=paste(tools::file_path_sans_ext(k),"tex",sep="."))
                     })
                 tkadd(menuReport, "cascade", label = "Knit", menu = menuKnit, underline = 0)
             menuPurl <- tkmenu(menuReport, tearoff = FALSE)
                 tkadd(menuPurl, "command", label = "purl",
-                    command = function() knittxt(genmode="purl", usefile=FALSE, usetxt=TRUE), underline = 0)
+                    command = function() knittxt(genmode="purl", use='text'), underline = 0)
                 tkadd(menuPurl, "command", label = "purl (from Sweave source)",
-                    command = function() knittxt(genmode="tangle", usefile=FALSE, usetxt=TRUE))
+                    command = function() knittxt(genmode="tangle", use='text'))
                 tkadd(menuReport, "cascade", label = "Purl", menu = menuPurl, underline = 0)
             menuStitch <- tkmenu(menuReport, tearoff = FALSE)
                 tkadd(menuStitch, "command", label = "stitch (tex)",
-                    command = function() knittxt(genmode="stitch.rnw", usefile=FALSE, usetxt=TRUE), underline = 0)
+                    command = function() knittxt(genmode="stitch.rnw", use='text'), underline = 0)
                 tkadd(menuStitch, "command", label = "stitch (HTML)",
-                    command = function() knittxt(genmode="stitch.rhtml", usefile=FALSE, usetxt=TRUE))
+                    command = function() knittxt(genmode="stitch.rhtml", use='text'))
                 tkadd(menuStitch, "command", label = "stitch (markdown)",
-                    command = function() knittxt(genmode="stitch.rmd", usefile=FALSE, usetxt=TRUE))
+                    command = function() knittxt(genmode="stitch.rmd", use='text'))
                 tkadd(menuReport, "cascade", label = "Stitch", menu = menuStitch, underline = 0)
             menuSpin <- tkmenu(menuReport, tearoff = FALSE)
                 tkadd(menuSpin, "command", label = "spin to Rmd",
-                    command = function() knittxt(genmode="spin", usefile=FALSE, usetxt=TRUE, spinformat="Rmd"))
+                    command = function() knittxt(genmode="spin", use='text', spinformat="Rmd"))
                 tkadd(menuSpin, "command", label = "spin to Rnw",
-                    command = function() knittxt(genmode="spin", usefile=FALSE, usetxt=TRUE, spinformat="Rnw"))
+                    command = function() knittxt(genmode="spin", use='text', spinformat="Rnw"))
                 tkadd(menuSpin, "command", label = "spin to Rhtml",
-                    command = function() knittxt(genmode="spin", usefile=FALSE, usetxt=TRUE, spinformat="Rhtml"))
+                    command = function() knittxt(genmode="spin", use='text', spinformat="Rhtml"))
                 tkadd(menuSpin, "command", label = "spin to Rtex",
-                    command = function() knittxt(genmode="spin", usefile=FALSE, usetxt=TRUE, spinformat="Rtex"))
+                    command = function() knittxt(genmode="spin", use='text', spinformat="Rtex"))
                 tkadd(menuSpin, "command", label = "spin to Rrst",
-                    command = function() knittxt(genmode="spin", usefile=FALSE, usetxt=TRUE, spinformat="Rrst"))
+                    command = function() knittxt(genmode="spin", use='text', spinformat="Rrst"))
                 tkadd(menuSpin, "separator")
                 tkadd(menuSpin, "command", label = "spin to Rmd and knit",
-                    command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rmd"))
+                    command = function() knittxt(genmode="spinknit", use='text', spinformat="Rmd"))
                 tkadd(menuSpin, "command", label = "spin to Rnw and knit",
-                    command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rnw"), state="disabled")
+                    command = function() knittxt(genmode="spinknit", use='text', spinformat="Rnw"), state="disabled")
                 tkadd(menuSpin, "command", label = "spin to Rhtml and knit",
-                    command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rhtml"))
+                    command = function() knittxt(genmode="spinknit", use='text', spinformat="Rhtml"))
                 tkadd(menuSpin, "command", label = "spin to Rtex and knit",
-                    command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rtex"), state="disabled")
+                    command = function() knittxt(genmode="spinknit", use='text', spinformat="Rtex"), state="disabled")
                 tkadd(menuSpin, "command", label = "spin to Rrst and knit",
-                    command = function() knittxt(genmode="spinknit", usefile=FALSE, usetxt=TRUE, spinformat="Rrst"))
+                    command = function() knittxt(genmode="spinknit", use='text', spinformat="Rrst"))
                 tkadd(menuReport, "cascade", label = "Spin", menu = menuSpin)
             tkadd(menuReport, "separator")
             #menuSlidify <- tkmenu(menuReport, tearoff = FALSE)
@@ -1022,16 +1027,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             #tkadd(menuReport, "separator")
             menuMD <- tkmenu(menuReport, tearoff = FALSE)
                 tkadd(menuMD, "command", label = "Convert md to HTML",
-                    command = function() knittxt(genmode="md2html", usefile=FALSE, usetxt=TRUE))
+                    command = function() knittxt(genmode="md2html", use='text'))
                 tkadd(menuMD, "command", label = "Convert md to HTML fragment",
-                    command = function() knittxt(genmode="md2html.fragment", usefile=FALSE, usetxt=TRUE))
+                    command = function() knittxt(genmode="md2html.fragment", use='text'))
                 tkadd(menuMD, "command", label = "knit Rmd to HTML",
-                    command = function() knittxt(genmode="rmd2html", usefile=FALSE, usetxt=TRUE))
+                    command = function() knittxt(genmode="rmd2html", use='text'))
                 # tkadd(menuMD, "separator")
                 #tkadd(menuMD, "command", label = "Slidify",
-                #    command = function() knittxt(genmode="slidify", usefile=FALSE, usetxt=TRUE))
+                #    command = function() knittxt(genmode="slidify", use='text'))
                 #tkadd(menuMD, "command", label = "knit and Slidify",
-                #    command = function() knittxt(genmode="knit2slidify", usefile=FALSE, usetxt=TRUE))
+                #    command = function() knittxt(genmode="knit2slidify", use='text'))
                 tkadd(menuReport, "cascade", label = "Markdown", menu = menuMD, underline = 0)
             tkadd(menuReport, "separator")
             #texstatus <- ifelse(!system("pdflatex -version",show.output.on.console=FALSE), "enabled","disabled")
@@ -1050,43 +1055,43 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             tkadd(menuReport, "separator")
             menuFromFile <- tkmenu(menuReport, tearoff = FALSE)
                 tkadd(menuFromFile, "command", label = "knit",
-                    command = function() knittxt(genmode="knit", usefile=TRUE, usetxt=FALSE), underline = 0)
+                    command = function() knittxt(genmode="knit", use='file'), underline = 0)
                 tkadd(menuFromFile, "command", label = "purl",
-                    command = function() knittxt(genmode="purl", usefile=TRUE, usetxt=FALSE), underline = 0)
+                    command = function() knittxt(genmode="purl", use='file'), underline = 0)
                 tkadd(menuFromFile, "command", label = "Sweave",
                     command = function() 
-                        pdffromfile(filetopdf=knittxt(genmode="sweave", usefile=TRUE, usetxt=FALSE)),
+                        pdffromfile(filetopdf=knittxt(genmode="sweave", use='file')),
                     underline = 0)
                 tkadd(menuFromFile, "command", label = "knit Rmd to HTML",
-                    command = function() knittxt(genmode="rmd2html", usefile=TRUE, usetxt=FALSE))
+                    command = function() knittxt(genmode="rmd2html", use='file'))
                 tkadd(menuFromFile, "separator")
                 tkadd(menuFromFile, "command", label = "stitch (tex)",
-                    command = function() knittxt(genmode="stitch.rnw", usefile=TRUE, usetxt=FALSE))
+                    command = function() knittxt(genmode="stitch.rnw", use='file'))
                 tkadd(menuFromFile, "command", label = "stitch (HTML)",
-                    command = function() knittxt(genmode="stitch.rhtml", usefile=TRUE, usetxt=FALSE))
+                    command = function() knittxt(genmode="stitch.rhtml", use='file'))
                 tkadd(menuFromFile, "command", label = "stitch (markdown)",
-                    command = function() knittxt(genmode="stitch.rmd", usefile=TRUE, usetxt=FALSE))
+                    command = function() knittxt(genmode="stitch.rmd", use='file'))
                 tkadd(menuFromFile, "separator")
                 tkadd(menuFromFile, "command", label = "spin to Rmd",
-                    command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE, spinformat="Rmd"))
+                    command = function() knittxt(genmode="spin", use='file', spinformat="Rmd"))
                 tkadd(menuFromFile, "command", label = "spin to Rnw",
-                    command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE, spinformat="Rnw"))
+                    command = function() knittxt(genmode="spin", use='file', spinformat="Rnw"))
                 tkadd(menuFromFile, "command", label = "spin to Rhtml",
-                    command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE, spinformat="Rhtml"))
+                    command = function() knittxt(genmode="spin", use='file', spinformat="Rhtml"))
                 tkadd(menuFromFile, "command", label = "spin to Rtex",
-                    command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE, spinformat="Rtex"))
+                    command = function() knittxt(genmode="spin", use='file', spinformat="Rtex"))
                 tkadd(menuFromFile, "command", label = "spin to Rrst",
-                    command = function() knittxt(genmode="spin", usefile=TRUE, usetxt=FALSE, spinformat="Rrst"))
+                    command = function() knittxt(genmode="spin", use='file', spinformat="Rrst"))
                 tkadd(menuFromFile, "separator")
                 tkadd(menuFromFile, "command", label = "Convert md to HTML",
-                    command = function() knittxt(genmode="md2html", usefile=TRUE, usetxt=FALSE))
+                    command = function() knittxt(genmode="md2html", use='file'))
                 tkadd(menuFromFile, "command", label = "Convert md to HTML fragment",
-                    command = function() knittxt(genmode="md2html.fragment", usefile=TRUE, usetxt=FALSE))
+                    command = function() knittxt(genmode="md2html.fragment", use='file'))
                 # update when slidify is on CRAN
                 #tkadd(menuMD, "command", label = "slidify md to HTML",
-                #    command = function() knittxt(genmode="slidify", usefile=TRUE, usetxt=FALSE))
+                #    command = function() knittxt(genmode="slidify", use='file'))
                 #tkadd(menuMD, "command", label = "knit Rmd and slidify to HTML",
-                #    command = function() knittxt(genmode="knit2slidify", usefile=TRUE, usetxt=FALSE))
+                #    command = function() knittxt(genmode="knit2slidify", use='file'))
                 tkadd(menuFromFile, "separator")
                 tkadd(menuFromFile, "command", label = "pdflatex",
                     command = function() pdffromfile(texttopdf=FALSE, bibtex=FALSE))
