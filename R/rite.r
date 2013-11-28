@@ -323,15 +323,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         gistid <- strsplit(outsplit[grep("id",outsplit)],':"')[[1]][2]
         gistouturl <- paste("https://gist.github.com/",gistid,sep="")
         results <- paste("Script saved as Gist ",gistid," at: ",gistouturl,sep="")
+        riteMsg(results, error=TRUE)
         if(catchOutput){
-            tkconfigure(err_out, state="normal")
-            tkinsert(err_out,"end",results)
-            tkconfigure(err_out, state="disabled")
             tkselect(nb2, 1)
             tkfocus(txt_edit)
         }
-        else
-            message(results)
         if(browse)
             browseURL(gistouturl)
     }
@@ -403,7 +399,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 errmsg <- strsplit(as.character(errmsg),": ")[[1]]
                 errmsg <- paste(errmsg[-1],collapse=":")
                 if(catchOutput)
-                        writeError(errmsg,"Warning")
+                    writeError(errmsg,"Warning")
                 errbox <- tkmessageBox(message = paste("Warning:",errmsg,"\nDo you want to continue evaluation?"),
                                         icon = "error", type = "yesno", default = "no")
                 if(tclvalue(errbox)=="no")
@@ -429,7 +425,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         )
         if(catchOutput){
             # output to `output`
-            #tkconfigure(output, state="normal")
             if(length(osink)>length2){
                 tryCatch(tkinsert(output,"end",paste(osink[(length2+1):length(osink)],"\n",collapse="")),
                     error = function(e){
@@ -443,7 +438,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             }
             tkmark.set(output,"insert","end")
             tksee(output,"insert")
-            #tkconfigure(output, state="disabled")
             outputSaved <<- FALSE
         }
         unlink(runtemp)
@@ -492,16 +486,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             if(!length(outfilename) || outfilename=="")
                 invisible()
             chn <- tclopen(outfilename, "w")
-            #tkconfigure(output, state="normal")
             tclputs(chn, tclvalue(tkget(output,"0.0","end")))
-            #tkconfigure(output, state="disabled")
             tclclose(chn)
             invisible(outfilename)
         }
         clearOutput <- function(){
-            #tkconfigure(output, state="normal")
             tkdelete(output,"0.0","end")
-            #tkconfigure(output, state="disabled")
             tkselect(nb2, 0)
         }
         clearError <- function(){
@@ -510,261 +500,249 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             tkconfigure(err_out, state="disabled")
             tkselect(nb2, 1)
         }
+    }
         
-        # convert script to .tex or tangles with knitr
-        knittxt <- function(genmode="knit", use='text', spinformat=NULL){
-            if(!require(knitr)){
-                install <- try(install.packages("knitr"), silent=TRUE)
-                if(inherits(install, "try-error")){
-                    tkmessageBox(message="knitr not installed and not installable")
-                    return()
-                }
-            }
-            if(genmode %in% c("md2html","rmd2html")){
-                if(!require(markdown)){
-                    install <- try(install.packages("markdown"), silent=TRUE)
-                    if(inherits(install, "try-error")){
-                        tkmessageBox(message="markdown not installed and not installable")
-                        return()
-                    }
-                }
-            }
-            clearError()
-            tkconfigure(err_out, state="normal")
-            tkinsert(err_out, "end", "Generating report...")
-            tkconfigure(err_out, state="disabled")
-            ksink1 <- ""
-            ksink2 <- ""
-            knitsink1 <- textConnection("ksink1", "w") # create connection for stdout
-            knitsink2 <- textConnection("ksink2", "w") # create connection for stderr
-            sink(knitsink1, type="output") # sink stdout
-            sink(knitsink2, type="message") # sink stderr
-            
-            if(use=='text'){
-                saveScript()
-                txtvalue <- tclvalue(tkget(txt_edit,"0.0","end"))
-                inputvalue <- NULL
-            }
-            else if(use=='current'){
-                saveScript()
-                txtvalue <- NULL
-                inputvalue <- filename
-            }
-            else if(use=='file'){
-                loadScript()
-                txtvalue <- NULL
-                inputvalue <- filename
-            }
-            
-            if(genmode=="knit")
-                knit_out <- try(knit(input=inputvalue, text=txtvalue))
-            else if(genmode=="purl")
-                knit_out <- try(purl(input=inputvalue, text=txtvalue))
-            else if(genmode=="sweave"){
-                require(tools)
-                if(is.null(txtvalue))
-                    knit_out <- Sweave(file=inputvalue, quiet=TRUE)
-                else if(!saveScript())
-                    knit_out <- Sweave(file=filename, quiet=TRUE)
-                else {
-                    tkconfigure(err_out, state="normal")
-                    tkinsert(err_out, "end", "script not saved.")
-                    tkconfigure(err_out, state="disabled")
-                    return()
-                }
-            }
-            else if(genmode=="knitsweave"){
-                sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
-                if(inherits(sweave_out, "try-error")){
-                    tkmessageBox(message="Could not convert Sweave to knitr!")
-                    return()
-                }
-                else if(!is.null(inputvalue))
-                    knit_out <- try(knit(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
-                else if(!is.null(txtvalue))
-                    knit_out <- try(knit(text=sweave_out))
-            }
-            else if(genmode=="tangle"){
-                sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
-                if(inherits(sweave_out, "try-error")){
-                    tkmessageBox(message="Could not convert Sweave to knitr!")
-                    return()
-                }
-                else if(!is.null(inputvalue))
-                    knit_out <- try(purl(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
-                else if(!is.null(txtvalue))
-                    knit_out <- try(purl(text=sweave_out))
-            }
-            else if(genmode=="rmd2html"){
-                if(!is.null(inputvalue))
-                    knit_out <- try(knit2html(input=inputvalue))
-                else if(!is.null(txtvalue))
-                    knit_out <- try(knit2html(text=txtvalue))
-            }
-            else if(genmode=="md2html"){
-                if(!is.null(inputvalue))
-                    knit_out <- try(markdown::markdownToHTML(file=inputvalue))
-                else if(!is.null(txtvalue))
-                    knit_out <- try(markdown::markdownToHTML(text=txtvalue))
-            }
-            else if(genmode=="md2html.fragment"){
-                if(!is.null(inputvalue))
-                    knit_out <- try(markdown::markdownToHTML(file=inputvalue,fragment.only=TRUE))
-                else if(!is.null(txtvalue))
-                    knit_out <- try(markdown::markdownToHTML(text=txtvalue,fragment.only=TRUE))
-            }
-            else if(genmode=="stitch.rnw"){
-                if(!is.null(inputvalue))
-                    knit_out <- try(stitch(script=inputvalue))
-                else if(!is.null(txtvalue))
-                    knit_out <- try(stitch(text=txtvalue))
-                if(!inherits(knit_out,"try-error"))
-                    knit_out_pdf <- paste(tools::file_path_sans_ext(knit_out),"pdf",sep=".")
-            }
-            else if(genmode=="stitch.rhtml"){
-                if(!is.null(inputvalue))
-                    knit_out <- try(stitch_rhtml(script=inputvalue))
-                else if(!is.null(txtvalue))
-                    knit_out <- try(stitch_rhtml(text=txtvalue))
-            }
-            else if(genmode=="stitch.rmd"){
-                if(!is.null(inputvalue))
-                    knit_out <- try(stitch_rmd(script=inputvalue))
-                else if(!is.null(txtvalue))
-                    knit_out <- try(stitch_rmd(text=txtvalue))
-            }
-            else if(genmode=="spin"){
-                if(!is.null(inputvalue))
-                    knit_out <- try(spin(hair=inputvalue, text=NULL, knit=FALSE, format=spinformat))
-                else if(!is.null(txtvalue))
-                    knit_out <- try(spin(hair=NULL, text=txtvalue, knit=FALSE, format=spinformat))
-            }
-            else if(genmode=="spinknit"){
-                if(!is.null(inputvalue)){
-                    knit_out <- try(spin(hair=inputvalue, text=NULL, knit=TRUE, format=spinformat))
-                }
-                else if(!is.null(txtvalue)){
-                    knit_out <- try(spin(hair=NULL, text=txtvalue, knit=TRUE, format=spinformat))
-                }
-            }
-            else{
-                tkmessageBox(message=paste("Unrecognized report type!",sep=""))
-                invisible()
-            }
-            sink(type="output")
-            sink(type="message")
-            close(knitsink1)
-            close(knitsink2)
-            if(catchOutput){
-                tkselect(nb2, 1)
-                tkconfigure(err_out, state="normal")
-                tkinsert(err_out, "end", paste(ksink1,collapse="\n"))
-                tkinsert(err_out, "end", paste(ksink2,collapse="\n"))
-                tkconfigure(err_out, state="disabled")
-                tkfocus(txt_edit)
-            }
-            rm(ksink1) # cleanup
-            rm(ksink2) # cleanup
-            sink(errsink, type="message")
-            if(inherits(knit_out,"try-error")){
-                if(catchOutput){
-                    tkconfigure(err_out, state="normal")
-                    tkinsert(err_out, "end", "Report generation failed!")
-                    tkconfigure(err_out, state="disabled")
-                }
-                else
-                    message('Report generation failed!')
-                tkmessageBox(message=paste("Report generation failed:\n",knit_out))
-                invisible(knit_out)
-            }
-            else{
-                if(catchOutput){
-                    tkconfigure(err_out, state="normal")
-                    tkinsert(err_out, "end", "Report finished!")
-                    tkconfigure(err_out, state="disabled")
-                    clearOutput()
-                    #tkconfigure(output, state="normal")
-                    if(use %in% c('current','file') || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd","sweave")){
-                        chn <- tclopen(knit_out, "r")
-                        tkinsert(output, "end", tclvalue(tclread(chn)))
-                        tclclose(chn)
-                        if(as.numeric(tclvalue(openreports))){
-                            if(genmode %in% c("md2html","rmd2html","stitch.rhtml","stitch.rmd"))
-                                browseURL(knit_out)
-                            else if(genmode=="stitch.rnw")
-                                browseURL(knit_out_pdf)
-                        }
-                    }
-                    else if(genmode=="spin")
-                        tkinsert(output, "end", paste(knit_out,collapse="\n"))
-                    else
-                        tkinsert(output, "end", knit_out)
-                    #tkconfigure(output, state="disabled")
-                    tkselect(nb2, 0)
-                    tkfocus(txt_edit)
-                }
-                else
-                    message('Report finished!')
-                invisible(knit_out)
+    ## KNITR, etc. INTEGRATION ##
+    knittxt <- function(genmode="knit", use='text', spinformat=NULL){
+        if(!require(knitr)){
+            install <- try(install.packages("knitr"), silent=TRUE)
+            if(inherits(install, "try-error")){
+                tkmessageBox(message="knitr not installed and not installable")
+                return()
             }
         }
-        pdffromfile <- function(filetopdf=NULL, texttopdf=FALSE, textype="texi2pdf", bibtex=TRUE){
-            require(tools)
-            if(texttopdf){
-                if(!scriptSaved)
-                    saveScript()
-                if(filename=="")
-                    invisible()
-                else
-                    filetopdf <- filename
-            }
-            else if(is.null(filetopdf))
-                filetopdf <- tclvalue(tkgetOpenFile(title="Open File",
-                                                    filetypes=filetypelist))
-            if(!filetopdf==""){
-                if(dirname(filetopdf) %in% c(".",getwd())) {}
-                else{
-                    file.copy(filetopdf,paste(getwd(),basename(filetopdf),sep="/"), overwrite=TRUE)
-                    filetopdf <- paste(getwd(),basename(filetopdf),sep="/")
+        if(genmode %in% c("md2html","rmd2html")){
+            if(!require(markdown)){
+                install <- try(install.packages("markdown"), silent=TRUE)
+                if(inherits(install, "try-error")){
+                    tkmessageBox(message="markdown not installed and not installable")
+                    return()
                 }
-                fstem <- substring(basename(filetopdf),1,regexpr("\\.[[:alnum:]]+$",basename(filetopdf))-1)
-                fstem <- paste(fstem,".pdf",sep="")
-                #clearError()
+            }
+        }
+        if(catchOutput)
+            clearError()
+        riteMsg("Generating report...", error=TRUE)
+        ksink1 <- ""
+        ksink2 <- ""
+        knitsink1 <- textConnection("ksink1", "w") # create connection for stdout
+        knitsink2 <- textConnection("ksink2", "w") # create connection for stderr
+        sink(knitsink1, type="output") # sink stdout
+        sink(knitsink2, type="message") # sink stderr
+        
+        if(use=='text'){
+            saveScript()
+            txtvalue <- tclvalue(tkget(txt_edit,"0.0","end"))
+            inputvalue <- NULL
+        }
+        else if(use=='current'){
+            saveScript()
+            txtvalue <- NULL
+            inputvalue <- filename
+        }
+        else if(use=='file'){
+            loadScript()
+            txtvalue <- NULL
+            inputvalue <- filename
+        }
+        
+        if(genmode=="knit")
+            knit_out <- try(knit(input=inputvalue, text=txtvalue))
+        else if(genmode=="purl")
+            knit_out <- try(purl(input=inputvalue, text=txtvalue))
+        else if(genmode=="sweave"){
+            require(tools)
+            if(is.null(txtvalue))
+                knit_out <- Sweave(file=inputvalue, quiet=TRUE)
+            else if(!saveScript())
+                knit_out <- Sweave(file=filename, quiet=TRUE)
+            else {
+                riteMsg("script not saved.", error=TRUE)
+                return()
+            }
+        }
+        else if(genmode=="knitsweave"){
+            sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
+            if(inherits(sweave_out, "try-error")){
+                tkmessageBox(message="Could not convert Sweave to knitr!")
+                return()
+            }
+            else if(!is.null(inputvalue))
+                knit_out <- try(knit(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
+            else if(!is.null(txtvalue))
+                knit_out <- try(knit(text=sweave_out))
+        }
+        else if(genmode=="tangle"){
+            sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
+            if(inherits(sweave_out, "try-error")){
+                tkmessageBox(message="Could not convert Sweave to knitr!")
+                return()
+            }
+            else if(!is.null(inputvalue))
+                knit_out <- try(purl(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
+            else if(!is.null(txtvalue))
+                knit_out <- try(purl(text=sweave_out))
+        }
+        else if(genmode=="rmd2html"){
+            if(!is.null(inputvalue))
+                knit_out <- try(knit2html(input=inputvalue))
+            else if(!is.null(txtvalue))
+                knit_out <- try(knit2html(text=txtvalue))
+        }
+        else if(genmode=="md2html"){
+            if(!is.null(inputvalue))
+                knit_out <- try(markdown::markdownToHTML(file=inputvalue))
+            else if(!is.null(txtvalue))
+                knit_out <- try(markdown::markdownToHTML(text=txtvalue))
+        }
+        else if(genmode=="md2html.fragment"){
+            if(!is.null(inputvalue))
+                knit_out <- try(markdown::markdownToHTML(file=inputvalue,fragment.only=TRUE))
+            else if(!is.null(txtvalue))
+                knit_out <- try(markdown::markdownToHTML(text=txtvalue,fragment.only=TRUE))
+        }
+        else if(genmode=="stitch.rnw"){
+            if(!is.null(inputvalue))
+                knit_out <- try(stitch(script=inputvalue))
+            else if(!is.null(txtvalue))
+                knit_out <- try(stitch(text=txtvalue))
+            if(!inherits(knit_out,"try-error"))
+                knit_out_pdf <- paste(tools::file_path_sans_ext(knit_out),"pdf",sep=".")
+            else
+                knit_out_pdf <- NULL
+        }
+        else if(genmode=="stitch.rhtml"){
+            if(!is.null(inputvalue))
+                knit_out <- try(stitch_rhtml(script=inputvalue))
+            else if(!is.null(txtvalue))
+                knit_out <- try(stitch_rhtml(text=txtvalue))
+        }
+        else if(genmode=="stitch.rmd"){
+            if(!is.null(inputvalue))
+                knit_out <- try(stitch_rmd(script=inputvalue))
+            else if(!is.null(txtvalue))
+                knit_out <- try(stitch_rmd(text=txtvalue))
+        }
+        else if(genmode=="spin"){
+            if(!is.null(inputvalue))
+                knit_out <- try(spin(hair=inputvalue, text=NULL, knit=FALSE, format=spinformat))
+            else if(!is.null(txtvalue))
+                knit_out <- try(spin(hair=NULL, text=txtvalue, knit=FALSE, format=spinformat))
+        }
+        else if(genmode=="spinknit"){
+            if(!is.null(inputvalue))
+                knit_out <- try(spin(hair=inputvalue, text=NULL, knit=TRUE, format=spinformat))
+            else if(!is.null(txtvalue))
+                knit_out <- try(spin(hair=NULL, text=txtvalue, knit=TRUE, format=spinformat))
+        }
+        else{
+            riteMsg("Unrecognized report type!")
+            return(invisible(NULL))
+        }
+        if(catchOutput){
+            sink(type="output")
+            sink(type="message")
+        }
+        close(knitsink1)
+        close(knitsink2)
+        if(catchOutput){
+            tkselect(nb2, 1)
+            riteMsg(paste(ksink1,collapse="\n"), error=TRUE)
+            riteMsg(paste(ksink2,collapse="\n"), error=TRUE)
+            tkfocus(txt_edit)
+        }
+        rm(ksink1) # cleanup
+        rm(ksink2) # cleanup
+        if(catchOutput)
+            sink(errsink, type="message")
+        if(inherits(knit_out,"try-error")){
+            riteMsg("Report generation failed!", error=TRUE)
+            return(knit_out)
+        }
+        else{
+            riteMsg('Report finished!', error=TRUE)
+            if(catchOutput)
+                clearOutput()
+            if(use %in% c('current','file') || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd","sweave")){
+                chn <- tclopen(knit_out, "r")
+                riteMsg(tclvalue(tclread(chn)))
+                tclclose(chn)
+            }
+            else if(genmode=="spin")
+                riteMsg(paste(knit_out,collapse="\n"))
+            else
+                riteMsg(knit_out)
+            if(catchOutput){
+                tkselect(nb2, 0)
+                tkfocus(txt_edit)
+            }
+            if(as.numeric(tclvalue(openreports))){
+                if(genmode %in% c("md2html","rmd2html","stitch.rhtml","stitch.rmd"))
+                    browseURL(knit_out)
+                else if(genmode=="stitch.rnw")
+                    browseURL(knit_out_pdf)
+            }
+            return(knit_out)
+        }
+    }
+    pdffromfile <- function(filetopdf=NULL, texttopdf=FALSE, textype="texi2pdf", bibtex=TRUE){
+        require(tools)
+        if(texttopdf){
+            if(!scriptSaved)
+                saveScript()
+            if(filename=="")
+                invisible()
+            else
+                filetopdf <- filename
+        }
+        else if(is.null(filetopdf))
+            filetopdf <- tclvalue(tkgetOpenFile(title="Open File",
+                                                filetypes=filetypelist))
+        if(!filetopdf==""){
+            if(dirname(filetopdf) %in% c(".",getwd())) {}
+            else{
+                file.copy(filetopdf,paste(getwd(),basename(filetopdf),sep="/"), overwrite=TRUE)
+                filetopdf <- paste(getwd(),basename(filetopdf),sep="/")
+            }
+            fstem <- substring(basename(filetopdf),1,regexpr("\\.[[:alnum:]]+$",basename(filetopdf))-1)
+            fstem <- paste(fstem,".pdf",sep="")
+            if(catchOutput){
                 tkconfigure(err_out, state="normal")
                 tkmark.set(err_out, "insert", "end")
-                if(textype %in% c('latex','xelatex')){
-                    if(textype=="latex")
-                        tex1 <- system(paste("pdflatex",filetopdf), intern=TRUE)
-                    else
-                        tex1 <- system(paste("xelatex",filetopdf), intern=TRUE)
-                    tkselect(nb2, 1)
-                    tkfocus(txt_edit)
-                    tkinsert(err_out, "insert", paste(tex1,collapse="\n"))
-                    if(is.null(attributes(tex1)$status) && bibtex==TRUE){
-                        tex2 <- system(paste("bibtex",filetopdf), intern=TRUE)
-                        tkinsert(err_out, "insert", paste(tex2,collapse="\n"))
-                        if(is.null(attributes(tex2)$status)){
-                            tex3 <- system(paste("pdflatex",filetopdf), intern=TRUE)
-                            tkinsert(err_out, "insert", paste(tex3,collapse="\n"))
-                            if(is.null(attributes(tex3)$status)){
-                                tex4 <- system(paste("pdflatex",filetopdf), intern=TRUE)
-                                tkinsert(err_out, "insert", paste(tex4,collapse="\n"))
-                            }
+                tkselect(nb2, 1)
+                tkfocus(txt_edit)
+            }
+            if(textype %in% c('latex','xelatex')){
+                if(textype=="latex")
+                    tex1 <- system(paste("pdflatex",filetopdf), intern=TRUE)
+                else
+                    tex1 <- system(paste("xelatex",filetopdf), intern=TRUE)
+                riteMsg(paste(tex1,collapse="\n"), error=TRUE)
+                if(is.null(attributes(tex1)$status) && bibtex==TRUE){
+                    tex2 <- system(paste("bibtex",filetopdf), intern=TRUE)
+                    riteMsg(paste(tex2,collapse="\n"), error=TRUE)
+                    if(is.null(attributes(tex2)$status)){
+                        tex3 <- system(paste("pdflatex",filetopdf), intern=TRUE)
+                        riteMsg(paste(tex3,collapse="\n"), error=TRUE)
+                        if(is.null(attributes(tex3)$status)){
+                            tex4 <- system(paste("pdflatex",filetopdf), intern=TRUE)
+                            riteMsg(paste(tex4,collapse="\n"), error=TRUE)
                         }
                     }
                 }
-                else if(textype=="texi2pdf")
-                    tex1 <- texi2pdf(filetopdf, clean=TRUE)
-                if(fstem %in% list.files()){
-                    if(as.numeric(tclvalue(openreports))){
-                        tkinsert(err_out, "insert", "\n\nOpening pdf ",fstem,"...\n\n")
-                        system2(getOption("pdfviewer"),fstem)
-                    }
-                }
-                else
-                    tkmessageBox(message="PDF not created!", icon="error")
-                tkconfigure(err_out, state="disabled")
             }
+            else if(textype=="texi2pdf")
+                tex1 <- texi2pdf(filetopdf, clean=TRUE)
+            if(fstem %in% list.files()){
+                if(as.numeric(tclvalue(openreports))){
+                    riteMsg(paste("\n\nOpening pdf ",fstem,"...\n\n",sep=''), error=TRUE)
+                    system2(getOption("pdfviewer"),fstem)
+                }
+            }
+            else
+                riteMsg("PDF not created!", error=TRUE)
+            if(catchOutput)
+                tkconfigure(err_out, state="disabled")
         }
     }
     
@@ -957,168 +935,168 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             tkadd(menuOutput, "command", label = "Copy Message", command = copyMessage, underline = 0)
             tkadd(menuOutput, "command", label = "Clear Message", command = clearError, underline = 1)
             tkadd(menuTop, "cascade", label = "Output", menu = menuOutput, underline = 0)
-        menuReport <- tkmenu(menuTop, tearoff = FALSE)
-            menuKnit <- tkmenu(menuReport, tearoff = FALSE)
-                tkadd(menuKnit, "command", label = "knit",
-                    command = function() knittxt(genmode="knit", use='text'), underline = 0)
-                tkadd(menuKnit, "command", label = "Sweave",
-                    command = function() knittxt(genmode="sweave", use='text'))
-                tkadd(menuKnit, "command", label = "knit (from Sweave source)",
-                    command = function() knittxt(genmode="knitsweave", use='text'))
-                tkadd(menuKnit, "separator")
-                tkadd(menuKnit, "command", label = "knit Rmd to HTML",
-                    command = function() knittxt(genmode="rmd2html", use='text'))
-                #tkadd(menuKnit, "command", label = "knit and Slidify",
-                #    command = function() knittxt(genmode="knit2slidify", usefile=FALSE, usetxt=TRUE))
-                tkadd(menuKnit, "separator")
-                tkadd(menuKnit, "command", label = "knit to pdf",
-                    command = function(){
-                        k <- knittxt(genmode="knit", use='current')
-                        pdffromfile(filetopdf=paste(tools::file_path_sans_ext(k),"tex",sep="."))
-                    })
-                tkadd(menuKnit, "command", label = "Sweave to pdf",
-                    command = function(){
-                        k <- knittxt(genmode="sweave", use='text')
-                        pdffromfile(filetopdf=k)
-                    })
-                tkadd(menuKnit, "command", label = "knit to pdf (from Sweave source)",
-                    command = function(){
-                        k <- knittxt(genmode="knitsweave", use='current')
-                        pdffromfile(filetopdf=paste(tools::file_path_sans_ext(k),"tex",sep="."))
-                    })
-                tkadd(menuReport, "cascade", label = "Knit", menu = menuKnit, underline = 0)
-            menuPurl <- tkmenu(menuReport, tearoff = FALSE)
-                tkadd(menuPurl, "command", label = "purl",
-                    command = function() knittxt(genmode="purl", use='text'), underline = 0)
-                tkadd(menuPurl, "command", label = "purl (from Sweave source)",
-                    command = function() knittxt(genmode="tangle", use='text'))
-                tkadd(menuReport, "cascade", label = "Purl", menu = menuPurl, underline = 0)
-            menuStitch <- tkmenu(menuReport, tearoff = FALSE)
-                tkadd(menuStitch, "command", label = "stitch (tex)",
-                    command = function() knittxt(genmode="stitch.rnw", use='text'), underline = 0)
-                tkadd(menuStitch, "command", label = "stitch (HTML)",
-                    command = function() knittxt(genmode="stitch.rhtml", use='text'))
-                tkadd(menuStitch, "command", label = "stitch (markdown)",
-                    command = function() knittxt(genmode="stitch.rmd", use='text'))
-                tkadd(menuReport, "cascade", label = "Stitch", menu = menuStitch, underline = 0)
-            menuSpin <- tkmenu(menuReport, tearoff = FALSE)
-                tkadd(menuSpin, "command", label = "spin to Rmd",
-                    command = function() knittxt(genmode="spin", use='text', spinformat="Rmd"))
-                tkadd(menuSpin, "command", label = "spin to Rnw",
-                    command = function() knittxt(genmode="spin", use='text', spinformat="Rnw"))
-                tkadd(menuSpin, "command", label = "spin to Rhtml",
-                    command = function() knittxt(genmode="spin", use='text', spinformat="Rhtml"))
-                tkadd(menuSpin, "command", label = "spin to Rtex",
-                    command = function() knittxt(genmode="spin", use='text', spinformat="Rtex"))
-                tkadd(menuSpin, "command", label = "spin to Rrst",
-                    command = function() knittxt(genmode="spin", use='text', spinformat="Rrst"))
-                tkadd(menuSpin, "separator")
-                tkadd(menuSpin, "command", label = "spin to Rmd and knit",
-                    command = function() knittxt(genmode="spinknit", use='text', spinformat="Rmd"))
-                tkadd(menuSpin, "command", label = "spin to Rnw and knit",
-                    command = function() knittxt(genmode="spinknit", use='text', spinformat="Rnw"), state="disabled")
-                tkadd(menuSpin, "command", label = "spin to Rhtml and knit",
-                    command = function() knittxt(genmode="spinknit", use='text', spinformat="Rhtml"))
-                tkadd(menuSpin, "command", label = "spin to Rtex and knit",
-                    command = function() knittxt(genmode="spinknit", use='text', spinformat="Rtex"), state="disabled")
-                tkadd(menuSpin, "command", label = "spin to Rrst and knit",
-                    command = function() knittxt(genmode="spinknit", use='text', spinformat="Rrst"))
-                tkadd(menuReport, "cascade", label = "Spin", menu = menuSpin)
-            tkadd(menuReport, "separator")
-            #menuSlidify <- tkmenu(menuReport, tearoff = FALSE)
-                #tkadd(menuSlidify, "command", label = "Slidify",
-                #    command = function() knittxt(genmode="slidify", usefile=FALSE, usetxt=TRUE))
-                #tkadd(menuSlidify, "command", label = "knit and Slidify",
-                #    command = function() knittxt(genmode="knit2slidify", usefile=FALSE, usetxt=TRUE))
-                #tkadd(menuSlidify, "command", label = "Open Slidify template",
-                #    command = function() {newScript(); ??? }) # DO THIS
-            #tkadd(menuReport, "separator")
-            menuMD <- tkmenu(menuReport, tearoff = FALSE)
-                tkadd(menuMD, "command", label = "Convert md to HTML",
-                    command = function() knittxt(genmode="md2html", use='text'))
-                tkadd(menuMD, "command", label = "Convert md to HTML fragment",
-                    command = function() knittxt(genmode="md2html.fragment", use='text'))
-                tkadd(menuMD, "command", label = "knit Rmd to HTML",
-                    command = function() knittxt(genmode="rmd2html", use='text'))
-                # tkadd(menuMD, "separator")
-                #tkadd(menuMD, "command", label = "Slidify",
-                #    command = function() knittxt(genmode="slidify", use='text'))
-                #tkadd(menuMD, "command", label = "knit and Slidify",
-                #    command = function() knittxt(genmode="knit2slidify", use='text'))
-                tkadd(menuReport, "cascade", label = "Markdown", menu = menuMD, underline = 0)
-            tkadd(menuReport, "separator")
-            #texstatus <- ifelse(!system("pdflatex -version",show.output.on.console=FALSE), "enabled","disabled")
-            menuTex <- tkmenu(menuReport, tearoff = FALSE)
-                tkadd(menuTex, "command", label = "Compile LaTeX PDF",
-                    command = function() pdffromfile(texttopdf=TRUE))
-                tkadd(menuTex, "separator")
-                tkadd(menuTex, "command", label = "pdflatex",
-                    command = function() pdffromfile(texttopdf=TRUE, textype='latex', bibtex=FALSE))
-                tkadd(menuTex, "command", label = "pdflatex+bibtex",
-                    command = function() pdffromfile(texttopdf=TRUE, textype='latex', bibtex=TRUE))
-                tkadd(menuTex, "separator")
-                tkadd(menuTex, "command", label = "xelatex",
-                    command = function() pdffromfile(texttopdf=TRUE, textype="xelatex", bibtex=FALSE))
-                tkadd(menuTex, "command", label = "xelatex+bibtex",
-                    command = function() pdffromfile(texttopdf=TRUE, textype="xelatex", bibtex=TRUE))
-                tkadd(menuReport, "cascade", label = "TeX", menu = menuTex, underline = 0)
-            tkadd(menuReport, "separator")
-            menuFromFile <- tkmenu(menuReport, tearoff = FALSE)
-                tkadd(menuFromFile, "command", label = "knit",
-                    command = function() knittxt(genmode="knit", use='file'), underline = 0)
-                tkadd(menuFromFile, "command", label = "purl",
-                    command = function() knittxt(genmode="purl", use='file'), underline = 0)
-                tkadd(menuFromFile, "command", label = "Sweave",
-                    command = function() 
-                        pdffromfile(filetopdf=knittxt(genmode="sweave", use='file')),
-                    underline = 0)
-                tkadd(menuFromFile, "command", label = "knit Rmd to HTML",
-                    command = function() knittxt(genmode="rmd2html", use='file'))
-                tkadd(menuFromFile, "separator")
-                tkadd(menuFromFile, "command", label = "stitch (tex)",
-                    command = function() knittxt(genmode="stitch.rnw", use='file'))
-                tkadd(menuFromFile, "command", label = "stitch (HTML)",
-                    command = function() knittxt(genmode="stitch.rhtml", use='file'))
-                tkadd(menuFromFile, "command", label = "stitch (markdown)",
-                    command = function() knittxt(genmode="stitch.rmd", use='file'))
-                tkadd(menuFromFile, "separator")
-                tkadd(menuFromFile, "command", label = "spin to Rmd",
-                    command = function() knittxt(genmode="spin", use='file', spinformat="Rmd"))
-                tkadd(menuFromFile, "command", label = "spin to Rnw",
-                    command = function() knittxt(genmode="spin", use='file', spinformat="Rnw"))
-                tkadd(menuFromFile, "command", label = "spin to Rhtml",
-                    command = function() knittxt(genmode="spin", use='file', spinformat="Rhtml"))
-                tkadd(menuFromFile, "command", label = "spin to Rtex",
-                    command = function() knittxt(genmode="spin", use='file', spinformat="Rtex"))
-                tkadd(menuFromFile, "command", label = "spin to Rrst",
-                    command = function() knittxt(genmode="spin", use='file', spinformat="Rrst"))
-                tkadd(menuFromFile, "separator")
-                tkadd(menuFromFile, "command", label = "Convert md to HTML",
-                    command = function() knittxt(genmode="md2html", use='file'))
-                tkadd(menuFromFile, "command", label = "Convert md to HTML fragment",
-                    command = function() knittxt(genmode="md2html.fragment", use='file'))
-                # update when slidify is on CRAN
-                #tkadd(menuMD, "command", label = "slidify md to HTML",
-                #    command = function() knittxt(genmode="slidify", use='file'))
-                #tkadd(menuMD, "command", label = "knit Rmd and slidify to HTML",
-                #    command = function() knittxt(genmode="knit2slidify", use='file'))
-                tkadd(menuFromFile, "separator")
-                tkadd(menuFromFile, "command", label = "Compile LaTeX PDF",
-                    command = function() pdffromfile(texttopdf=TRUE))
-                tkadd(menuFromFile, "command", label = "pdflatex",
-                    command = function() pdffromfile(texttopdf=FALSE, textype='latex', bibtex=FALSE))
-                tkadd(menuFromFile, "command", label = "pdflatex+bibtex",
-                    command = function() pdffromfile(texttopdf=FALSE, textype='latex', bibtex=TRUE))
-                tkadd(menuFromFile, "command", label = "xelatex",
-                    command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=FALSE))
-                tkadd(menuFromFile, "command", label = "xelatex+bibtex",
-                    command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=TRUE))
-                tkadd(menuReport, "cascade", label = "Generate from file...", menu = menuFromFile, underline = 0)
-            tkadd(menuReport, "separator")
-            openreports <- tclVar(1)
-            tkadd(menuReport, 'checkbutton', label='Open finished reports', onvalue=1L, variable=openreports)
-            tkadd(menuTop, "cascade", label = "Report Generation", menu = menuReport, underline = 0)
     }
+    menuReport <- tkmenu(menuTop, tearoff = FALSE)
+        menuKnit <- tkmenu(menuReport, tearoff = FALSE)
+            tkadd(menuKnit, "command", label = "knit",
+                command = function() knittxt(genmode="knit", use='text'), underline = 0)
+            tkadd(menuKnit, "command", label = "Sweave",
+                command = function() knittxt(genmode="sweave", use='text'))
+            tkadd(menuKnit, "command", label = "knit (from Sweave source)",
+                command = function() knittxt(genmode="knitsweave", use='text'))
+            tkadd(menuKnit, "separator")
+            tkadd(menuKnit, "command", label = "knit Rmd to HTML",
+                command = function() knittxt(genmode="rmd2html", use='current'))
+            #tkadd(menuKnit, "command", label = "knit and Slidify",
+            #    command = function() knittxt(genmode="knit2slidify", usefile=FALSE, usetxt=TRUE))
+            tkadd(menuKnit, "separator")
+            tkadd(menuKnit, "command", label = "knit to pdf",
+                command = function(){
+                    k <- knittxt(genmode="knit", use='current')
+                    pdffromfile(filetopdf=paste(tools::file_path_sans_ext(k),"tex",sep="."))
+                })
+            tkadd(menuKnit, "command", label = "Sweave to pdf",
+                command = function(){
+                    k <- knittxt(genmode="sweave", use='text')
+                    pdffromfile(filetopdf=k)
+                })
+            tkadd(menuKnit, "command", label = "knit to pdf (from Sweave source)",
+                command = function(){
+                    k <- knittxt(genmode="knitsweave", use='current')
+                    pdffromfile(filetopdf=paste(tools::file_path_sans_ext(k),"tex",sep="."))
+                })
+            tkadd(menuReport, "cascade", label = "Knit", menu = menuKnit, underline = 0)
+        menuPurl <- tkmenu(menuReport, tearoff = FALSE)
+            tkadd(menuPurl, "command", label = "purl",
+                command = function() knittxt(genmode="purl", use='text'), underline = 0)
+            tkadd(menuPurl, "command", label = "purl (from Sweave source)",
+                command = function() knittxt(genmode="tangle", use='text'))
+            tkadd(menuReport, "cascade", label = "Purl", menu = menuPurl, underline = 0)
+        menuStitch <- tkmenu(menuReport, tearoff = FALSE)
+            tkadd(menuStitch, "command", label = "stitch (tex)",
+                command = function() knittxt(genmode="stitch.rnw", use='text'), underline = 0)
+            tkadd(menuStitch, "command", label = "stitch (HTML)",
+                command = function() knittxt(genmode="stitch.rhtml", use='text'))
+            tkadd(menuStitch, "command", label = "stitch (markdown)",
+                command = function() knittxt(genmode="stitch.rmd", use='text'))
+            tkadd(menuReport, "cascade", label = "Stitch", menu = menuStitch, underline = 0)
+        menuSpin <- tkmenu(menuReport, tearoff = FALSE)
+            tkadd(menuSpin, "command", label = "spin to Rmd",
+                command = function() knittxt(genmode="spin", use='text', spinformat="Rmd"))
+            tkadd(menuSpin, "command", label = "spin to Rnw",
+                command = function() knittxt(genmode="spin", use='text', spinformat="Rnw"))
+            tkadd(menuSpin, "command", label = "spin to Rhtml",
+                command = function() knittxt(genmode="spin", use='text', spinformat="Rhtml"))
+            tkadd(menuSpin, "command", label = "spin to Rtex",
+                command = function() knittxt(genmode="spin", use='text', spinformat="Rtex"))
+            tkadd(menuSpin, "command", label = "spin to Rrst",
+                command = function() knittxt(genmode="spin", use='text', spinformat="Rrst"))
+            tkadd(menuSpin, "separator")
+            tkadd(menuSpin, "command", label = "spin to Rmd and knit",
+                command = function() knittxt(genmode="spinknit", use='text', spinformat="Rmd"))
+            tkadd(menuSpin, "command", label = "spin to Rnw and knit",
+                command = function() knittxt(genmode="spinknit", use='text', spinformat="Rnw"), state="disabled")
+            tkadd(menuSpin, "command", label = "spin to Rhtml and knit",
+                command = function() knittxt(genmode="spinknit", use='text', spinformat="Rhtml"))
+            tkadd(menuSpin, "command", label = "spin to Rtex and knit",
+                command = function() knittxt(genmode="spinknit", use='text', spinformat="Rtex"), state="disabled")
+            tkadd(menuSpin, "command", label = "spin to Rrst and knit",
+                command = function() knittxt(genmode="spinknit", use='text', spinformat="Rrst"))
+            tkadd(menuReport, "cascade", label = "Spin", menu = menuSpin)
+        tkadd(menuReport, "separator")
+        #menuSlidify <- tkmenu(menuReport, tearoff = FALSE)
+            #tkadd(menuSlidify, "command", label = "Slidify",
+            #    command = function() knittxt(genmode="slidify", usefile=FALSE, usetxt=TRUE))
+            #tkadd(menuSlidify, "command", label = "knit and Slidify",
+            #    command = function() knittxt(genmode="knit2slidify", usefile=FALSE, usetxt=TRUE))
+            #tkadd(menuSlidify, "command", label = "Open Slidify template",
+            #    command = function() {newScript(); ??? }) # DO THIS
+        #tkadd(menuReport, "separator")
+        menuMD <- tkmenu(menuReport, tearoff = FALSE)
+            tkadd(menuMD, "command", label = "Convert md to HTML",
+                command = function() knittxt(genmode="md2html", use='text'))
+            tkadd(menuMD, "command", label = "Convert md to HTML fragment",
+                command = function() knittxt(genmode="md2html.fragment", use='text'))
+            tkadd(menuMD, "command", label = "knit Rmd to HTML",
+                command = function() knittxt(genmode="rmd2html", use='current'))
+            # tkadd(menuMD, "separator")
+            #tkadd(menuMD, "command", label = "Slidify",
+            #    command = function() knittxt(genmode="slidify", use='text'))
+            #tkadd(menuMD, "command", label = "knit and Slidify",
+            #    command = function() knittxt(genmode="knit2slidify", use='text'))
+            tkadd(menuReport, "cascade", label = "Markdown", menu = menuMD, underline = 0)
+        tkadd(menuReport, "separator")
+        #texstatus <- ifelse(!system("pdflatex -version",show.output.on.console=FALSE), "enabled","disabled")
+        menuTex <- tkmenu(menuReport, tearoff = FALSE)
+            tkadd(menuTex, "command", label = "Compile LaTeX PDF",
+                command = function() pdffromfile(texttopdf=TRUE))
+            tkadd(menuTex, "separator")
+            tkadd(menuTex, "command", label = "pdflatex",
+                command = function() pdffromfile(texttopdf=TRUE, textype='latex', bibtex=FALSE))
+            tkadd(menuTex, "command", label = "pdflatex+bibtex",
+                command = function() pdffromfile(texttopdf=TRUE, textype='latex', bibtex=TRUE))
+            tkadd(menuTex, "separator")
+            tkadd(menuTex, "command", label = "xelatex",
+                command = function() pdffromfile(texttopdf=TRUE, textype="xelatex", bibtex=FALSE))
+            tkadd(menuTex, "command", label = "xelatex+bibtex",
+                command = function() pdffromfile(texttopdf=TRUE, textype="xelatex", bibtex=TRUE))
+            tkadd(menuReport, "cascade", label = "TeX", menu = menuTex, underline = 0)
+        tkadd(menuReport, "separator")
+        menuFromFile <- tkmenu(menuReport, tearoff = FALSE)
+            tkadd(menuFromFile, "command", label = "knit",
+                command = function() knittxt(genmode="knit", use='file'), underline = 0)
+            tkadd(menuFromFile, "command", label = "purl",
+                command = function() knittxt(genmode="purl", use='file'), underline = 0)
+            tkadd(menuFromFile, "command", label = "Sweave",
+                command = function() 
+                    pdffromfile(filetopdf=knittxt(genmode="sweave", use='file')),
+                underline = 0)
+            tkadd(menuFromFile, "command", label = "knit Rmd to HTML",
+                command = function() knittxt(genmode="rmd2html", use='file'))
+            tkadd(menuFromFile, "separator")
+            tkadd(menuFromFile, "command", label = "stitch (tex)",
+                command = function() knittxt(genmode="stitch.rnw", use='file'))
+            tkadd(menuFromFile, "command", label = "stitch (HTML)",
+                command = function() knittxt(genmode="stitch.rhtml", use='file'))
+            tkadd(menuFromFile, "command", label = "stitch (markdown)",
+                command = function() knittxt(genmode="stitch.rmd", use='file'))
+            tkadd(menuFromFile, "separator")
+            tkadd(menuFromFile, "command", label = "spin to Rmd",
+                command = function() knittxt(genmode="spin", use='file', spinformat="Rmd"))
+            tkadd(menuFromFile, "command", label = "spin to Rnw",
+                command = function() knittxt(genmode="spin", use='file', spinformat="Rnw"))
+            tkadd(menuFromFile, "command", label = "spin to Rhtml",
+                command = function() knittxt(genmode="spin", use='file', spinformat="Rhtml"))
+            tkadd(menuFromFile, "command", label = "spin to Rtex",
+                command = function() knittxt(genmode="spin", use='file', spinformat="Rtex"))
+            tkadd(menuFromFile, "command", label = "spin to Rrst",
+                command = function() knittxt(genmode="spin", use='file', spinformat="Rrst"))
+            tkadd(menuFromFile, "separator")
+            tkadd(menuFromFile, "command", label = "Convert md to HTML",
+                command = function() knittxt(genmode="md2html", use='file'))
+            tkadd(menuFromFile, "command", label = "Convert md to HTML fragment",
+                command = function() knittxt(genmode="md2html.fragment", use='file'))
+            # update when slidify is on CRAN
+            #tkadd(menuMD, "command", label = "slidify md to HTML",
+            #    command = function() knittxt(genmode="slidify", use='file'))
+            #tkadd(menuMD, "command", label = "knit Rmd and slidify to HTML",
+            #    command = function() knittxt(genmode="knit2slidify", use='file'))
+            tkadd(menuFromFile, "separator")
+            tkadd(menuFromFile, "command", label = "Compile LaTeX PDF",
+                command = function() pdffromfile(texttopdf=TRUE))
+            tkadd(menuFromFile, "command", label = "pdflatex",
+                command = function() pdffromfile(texttopdf=FALSE, textype='latex', bibtex=FALSE))
+            tkadd(menuFromFile, "command", label = "pdflatex+bibtex",
+                command = function() pdffromfile(texttopdf=FALSE, textype='latex', bibtex=TRUE))
+            tkadd(menuFromFile, "command", label = "xelatex",
+                command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=FALSE))
+            tkadd(menuFromFile, "command", label = "xelatex+bibtex",
+                command = function() pdffromfile(texttopdf=FALSE, textype="xelatex", bibtex=TRUE))
+            tkadd(menuReport, "cascade", label = "Generate from file...", menu = menuFromFile, underline = 0)
+        tkadd(menuReport, "separator")
+        openreports <- tclVar(1)
+        tkadd(menuReport, 'checkbutton', label='Open finished reports', onvalue=1L, variable=openreports)
+        tkadd(menuTop, "cascade", label = "Report Generation", menu = menuReport, underline = 0)
     menuHelp <- tkmenu(menuTop, tearoff = FALSE)
         tkadd(menuHelp, "command", label = "Add Package Highlighting", command = addHighlighting, underline = 0)
         #tkadd(menuHelp, "separator")
@@ -1297,6 +1275,22 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     }
     tkpack(pw, fill="both", expand = "yes") # pack panedwindow to editor
 
+    ## FUNCTION TO CONTROL PRINTING TO OUTPUT VERSUS CONSOLE ##
+    riteMsg <- function(value, error=FALSE){
+        if(catchOutput && error){
+            tkconfigure(err_out, state="normal")
+            tkinsert(err_out, "end", value)
+            tkconfigure(err_out, state="disabled")
+        } else if(catchOutput){
+            #tkconfigure(output, state="normal")
+            tkinsert(output, "end", value)
+            #tkconfigure(output, state="disabled")
+        } else{
+            message(value)
+        }
+    }
+    
+    
     ## KEY BINDINGS ##
     f1 <- function(){
         iwordstart <- tclvalue(tkindex(txt_edit,"insert-1char wordstart"))
