@@ -221,11 +221,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                         entry <- regmatches(entry, regexpr("[0-9a-f]+$", entry))
                     entry <- getRawGistURL(entry)
                     if(is.null(entry)){
-                        tkmessageBox(message="Gist not loaded!", icon="error")
+                        riteMsg("Gist not loaded!", error=TRUE)
                         return()
                     }
                     else if(length(entry)>1){
                         tkmessageBox(message="More than one file found in Gist. Only first is used.", icon='info')
+                        # TODO: add a menu to deal with this
                         entry <- entry[1]
                     }
                 }
@@ -250,7 +251,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                             tkinsert(txt_edit, "insert", content)
                     }
                     else
-                        tkmessageBox(message="Script not loaded!", icon="error")
+                        riteMsg("Script not loaded!", error=TRUE)
                 }
                 scriptSaved <<- FALSE
             }
@@ -369,7 +370,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             if(!require(knitr)){
                 install <- try(install.packages("knitr"), silent=TRUE)
                 if(inherits(install, "try-error")){
-                    tkmessageBox(message="knitr not installed and not installable")
+                    riteMsg("knitr not installed and not installable", error=TRUE)
                     return()
                 }
             }
@@ -405,10 +406,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 errmsg <- paste(errmsg[-1],collapse=":")
                 if(catchOutput)
                     writeError(errmsg,"Error")
-                #errbox <- tkmessageBox(message = paste("Error:",errmsg,"\nDo you want to continue evaluation?"),
-                #                        icon = "error", type = "yesno", default = "no")
-                #if(tclvalue(errbox)=="no")
-                #    invokeRestart("discontinue")
             },
             warning = function(errmsg){
                 errmsg <- strsplit(as.character(errmsg),": ")[[1]]
@@ -432,7 +429,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 if(catchOutput)
                     writeError("","Interruption")
                 else
-                    tkmessageBox(message="Evaluation interrupted!", icon="error")
+                    riteMsg("Evaluation interrupted!", error=TRUE)
             }
         ),
         # a restart to 'discontinue' source(.)-ing
@@ -443,10 +440,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             if(length(osink)>length2){
                 tryCatch(tkinsert(output,"end",paste(osink[(length2+1):length(osink)],"\n",collapse="")),
                     error = function(e){
-                        tkmessageBox(message=paste("Printing error:",e,"!"), icon="error")
+                        riteMsg(paste("Printing error:",e,"!"), error=TRUE)
                     },
                     interrupt = function(){
-                        tkmessageBox(message="Printing interrupt!", icon="error")
+                        riteMsg("Printing interrupt!", error=TRUE)
                     }
                 )
                 tkselect(nb2, 0)
@@ -520,7 +517,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         if(!require(knitr)){
             install <- try(install.packages("knitr"), silent=TRUE)
             if(inherits(install, "try-error")){
-                tkmessageBox(message="knitr not installed and not installable")
+                riteMsg("knitr not installed and not installable", error=TRUE)
                 return()
             }
         }
@@ -528,14 +525,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             if(!require(markdown)){
                 install <- try(install.packages("markdown"), silent=TRUE)
                 if(inherits(install, "try-error")){
-                    tkmessageBox(message="markdown not installed and not installable")
+                    riteMsg("markdown not installed and not installable", error=TRUE)
                     return()
                 }
             }
         }
         if(catchOutput)
             clearError()
-        riteMsg("Generating report...", error=TRUE)
         ksink1 <- ""
         ksink2 <- ""
         if('ksink1' %in% showConnections()){
@@ -552,18 +548,27 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         sink(knitsink2, type="message") # sink stderr
         
         if(use=='text'){
-            saveScript()
+            if(saveScript())
+                return(1)
             txtvalue <- tclvalue(tkget(txt_edit,"0.0","end"))
             inputvalue <- NULL
         } else if(use=='current'){
-            saveScript()
+            if(saveScript())
+                return(1)
             txtvalue <- NULL
             inputvalue <- filename
         } else if(use=='file'){
-            loadScript()
-            txtvalue <- NULL
-            inputvalue <- filename
+            fname <- tclvalue(tkgetOpenFile(title="Load Script",filetypes=filetypelist))
+            if(!length(fname) || fname==""){
+                riteMsg('No file selected', error=TRUE)
+                return()
+            } else {
+                txtvalue <- NULL
+                inputvalue <- fname
+            }
         }
+        
+        riteMsg("Generating report...", error=TRUE)
         
         if(genmode=="knit")
             knit_out <- try(knit(input=inputvalue, text=txtvalue))
@@ -583,7 +588,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         else if(genmode=="knitsweave"){
             sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
             if(inherits(sweave_out, "try-error")){
-                tkmessageBox(message="Could not convert Sweave to knitr!")
+                riteMsg("Could not convert Sweave to knitr!", error=TRUE)
                 return()
             }
             else if(!is.null(inputvalue))
@@ -594,7 +599,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         else if(genmode=="tangle"){
             sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
             if(inherits(sweave_out, "try-error")){
-                tkmessageBox(message="Could not convert Sweave to knitr!")
+                riteMsg("Could not convert Sweave to knitr!", error=TRUE)
                 return()
             }
             else if(!is.null(inputvalue))
@@ -659,7 +664,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 knit_out <- try(spin(hair=NULL, text=txtvalue, knit=TRUE, format=spinformat))
         }
         else{
-            riteMsg("Unrecognized report type!")
+            riteMsg("Unrecognized report type!", error=TRUE)
             return(invisible(NULL))
         }
         sink(type="output")
@@ -692,11 +697,21 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             if(catchOutput)
                 clearOutput()
             if(use %in% c('current','file') || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd","sweave")){
-                chn <- tclopen(knit_out, "r")
-                riteMsg(tclvalue(tclread(chn)))
-                tclclose(chn)
-            } else
-                riteMsg(knit_out)
+                if(catchOutput){
+                    chn <- tclopen(knit_out, "r")
+                    riteMsg(tclvalue(tclread(chn)))
+                    tclclose(chn)
+                } else if(use=='current' | (use=='file' & as.numeric(tclvalue(openreports))))
+                    file.show(knit_out, title='Output')
+            } else {
+                if(catchOutput)
+                    riteMsg(knit_out)
+                else {
+                    tmp <- tempfile()
+                    writeLines(knit_out, tmp)
+                    file.show(tmp, title='Output')
+                }
+            }
             if(as.numeric(tclvalue(openreports))){
                 if(use=='file' & genmode %in% c('md2html','md2html.fragment'))
                     browseURL(outfile)
@@ -761,12 +776,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tex1 <- texi2pdf(filetopdf, clean=TRUE)
             if(fstem %in% list.files()){
                 if(as.numeric(tclvalue(openreports))){
-                    riteMsg(paste("\n\nOpening pdf ",fstem,"...\n\n",sep=''), error=TRUE)
+                    riteMsg(paste("\nOpening pdf ",fstem,"...\n",sep=''), error=TRUE)
                     system2(getOption("pdfviewer"),fstem)
                 }
             }
             else
-                riteMsg("PDF not created!", error=TRUE)
+                riteMsg("PDF not created!\n", error=TRUE)
         }
     }
     
@@ -1314,7 +1329,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         else if(catchOutput)
             tkinsert(output, "end", value)
         else
-            message(value)
+            message(value, appendLF = FALSE)
         return(invisible(NULL))
     }
     
@@ -1671,7 +1686,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         }
         else{
             if(verbose==TRUE){
-                tkmessageBox(message="No syntax errors found")
+                riteMsg("No syntax errors found", error=TRUE)
                 tkfocus(txt_edit)
             }
             invisible(TRUE)
