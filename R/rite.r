@@ -108,12 +108,29 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         if(catchOutput){
             if(!sink.number()==0)
                 sink(type="output")
-            close(outsink)
             if(!sink.number('message')==2)
                 sink(type="message")
-            close(errsink)
-            close(ritecat)
+            if('riteoutcon' %in% showConnections()){
+                thiscon <- rownames(showConnections())[which('riteoutcon'==showConnections()[,1])]
+                close(getConnection(thiscon))
+            }
             cat <<- base::cat
+        }
+        if('ksink1' %in% showConnections()){
+            thiscon <- rownames(showConnections())[which('ksink1'==showConnections()[,1])]
+            close(getConnection(thiscon))
+        }
+        if('ksink2' %in% showConnections()){
+            thiscon <- rownames(showConnections())[which('ksink2'==showConnections()[,1])]
+            close(getConnection(thiscon))
+        }
+        if('osink' %in% showConnections()){
+            thiscon <- rownames(showConnections())[which('osink'==showConnections()[,1])]
+            close(getConnection(thiscon))
+        }
+        if('esink' %in% showConnections()){
+            thiscon <- rownames(showConnections())[which('esink'==showConnections()[,1])]
+            close(getConnection(thiscon))
         }
         if("windows"==.Platform$OS.type)
             bringToTop(-1)
@@ -123,7 +140,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     
     ## FILE MENU FUNCTIONS ##
     newScript <- function(){
-        if(!scriptSaved){
+        if(!scriptSaved & !tclvalue(tkget(txt_edit,"0.0","end")) %in% c('','\n')){
             exit <- tkmessageBox(message = "Do you want to save the current script?",
                                  icon = "question", type = "yesnocancel",
                                  default = "yes")
@@ -369,7 +386,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         runtemp <- tempfile()
         writeLines(code,runtemp)
         writeError <- function(errmsg, type, focus=TRUE){
-            tkconfigure(err_out, state="normal")
             if(type=="Error")
                 tkinsert(err_out,"end",paste(type,": ",errmsg,"\n",sep=""),("error"))
             else if(type=="Warning")
@@ -378,7 +394,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkinsert(err_out,"end",paste(type,": ",errmsg,"\n",sep=""),("message"))
             else
                 tkinsert(err_out,"end",paste(type,": ",errmsg,"\n",sep=""), ("text"))
-            tkconfigure(err_out, state="disabled")
             if(focus){
                 tkselect(nb2, 1)
                 tkfocus(txt_edit)
@@ -495,9 +510,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             tkselect(nb2, 0)
         }
         clearError <- function(){
-            tkconfigure(err_out, state="normal")
             tkdelete(err_out,"0.0","end")
-            tkconfigure(err_out, state="disabled")
             tkselect(nb2, 1)
         }
     }
@@ -525,6 +538,14 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         riteMsg("Generating report...", error=TRUE)
         ksink1 <- ""
         ksink2 <- ""
+        if('ksink1' %in% showConnections()){
+            thiscon <- rownames(showConnections())[which('ksink1'==showConnections()[,1])]
+            close(getConnection(thiscon))
+        }
+        if('ksink2' %in% showConnections()){
+            thiscon <- rownames(showConnections())[which('ksink2'==showConnections()[,1])]
+            close(getConnection(thiscon))
+        }
         knitsink1 <- textConnection("ksink1", "w") # create connection for stdout
         knitsink2 <- textConnection("ksink2", "w") # create connection for stderr
         sink(knitsink1, type="output") # sink stdout
@@ -534,13 +555,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             saveScript()
             txtvalue <- tclvalue(tkget(txt_edit,"0.0","end"))
             inputvalue <- NULL
-        }
-        else if(use=='current'){
+        } else if(use=='current'){
             saveScript()
             txtvalue <- NULL
             inputvalue <- filename
-        }
-        else if(use=='file'){
+        } else if(use=='file'){
             loadScript()
             txtvalue <- NULL
             inputvalue <- filename
@@ -590,15 +609,19 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 knit_out <- try(knit2html(text=txtvalue))
         }
         else if(genmode=="md2html"){
-            if(!is.null(inputvalue))
-                knit_out <- try(markdown::markdownToHTML(file=inputvalue))
-            else if(!is.null(txtvalue))
+            if(!is.null(inputvalue)){
+                outfile <- substring(basename(inputvalue),1,regexpr("\\.[[:alnum:]]+$",basename(inputvalue))-1)
+                outfile <- paste(outfile,'html',sep='.')
+                knit_out <- try(markdown::markdownToHTML(file=inputvalue, output=outfile))
+            }else if(!is.null(txtvalue))
                 knit_out <- try(markdown::markdownToHTML(text=txtvalue))
         }
         else if(genmode=="md2html.fragment"){
-            if(!is.null(inputvalue))
-                knit_out <- try(markdown::markdownToHTML(file=inputvalue,fragment.only=TRUE))
-            else if(!is.null(txtvalue))
+            if(!is.null(inputvalue)){
+                outfile <- substring(basename(inputvalue),1,regexpr("\\.[[:alnum:]]+$",basename(inputvalue))-1)
+                outfile <- paste(outfile,'html',sep='.')
+                knit_out <- try(markdown::markdownToHTML(file=inputvalue,output=outfile,fragment.only=TRUE))
+            }else if(!is.null(txtvalue))
                 knit_out <- try(markdown::markdownToHTML(text=txtvalue,fragment.only=TRUE))
         }
         else if(genmode=="stitch.rnw"){
@@ -639,20 +662,25 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             riteMsg("Unrecognized report type!")
             return(invisible(NULL))
         }
-        if(catchOutput){
-            sink(type="output")
-            sink(type="message")
+        sink(type="output")
+        sink(type="message")
+        if('ksink1' %in% showConnections()){
+            thiscon <- rownames(showConnections())[which('ksink1'==showConnections()[,1])]
+            close(getConnection(thiscon))
         }
-        close(knitsink1)
-        close(knitsink2)
+        if('ksink2' %in% showConnections()){
+            thiscon <- rownames(showConnections())[which('ksink2'==showConnections()[,1])]
+            close(getConnection(thiscon))
+        }
         if(catchOutput){
             tkselect(nb2, 1)
             riteMsg(paste(ksink1,collapse="\n"), error=TRUE)
             riteMsg(paste(ksink2,collapse="\n"), error=TRUE)
             tkfocus(txt_edit)
+        } else{
+            riteMsg(paste(ksink1,collapse="\n"))
+            riteMsg(paste(ksink2,collapse="\n"))
         }
-        rm(ksink1) # cleanup
-        rm(ksink2) # cleanup
         if(catchOutput)
             sink(errsink, type="message")
         if(inherits(knit_out,"try-error")){
@@ -660,27 +688,26 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             return(knit_out)
         }
         else{
-            riteMsg('Report finished!', error=TRUE)
+            riteMsg('Report finished!\n', error=TRUE)
             if(catchOutput)
                 clearOutput()
             if(use %in% c('current','file') || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd","sweave")){
                 chn <- tclopen(knit_out, "r")
                 riteMsg(tclvalue(tclread(chn)))
                 tclclose(chn)
-            }
-            else if(genmode=="spin")
-                riteMsg(paste(knit_out,collapse="\n"))
-            else
+            } else
                 riteMsg(knit_out)
-            if(catchOutput){
-                tkselect(nb2, 0)
-                tkfocus(txt_edit)
-            }
             if(as.numeric(tclvalue(openreports))){
-                if(genmode %in% c("md2html","rmd2html","stitch.rhtml","stitch.rmd"))
+                if(use=='file' & genmode %in% c('md2html','md2html.fragment'))
+                    browseURL(outfile)
+                else if(genmode %in% c("rmd2html","stitch.rhtml","stitch.rmd"))
                     browseURL(knit_out)
                 else if(genmode=="stitch.rnw")
                     browseURL(knit_out_pdf)
+            }
+            if(catchOutput){
+                tkselect(nb2, 0)
+                tkfocus(txt_edit)
             }
             return(knit_out)
         }
@@ -707,7 +734,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             fstem <- substring(basename(filetopdf),1,regexpr("\\.[[:alnum:]]+$",basename(filetopdf))-1)
             fstem <- paste(fstem,".pdf",sep="")
             if(catchOutput){
-                tkconfigure(err_out, state="normal")
                 tkmark.set(err_out, "insert", "end")
                 tkselect(nb2, 1)
                 tkfocus(txt_edit)
@@ -741,8 +767,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             }
             else
                 riteMsg("PDF not created!", error=TRUE)
-            if(catchOutput)
-                tkconfigure(err_out, state="disabled")
         }
     }
     
@@ -916,10 +940,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     if(catchOutput){
         menuOutput <- tkmenu(menuTop, tearoff = FALSE)
             copyOutput <- function(){
-                #tkconfigure(output, state="normal")
                 tkclipboard.clear()
                 tkclipboard.append(tclvalue(tkget(output, "0.0", "end")))
-                #tkconfigure(output, state="disabled")
             }
             tkadd(menuOutput, "command", label = "Copy Output", command = copyOutput, underline = 0)
             tkadd(menuOutput, "command", label = "Save Output",
@@ -927,10 +949,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             tkadd(menuOutput, "command", label = "Clear Output", command = clearOutput, underline = 1)
             tkadd(menuOutput, "separator")
             copyMessage <- function(){
-                tkconfigure(err_out, state="normal")
                 tkclipboard.clear()
                 tkclipboard.append(tclvalue(tkget(err_out, "0.0", "end")))
-                tkconfigure(err_out, state="disabled")
             }
             tkadd(menuOutput, "command", label = "Copy Message", command = copyMessage, underline = 0)
             tkadd(menuOutput, "command", label = "Clear Message", command = clearError, underline = 1)
@@ -1048,9 +1068,23 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             tkadd(menuFromFile, "command", label = "purl",
                 command = function() knittxt(genmode="purl", use='file'), underline = 0)
             tkadd(menuFromFile, "command", label = "Sweave",
-                command = function() 
-                    pdffromfile(filetopdf=knittxt(genmode="sweave", use='file')),
-                underline = 0)
+                command = function() knittxt(genmode="sweave", use='file'), underline = 0)
+            tkadd(menuFromFile, "separator")
+            tkadd(menuFromFile, "command", label = "knit to pdf",
+                command = function(){
+                    k <- knittxt(genmode="knit", use='file')
+                    pdffromfile(filetopdf=paste(tools::file_path_sans_ext(k),"tex",sep="."))
+                })
+            tkadd(menuFromFile, "command", label = "Sweave to pdf",
+                command = function(){
+                    k <- knittxt(genmode="sweave", use='file')
+                    pdffromfile(filetopdf=k)
+                })
+            tkadd(menuFromFile, "command", label = "knit to pdf (from Sweave source)",
+                command = function(){
+                    k <- knittxt(genmode="knitsweave", use='file')
+                    pdffromfile(filetopdf=paste(tools::file_path_sans_ext(k),"tex",sep="."))
+                })
             tkadd(menuFromFile, "command", label = "knit Rmd to HTML",
                 command = function() knittxt(genmode="rmd2html", use='file'))
             tkadd(menuFromFile, "separator")
@@ -1235,7 +1269,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             outModified <- function()
                 outputSaved <<- FALSE
             tkbind(output, "<<Modified>>", outModified)
-            #tkconfigure(output, state="disabled")
             tkgrid(output, column=1, row=1, sticky="nsew")
             tkgrid(out_scr, column=2, row=1, sticky="nsew")
             tkgrid.columnconfigure(out_tab1,1,weight=1)
@@ -1249,7 +1282,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                                         font=tkfont.create(family=fontFamily,size=fontSize))
             errModified <- function() {}
             tkbind(err_out, "<<Modified>>", errModified)
-            tkconfigure(err_out, state="disabled")
             tkgrid(err_out, column=1, row=1, sticky="nsew")
             tkgrid(err_scr, column=2, row=1, sticky="nsew")
             tkgrid.columnconfigure(out_tab2,1,weight=1)
@@ -1277,17 +1309,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 
     ## FUNCTION TO CONTROL PRINTING TO OUTPUT VERSUS CONSOLE ##
     riteMsg <- function(value, error=FALSE){
-        if(catchOutput && error){
-            tkconfigure(err_out, state="normal")
+        if(catchOutput & error)
             tkinsert(err_out, "end", value)
-            tkconfigure(err_out, state="disabled")
-        } else if(catchOutput){
-            #tkconfigure(output, state="normal")
+        else if(catchOutput)
             tkinsert(output, "end", value)
-            #tkconfigure(output, state="disabled")
-        } else{
+        else
             message(value)
-        }
+        return(invisible(NULL))
     }
     
     
