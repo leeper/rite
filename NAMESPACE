@@ -1,7 +1,7 @@
-# 2013-06-01
+exportPattern("^[[:alpha:]]+")
+
 import(tcltk)
 importFrom(tcltk2, tk2notebook, tk2notetab, tk2ctext)
 importFrom(utils, available.packages, install.packages)
 importFrom(RCurl, getURL, postForm)
-
-exportPattern("^[[:alpha:]]+")
+importFrom(tools, texi2pdf)
