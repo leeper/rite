@@ -1,7 +1,10 @@
-exportPattern("^[[:alpha:]]+")
+export(rite)
+export(riteout)
+export(sinkstart)
+export(sinkstop)
 
 import(tcltk)
 importFrom(tcltk2, tk2notebook, tk2notetab, tk2ctext)
 importFrom(utils, available.packages, install.packages)
 importFrom(RCurl, getURL, postForm)
-importFrom(tools, texi2pdf)
+importFrom(tools, texi2pdf, file_path_sans_ext)

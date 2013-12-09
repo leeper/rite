@@ -575,7 +575,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         else if(genmode=="purl")
             knit_out <- try(purl(input=inputvalue, text=txtvalue))
         else if(genmode=="sweave"){
-            require(tools)
             if(is.null(txtvalue))
                 knit_out <- Sweave(file=inputvalue, quiet=TRUE)
             else if(!saveScript())
@@ -635,7 +634,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             else if(!is.null(txtvalue))
                 knit_out <- try(stitch(text=txtvalue))
             if(!inherits(knit_out,"try-error"))
-                knit_out_pdf <- paste(tools::file_path_sans_ext(knit_out),"pdf",sep=".")
+                knit_out_pdf <- paste(file_path_sans_ext(knit_out),"pdf",sep=".")
             else
                 knit_out_pdf <- NULL
         }
@@ -728,7 +727,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         }
     }
     pdffromfile <- function(filetopdf=NULL, texttopdf=FALSE, textype="texi2pdf", bibtex=TRUE){
-        require(tools)
         if(texttopdf){
             if(!scriptSaved)
                 saveScript()
@@ -988,7 +986,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             tkadd(menuKnit, "command", label = "knit to pdf",
                 command = function(){
                     k <- knittxt(genmode="knit", use='current')
-                    pdffromfile(filetopdf=paste(tools::file_path_sans_ext(k),"tex",sep="."))
+                    pdffromfile(filetopdf=paste(file_path_sans_ext(k),"tex",sep="."))
                 })
             tkadd(menuKnit, "command", label = "Sweave to pdf",
                 command = function(){
@@ -998,7 +996,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             tkadd(menuKnit, "command", label = "knit to pdf (from Sweave source)",
                 command = function(){
                     k <- knittxt(genmode="knitsweave", use='current')
-                    pdffromfile(filetopdf=paste(tools::file_path_sans_ext(k),"tex",sep="."))
+                    pdffromfile(filetopdf=paste(file_path_sans_ext(k),"tex",sep="."))
                 })
             tkadd(menuReport, "cascade", label = "Knit", menu = menuKnit, underline = 0)
         menuPurl <- tkmenu(menuReport, tearoff = FALSE)
@@ -1088,7 +1086,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             tkadd(menuFromFile, "command", label = "knit to pdf",
                 command = function(){
                     k <- knittxt(genmode="knit", use='file')
-                    pdffromfile(filetopdf=paste(tools::file_path_sans_ext(k),"tex",sep="."))
+                    pdffromfile(filetopdf=paste(file_path_sans_ext(k),"tex",sep="."))
                 })
             tkadd(menuFromFile, "command", label = "Sweave to pdf",
                 command = function(){
@@ -1098,7 +1096,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             tkadd(menuFromFile, "command", label = "knit to pdf (from Sweave source)",
                 command = function(){
                     k <- knittxt(genmode="knitsweave", use='file')
-                    pdffromfile(filetopdf=paste(tools::file_path_sans_ext(k),"tex",sep="."))
+                    pdffromfile(filetopdf=paste(file_path_sans_ext(k),"tex",sep="."))
                 })
             tkadd(menuFromFile, "command", label = "knit Rmd to HTML",
                 command = function() knittxt(genmode="rmd2html", use='file'))
