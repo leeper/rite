@@ -1,4 +1,4 @@
-# MTurkR Website #
+# rite website #
 
 [![Build Status](https://travis-ci.org/leeper/rite.png?branch=gh-pages)](https://travis-ci.org/leeper/rite)
 
