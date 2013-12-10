@@ -4,10 +4,6 @@ title: Home
 ghurl: https://github.com/leeper/rite/blob/gh-pages
 ---
 
-# rite #
-
-[![Build Status](https://travis-ci.org/leeper/rite.png?branch=master)](https://travis-ci.org/leeper/rite)
-
 ## What is rite? ##
 
 **rite** is a simple yet powerful script editor built natively in R with tcltk, currently in beta release.
