@@ -44,3 +44,9 @@ To complement this functionality, **rite** provides syntax highlighting for R (b
 ## Highlighted output function ##
 
 The current release of **rite** also includes a pair of functions (`sinkstart` and `sinkstop`) that provide a small widget for viewing highlighted R output instead of (or in addition to) sending those results to the R console. This tool aims to offer a robust, CRAN-compliant alternative to the deprecated [**colorout** package](http://cran.r-project.org/web/packages/colorout/index.html). In essence, the package builds a layer on top of R (using `sink`, task callbacks, and a custom error handler) to dynamically display R calls and output in a tcl/tk window. The sink can be turned on (`sinkstart`) and off (`sinkstop`) throughout an R session and the sink display is a fully featured and editable tcl/tk text widget.
+
+Here's a screenshot of a trivial use of the sink:
+
+[![rite sink Screenshot](http://i.imgur.com/pGjsgxF.png)](http://i.imgur.com/pGjsgxF)
+
+
