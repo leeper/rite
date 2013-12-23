@@ -1007,11 +1007,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             tkadd(menuReport, "cascade", label = "Purl", menu = menuPurl, underline = 0)
         menuStitch <- tkmenu(menuReport, tearoff = FALSE)
             tkadd(menuStitch, "command", label = "stitch (tex)",
-                command = function() knittxt(genmode="stitch.rnw", use='text'), underline = 0)
+                command = function() knittxt(genmode="stitch.rnw", use='current'), underline = 0)
             tkadd(menuStitch, "command", label = "stitch (HTML)",
-                command = function() knittxt(genmode="stitch.rhtml", use='text'))
+                command = function() knittxt(genmode="stitch.rhtml", use='current'))
             tkadd(menuStitch, "command", label = "stitch (markdown)",
-                command = function() knittxt(genmode="stitch.rmd", use='text'))
+                command = function() knittxt(genmode="stitch.rmd", use='current'))
             tkadd(menuReport, "cascade", label = "Stitch", menu = menuStitch, underline = 0)
         menuSpin <- tkmenu(menuReport, tearoff = FALSE)
             tkadd(menuSpin, "command", label = "spin to Rmd",
