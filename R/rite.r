@@ -7,6 +7,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     searchterm <- ""
     ritetmpfile <- tempfile(pattern="rite",fileext=".r")
     wmtitle <- packagetitle <- "rite"
+    if(echo)
+        echorun <- tclVar(1)
+    else
+        echorun <- tclVar(0)
     # optionally setup evaluation environment
     if(is.null(evalenv)){
         editenv <- new.env()
@@ -400,7 +404,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkfocus(txt_edit)
             }
         }
-        out <- withRestarts(withCallingHandlers(source(runtemp, print.eval=TRUE, echo=echo),
+        out <- withRestarts(withCallingHandlers(source(runtemp, print.eval=TRUE,
+                echo=as.logical(as.numeric(tclvalue(echorun)))),
             error = function(errmsg){
                 errmsg <- strsplit(as.character(errmsg),": ")[[1]]
                 errmsg <- paste(errmsg[-1],collapse=":")
@@ -923,10 +928,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         tkadd(menuRun, "command", label = "Run All", command = runAll, underline = 4)
         tkadd(menuRun, "command", label = "Run Code Chunks (All)", command = runAllChunks, underline = 4)
         tkadd(menuRun, "separator")
-        if(echo)
-            echorun <- tclVar(1)
-        else
-            echorun <- tclVar(0)
         tkadd(menuRun, 'checkbutton', label='Echo code', onvalue=1L, variable=echorun)
         tkadd(menuRun, "separator")
         if(catchOutput){
