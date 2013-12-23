@@ -1,7 +1,8 @@
 # CHANGES to rite 0.3 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
-* From v0.2.54, Reports can now be generated from the standard `rite` editor, not just from `riteout`.
+* From v0.2.56, multi-file gists can now be opened one file at a time.
+* From v0.2.54, reports can now be generated from the standard `rite` editor, not just from `riteout`.
 * The rite output and error widgets now have editing enabled.
 * A checkbox on the Report Generation menu now controls whether PDF and HTML output files are opened after report generation. (#47)
 * Attempting to open or append a multi-file Gist will cause only the first file to be opened and result in a warning.
