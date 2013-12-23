@@ -923,6 +923,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         tkadd(menuRun, "command", label = "Run All", command = runAll, underline = 4)
         tkadd(menuRun, "command", label = "Run Code Chunks (All)", command = runAllChunks, underline = 4)
         tkadd(menuRun, "separator")
+        if(echo)
+            echorun <- tclVar(1)
+        else
+            echorun <- tclVar(0)
+        tkadd(menuRun, 'checkbutton', label='Echo code', onvalue=1L, variable=echorun)
+        tkadd(menuRun, "separator")
         if(catchOutput){
             tkadd(menuRun, "command", label="List all objects", command=function()
                 tkinsert(output,"end",capture.output(ls(envir=evalenv))))
