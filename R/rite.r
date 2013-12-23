@@ -173,7 +173,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         }
         else
             return(NULL)
-        content <- try(RCurl::getURL(entry,ssl.verifypeer=0L,followlocation=1L))
+        content <- try(getURL(entry,ssl.verifypeer=0L, followlocation=1L, useragent='RCurl'))
         if(!inherits(content,"try-error")){
             tmp <- regmatches(content, gregexpr('"raw_url": ?"(.*?\\.[[:alpha:]]*)"', content))[[1]]
             rawurl <- sapply(tmp,function(x) strsplit(x,'"')[[1]][4])
@@ -229,12 +229,35 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                         return()
                     }
                     else if(length(entry)>1){
-                        tkmessageBox(message="More than one file found in Gist. Only first is used.", icon='info')
-                        # TODO: add a menu to deal with this
-                        entry <- entry[1]
+                        gistDialog <- tktoplevel()
+                        tkwm.title(gistDialog, "Select file from gist...")
+                        scr_gist <- tkscrollbar(gistDialog, repeatinterval=5, command=function(...) tkyview(gist_list,...))
+                        gist_list <- tklistbox(gistDialog, height=10, width=50, selectmode="single",
+                                            yscrollcommand=function(...) tkset(scr_gist,...), background="white")
+                        tkgrid(gist_list, sticky="nsew", column=1, row=1)
+                        tkgrid(scr_gist, sticky="nsew", column=2, row=1)
+                        tkgrid.columnconfigure(gistDialog,1,weight=1)
+                        tkgrid.columnconfigure(gistDialog,2,weight=0)
+                        tkgrid.rowconfigure(gistDialog,1,weight=1)
+                        for(i in 1:length(entry))
+                            tkinsert(gist_list, "end", entry[i])
+                        buttons <- tkframe(gistDialog)
+                            OKbutton <- tkbutton(buttons, text="   OK   ",
+                                command=function() {
+                                    entry <<- entry[as.numeric(tclvalue(tkcurselection(gist_list)))+1]
+                                    tkdestroy(gistDialog)
+                                    tkfocus(editor)
+                                })
+                            Cancelbutton <- tkbutton(buttons,text=" Cancel ",
+                                command=function() {tkdestroy(gistDialog); tkfocus(editor)})
+                            tkgrid(OKbutton, row = 1, column = 1)
+                            tkgrid(Cancelbutton, row = 1, column = 2)
+                        tkgrid(buttons, row=3, column=1, columnspan=3)
+                        tkwait.window(gistDialog)
                     }
                 }
-                else {}
+                else
+                    entry <- entry[1]
                 if(refonly){
                     if(gist || grepl("https",entry))
                         tkinsert(txt_edit, "insert", paste(
@@ -247,7 +270,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                         tkinsert(txt_edit, "insert", paste("source(\"",entry,"\")\n",sep=""))
                 }
                 else{
-                    content <- try(RCurl::getURL(entry,ssl.verifypeer=0L,followlocation=1L))
+                    content <- try(getURL(entry, ssl.verifypeer=0L, followlocation=1L, useragent='RCurl'))
                     if(!inherits(content,"try-error")){
                         if(fastinsert)
                             .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'insert', content))
