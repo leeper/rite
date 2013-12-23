@@ -6,7 +6,16 @@
 
 **rite** is a simple yet powerful script editor built natively in R with tcltk, currently in beta release.
 
-**rite** is designed to substitute for the built-in script editor provided by R and improve upon it by offering functionality more commonly found in standalone editors and IDEs (e.g., syntax highlighting, command completion, shortcut keys, find and go-to-line commands, direct access to R help files, etc.), as well as an optional output viewer, inspired by [CodeSkulptor](http://www.codeskulptor.org/), that eliminates the need to toggle between the script editor and the R console.
+**rite** is designed to substitute for the built-in script editor provided by R and improve upon it by offering functionality more commonly found in standalone editors and IDEs (e.g., syntax highlighting, command completion, shortcut keys, find and go-to-line commands, direct access to R help files, etc.), as well as an optional output viewer (called by `riteout`), inspired by [CodeSkulptor](http://www.codeskulptor.org/), that eliminates the need to toggle between the script editor and the R console.
+
+**Screenshot of rite**
+
+[![rite Screenshot](http://i.imgur.com/74TkHIn.png)](http://imgur.com/74TkHIn)
+
+
+**Screenshot of riteout**
+[![riteout Screenshot](http://i.imgur.com/P2mmwY7.png)](http://imgur.com/P2mmwY7)
+
 
 ## Installation ##
 
