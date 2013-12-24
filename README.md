@@ -44,15 +44,15 @@ But beyond a tool for beginners, **rite** is also designed to help advanced user
 
 ## Integration with [knitr](http://yihui.name/knitr/) ##
 
-**rite** provides the first visual interface for report generation directly in R through the `riteout` function (a simple wrapper for `rite(catchOutput=TRUE)`. Through `riteout`, users can generate reports in a variety of formats (including markdown, HTML, and LaTeX) through just a single mouse-click. `riteout` currently offers access to the **knitr** functions `knit` and `purl`, allowing users to convert documents embedded with R code chunks into either finished reports and analysis replication files, respectively. These functions work analogously to `Sweave` and `Stangle` provided by base R.
-
-Additionally, `riteout` allows users to `stitch` simple reports from unformatted R scripts, making the quick production of readable R analyses a mouse click away. Support for **knitr**'s `spin` (using Roxygen-style syntax) has also been added.
+**rite** provides the first visual, point-and-click interface for report generation directly in R, with support for a variety of formats (including markdown, HTML, and LaTeX). **rite** supports the **knitr** functions `knit` and `purl` (analogous to `Sweave` and `Stangle` in base R), as well as `stitch` and `spin` to convert R script files into reports without investing in a particular markup language. The report generation tools also support TeX compilation and markdown to HTML conversion.
 
 To complement this functionality, **rite** provides syntax highlighting for R (by default) and, optionally, for LaTeX, markdown, HTML/XML, brew, roxygen, and reST. Higlighting of `Sweave`/`knitr`-style code chunks is supported in each case.
 
+The *Run* menu also supports execution of Sweave/knitr code chunks, making it easy to run analyses while directly editing a full report.
+
 ## Highlighted output function ##
 
-The current release of **rite** also includes a pair of functions (`sinkstart` and `sinkstop`) that provide a small widget for viewing highlighted R output instead of (or in addition to) sending those results to the R console. This tool aims to offer a robust, CRAN-compliant alternative to the deprecated [**colorout** package](http://cran.r-project.org/web/packages/colorout/index.html). In essence, the package builds a layer on top of R (using `sink`, task callbacks, and a custom error handler) to dynamically display R calls and output in a tcl/tk window. The sink can be turned on (`sinkstart`) and off (`sinkstop`) throughout an R session and the sink display is a fully featured and editable tcl/tk text widget.
+**rite** also includes a pair of functions (`sinkstart` and `sinkstop`) that provide a widget for viewing highlighted R output instead of (or in addition to) sending those results to the R console. This tool aims to offer a robust, CRAN-compliant alternative to the deprecated [**colorout** package](http://cran.r-project.org/web/packages/colorout/index.html). In essence, the package builds a layer on top of R (using `sink`, task callbacks, and a custom error handler) to dynamically display R calls and output in a tcl/tk window. The sink can be turned on (`sinkstart`) and off (`sinkstop`) throughout an R session and the sink display is a fully featured and editable tcl/tk text widget.
 
 Here's a screenshot of a trivial use of the sink:
 
