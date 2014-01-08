@@ -11,8 +11,8 @@ A simple, but powerful script editor for R, built with tcl/tk. \code{\link{rite}
 \tabular{ll}{
 Package: \tab rite\cr
 Type: \tab Package\cr
-Version: \tab 0.2.56\cr
-Date: \tab 2013-12-24\cr
+Version: \tab 0.3\cr
+Date: \tab 2014-01-08\cr
 License: \tab GPL-2\cr
 }
 }
