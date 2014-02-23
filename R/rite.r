@@ -1188,10 +1188,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         # script editor
         edit_tab1 <- tk2notetab(nb1, "Script")
         edit_scr <- tkscrollbar(edit_tab1, repeatinterval=25, command=function(...){ tkyview(txt_edit,...) })
-        txt_edit <- tk2ctext(edit_tab1, bg=hcolors$background, fg=hcolors$normal, undo="true",
+        if(!is.ttk()) 
+            stop("Tcl/Tk >= 8.5 is required")
+        tclRequire("ctext")
+        txt_edit <- tkwidget(edit_tab1, "ctext", bg=hcolors$background, fg=hcolors$normal, undo="true",
                                 yscrollcommand=function(...) tkset(edit_scr,...),
                                 font=tkfont.create(family=fontFamily, size=fontSize))
-        # check for bracket commpletion
+        # check for bracket completion
         tktag.configure(txt_edit,'tmpbracketclose', foreground='red',
             font=tkfont.create(family=fontFamily, size=fontSize, weight='bold'))
         checkbrackets <- function(){

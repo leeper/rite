@@ -1,3 +1,8 @@
+# CHANGES to rite 0.4 #
+
+## BUG FIXES ##
+* Sometimes in January 2014, `tcltk2::ctext` started producing a catastrophic error of the form `Error in structure(.External(.C_dotTclObjv, objv), class = "tclObj"): [tcl] unknown color name "".` In response, `rite` now creates the "ctext" object directly rather than through its **tcltk2** wrapper.
+
 # CHANGES to rite 0.3 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
