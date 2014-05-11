@@ -401,7 +401,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 u <- rpubsUpload(title = tclvalue(entry), htmlFile = h,
                                  id = NULL, method='internal')
                                  # temporarily 'internal' due to SSL error
-                riteMsg("RPubs ID is: ", u$id)
+                riteMsg(paste("RPubs ID is:", u$id))
                 browseURL(u$continueUrl) # browse to continueUrl
                 tkfocus(txt_edit)
                 return()
@@ -433,7 +433,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 u <- rpubsUpload(title = NULL, htmlFile = h,
                                  id = tclvalue(entry), method='internal')
                                  # temporarily 'internal' due to SSL error
-                riteMsg("RPubs ID is: ", u$id)
+                riteMsg(paste("RPubs ID is:", u$id))
                 browseURL(u$continueUrl) # browse to continueUrl
                 tkfocus(txt_edit)
                 return()
