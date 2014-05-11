@@ -4,10 +4,10 @@
 \title{rite}
 \description{Open rite}
 \usage{
-rite(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
-     fontFamily="Courier", fontSize=10, orientation="horizontal",
-     fastinsert=FALSE, highlight="r", color=NULL, autosave=TRUE,
-     echo=TRUE, tab='    ', comment='#', isurl = FALSE, ...)
+rite(filename = NULL, catchOutput = FALSE, evalenv = .GlobalEnv,
+     fontFamily = "Courier", fontSize = 10, orientation = "horizontal",
+     fastinsert = FALSE, highlight = "r", color = NULL, autosave = TRUE,
+     echo = TRUE, tab = '    ', comment = '#', url = NULL, ...)
 
 riteout(...)
 }
