@@ -1,6 +1,8 @@
 rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
-                fontFamily="Courier", fontSize=10, orientation="horizontal", fastinsert=FALSE,
-                highlight="r", color=NULL, autosave=TRUE, echo=TRUE, tab='    ', comment='#', ...){
+                fontFamily="Courier", fontSize=10, orientation="horizontal",
+                fastinsert=FALSE, highlight="r", color=NULL,
+                autosave=TRUE, echo=TRUE, tab='    ', comment='#', 
+                url = NULL, ...){
     ## STARTUP OPTIONS ##
     filename <- filename # script filename (if loaded or saved)
     scriptSaved <- TRUE # a logical for whether current edit file is saved
@@ -198,7 +200,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             else{
                 if(refonly)
                     tkinsert(txt_edit, "insert", paste("source(\"",filename,"\")\n",sep=""))
-                else{
+                else {
                     chn <- tclopen(fname, "r")
                     if(fastinsert)
                         .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'insert', tclvalue(tclread(chn))))
@@ -211,101 +213,108 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     filename <<- fname
                     wmtitle <<- paste(filename,"-",packagetitle)
                     tkwm.title(editor, wmtitle)
-                }
-                else
+                } else
                     scriptSaved <<- FALSE
             }
         } else {
-            processEntry <- function() {
-                tkdestroy(gistDialog)
-                entry <- tclvalue(entry)
-                if(gist){
-                    if(grepl("((^https://)|^)gist.github.com/([^/]+/)?[0-9a-f]+$", entry))
-                        entry <- regmatches(entry, regexpr("[0-9a-f]+$", entry))
-                    entry <- getRawGistURL(entry)
-                    if(is.null(entry)){
-                        riteMsg("Gist not loaded!", error=TRUE)
-                        return()
-                    }
-                    else if(length(entry)>1){
-                        gistDialog <- tktoplevel()
-                        tkwm.title(gistDialog, "Select file from gist...")
-                        scr_gist <- tkscrollbar(gistDialog, repeatinterval=5, command=function(...) tkyview(gist_list,...))
-                        gist_list <- tklistbox(gistDialog, height=10, width=50, selectmode="single",
-                                            yscrollcommand=function(...) tkset(scr_gist,...), background="white")
-                        tkgrid(gist_list, sticky="nsew", column=1, row=1)
-                        tkgrid(scr_gist, sticky="nsew", column=2, row=1)
-                        tkgrid.columnconfigure(gistDialog,1,weight=1)
-                        tkgrid.columnconfigure(gistDialog,2,weight=0)
-                        tkgrid.rowconfigure(gistDialog,1,weight=1)
-                        for(i in 1:length(entry))
-                            tkinsert(gist_list, "end", entry[i])
-                        buttons <- tkframe(gistDialog)
-                            OKbutton <- tkbutton(buttons, text="   OK   ",
-                                command=function() {
-                                    entry <<- entry[as.numeric(tclvalue(tkcurselection(gist_list)))+1]
-                                    tkdestroy(gistDialog)
-                                    tkfocus(editor)
-                                })
-                            Cancelbutton <- tkbutton(buttons,text=" Cancel ",
-                                command=function() {tkdestroy(gistDialog); tkfocus(editor)})
-                            tkgrid(OKbutton, row = 1, column = 1)
-                            tkgrid(Cancelbutton, row = 1, column = 2)
-                        tkgrid(buttons, row=3, column=1, columnspan=3)
-                        tkwait.window(gistDialog)
-                    }
+            if(!is.null(fname)){
+                content <- try(getURL(fname, ssl.verifypeer=0L, followlocation=1L, useragent='RCurl'))
+                if(!inherits(content,"try-error")){
+                    if(fastinsert)
+                        .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'insert', content))
+                    else
+                        tkinsert(txt_edit, "insert", content)
                 }
                 else
-                    entry <- entry[1]
-                if(refonly){
-                    if(gist || grepl("https",entry))
-                        tkinsert(txt_edit, "insert", paste(
-                            "library(RCurl)\n",
-                            "writeLines(getURL('",entry,
-                                "',\n\tssl.verifypeer=0L,followlocation=1L),\n\ttemp_file <- tempfile())\n",
-                            "source(temp_file)\n",
-                            "unlink(temp_file)\n",sep=""))
-                    else
-                        tkinsert(txt_edit, "insert", paste("source(\"",entry,"\")\n",sep=""))
-                }
-                else{
-                    content <- try(getURL(entry, ssl.verifypeer=0L, followlocation=1L, useragent='RCurl'))
-                    if(!inherits(content,"try-error")){
-                        if(fastinsert)
-                            .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'insert', content))
+                    riteMsg("Script not loaded!", error=TRUE)
+            } else {
+                processEntry <- function() {
+                    tkdestroy(gistDialog)
+                    entry <- tclvalue(entry)
+                    if(gist){
+                        if(grepl("((^https://)|^)gist.github.com/([^/]+/)?[0-9a-f]+$", entry))
+                            entry <- regmatches(entry, regexpr("[0-9a-f]+$", entry))
+                        entry <- getRawGistURL(entry)
+                        if(is.null(entry)){
+                            riteMsg("Gist not loaded!", error=TRUE)
+                            return()
+                        } else if(length(entry)>1){
+                            gistDialog <- tktoplevel()
+                            tkwm.title(gistDialog, "Select file from gist...")
+                            scr_gist <- tkscrollbar(gistDialog, repeatinterval=5, command=function(...) tkyview(gist_list,...))
+                            gist_list <- tklistbox(gistDialog, height=10, width=50, selectmode="single",
+                                                yscrollcommand=function(...) tkset(scr_gist,...), background="white")
+                            tkgrid(gist_list, sticky="nsew", column=1, row=1)
+                            tkgrid(scr_gist, sticky="nsew", column=2, row=1)
+                            tkgrid.columnconfigure(gistDialog,1,weight=1)
+                            tkgrid.columnconfigure(gistDialog,2,weight=0)
+                            tkgrid.rowconfigure(gistDialog,1,weight=1)
+                            for(i in 1:length(entry))
+                                tkinsert(gist_list, "end", entry[i])
+                            buttons <- tkframe(gistDialog)
+                                OKbutton <- tkbutton(buttons, text="   OK   ",
+                                    command=function() {
+                                        entry <<- entry[as.numeric(tclvalue(tkcurselection(gist_list)))+1]
+                                        tkdestroy(gistDialog)
+                                        tkfocus(editor)
+                                    })
+                                Cancelbutton <- tkbutton(buttons,text=" Cancel ",
+                                    command=function() {tkdestroy(gistDialog); tkfocus(editor)})
+                                tkgrid(OKbutton, row = 1, column = 1)
+                                tkgrid(Cancelbutton, row = 1, column = 2)
+                            tkgrid(buttons, row=3, column=1, columnspan=3)
+                            tkwait.window(gistDialog)
+                        }
+                    } else
+                        entry <- entry[1]
+                    if(refonly){
+                        if(gist || grepl("https",entry))
+                            tkinsert(txt_edit, "insert", paste(
+                                "library(RCurl)\n",
+                                "writeLines(getURL('",entry,
+                                    "',\n\tssl.verifypeer=0L,followlocation=1L),\n\ttemp_file <- tempfile())\n",
+                                "source(temp_file)\n",
+                                "unlink(temp_file)\n",sep=""))
                         else
-                            tkinsert(txt_edit, "insert", content)
+                            tkinsert(txt_edit, "insert", paste("source(\"",entry,"\")\n",sep=""))
+                    } else {
+                        content <- try(getURL(entry, ssl.verifypeer=0L, followlocation=1L, useragent='RCurl'))
+                        if(!inherits(content,"try-error")){
+                            if(fastinsert)
+                                .Tcl(.Tcl.args(.Tk.ID(txt_edit), 'fastinsert', 'insert', content))
+                            else
+                                tkinsert(txt_edit, "insert", content)
+                        } else
+                            riteMsg("Script not loaded!", error=TRUE)
                     }
-                    else
-                        riteMsg("Script not loaded!", error=TRUE)
+                    scriptSaved <<- FALSE
                 }
-                scriptSaved <<- FALSE
-            }
-            gistDialog <- tktoplevel()
-            if(gist)
-                tkwm.title(gistDialog, "Enter Gist ID or raw URL")
-            else
-                tkwm.title(gistDialog, "Enter URL")
-            entryform <- tkframe(gistDialog, relief="groove", borderwidth=2)
-                entry <- tclVar()
-                tkgrid(ttklabel(entryform, text = "     "), row=1)
-                urlentry <- tkentry(entryform, width = 50, textvariable=entry)
+                gistDialog <- tktoplevel()
                 if(gist)
-                    tkgrid(tklabel(entryform, text = "ID/URL: "), row=2, column=1)
+                    tkwm.title(gistDialog, "Enter Gist ID or raw URL")
                 else
-                    tkgrid(tklabel(entryform, text = "URL: "), row=2, column=1)
-                tkgrid(urlentry, row=2, column=2, columnspan=4)
-                tkgrid(ttklabel(entryform, text = "     "), row=3)
-            tkgrid(entryform)
-            buttons <- tkframe(gistDialog)
-                OKbutton <- tkbutton(buttons, text="   OK   ", command=processEntry)
-                Cancelbutton <- tkbutton(buttons, text=" Cancel ",
-                    command=function() {tkdestroy(gistDialog); tkfocus(txt_edit)})
-                tkgrid(OKbutton, row=1, column=2)
-                tkgrid(Cancelbutton, row=1, column=3)
-            tkgrid(buttons)
-            tkbind(urlentry, "<Return>", processEntry)
-            tkfocus(gistDialog)
+                    tkwm.title(gistDialog, "Enter URL")
+                entryform <- tkframe(gistDialog, relief="groove", borderwidth=2)
+                    entry <- tclVar()
+                    tkgrid(ttklabel(entryform, text = "     "), row=1)
+                    urlentry <- tkentry(entryform, width = 50, textvariable=entry)
+                    if(gist)
+                        tkgrid(tklabel(entryform, text = "ID/URL: "), row=2, column=1)
+                    else
+                        tkgrid(tklabel(entryform, text = "URL: "), row=2, column=1)
+                    tkgrid(urlentry, row=2, column=2, columnspan=4)
+                    tkgrid(ttklabel(entryform, text = "     "), row=3)
+                tkgrid(entryform)
+                buttons <- tkframe(gistDialog)
+                    OKbutton <- tkbutton(buttons, text="   OK   ", command=processEntry)
+                    Cancelbutton <- tkbutton(buttons, text=" Cancel ",
+                        command=function() {tkdestroy(gistDialog); tkfocus(txt_edit)})
+                    tkgrid(OKbutton, row=1, column=2)
+                    tkgrid(Cancelbutton, row=1, column=3)
+                tkgrid(buttons)
+                tkbind(urlentry, "<Return>", processEntry)
+                tkfocus(gistDialog)
+            }
         }
     }
     saveScript <- function(){
@@ -2166,6 +2175,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     ## DISPLAY EDITOR ##
     if(!is.null(filename))
         loadScript(fname=filename)
+    else if(!is.null(url))
+        loadScript(fname=url, locals=FALSE)
     tkmark.set(txt_edit,"insert","1.0")
     tkfocus(txt_edit)
     tksee(txt_edit, "insert")

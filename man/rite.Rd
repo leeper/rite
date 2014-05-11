@@ -5,8 +5,9 @@
 \description{Open rite}
 \usage{
 rite(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
-     fontFamily="Courier", fontSize=10, orientation="horizontal", fastinsert=FALSE,
-	 highlight="r", color=NULL, autosave=TRUE, echo=TRUE, tab='    ', comment='#', ...)
+     fontFamily="Courier", fontSize=10, orientation="horizontal",
+     fastinsert=FALSE, highlight="r", color=NULL, autosave=TRUE,
+     echo=TRUE, tab='    ', comment='#', isurl = FALSE, ...)
 
 riteout(...)
 }
@@ -24,6 +25,7 @@ riteout(...)
   \item{echo}{Whether the R calls should be copied to output during \code{source} (only when \code{catchOutput=FALSE}). Default is \code{TRUE}.}
   \item{tab}{A character string indicating what text should be inserted when the \code{<TAB>} key is pressed. Default is the \code{\\t} character. Alternatively, a numeric value (e.g., \code{4}) is treated as a number of spaces.}
   \item{comment}{A character string indicating what text should be used for commenting. Default is the hash/pound character.}
+  \item{url}{If \code{filename=NULL}, \code{url} is considered as the URL for a remote script to load.}
   \item{...}{Ignored by \code{rite}. Used by \code{riteout} to pass arguments to \code{rite}.}
 }
 \details{
