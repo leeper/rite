@@ -215,8 +215,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 else
                     scriptSaved <<- FALSE
             }
-        }
-        else{
+        } else {
             processEntry <- function() {
                 tkdestroy(gistDialog)
                 entry <- tclvalue(entry)
@@ -375,6 +374,82 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         }
         if(browse)
             browseURL(gistouturl)
+    }
+    
+    uploadToRPubs <- function(new = TRUE, render='html'){
+        saveScript()
+        if(render=='md2html'){
+            h <- knittxt(genmode="md2html", use='current')
+        } else if(render=='rmd2html') {
+            h <- knittxt(genmode="rmd2html", use='current')
+        } else {
+            h <- filename
+        }
+        if(new){
+            # interactively specify title
+            processEntry <- function() {
+                tkdestroy(rpubsDialog)
+                u <- rpubsUpload(title = tclvalue(entry), htmlFile = h,
+                                 id = NULL, method='internal')
+                                 # temporarily 'internal' due to SSL error
+                riteMsg("RPubs ID is: ", u$id)
+                browseURL(u$continueUrl) # browse to continueUrl
+                tkfocus(txt_edit)
+                return()
+            }
+
+            rpubsDialog <- tktoplevel()
+            tkwm.title(rpubsDialog, "Enter Title for Upload")
+            entryform <- tkframe(rpubsDialog, relief="groove", borderwidth=2)
+                entry <- tclVar()
+                tkgrid(ttklabel(entryform, text = "     "), row=1)
+                urlentry <- tkentry(entryform, width = 50, textvariable=entry)
+                tkgrid(tklabel(entryform, text = "Title: "), row=2, column=1)
+                tkgrid(urlentry, row=2, column=2, columnspan=4)
+                tkgrid(ttklabel(entryform, text = "     "), row=3)
+            tkgrid(entryform)
+            buttons <- tkframe(rpubsDialog)
+                OKbutton <- tkbutton(buttons, text="   OK   ", command=processEntry)
+                Cancelbutton <- tkbutton(buttons, text=" Cancel ",
+                    command=function() {tkdestroy(rpubsDialog); tkfocus(txt_edit)})
+                tkgrid(OKbutton, row=1, column=2)
+                tkgrid(Cancelbutton, row=1, column=3)
+            tkgrid(buttons)
+            tkbind(urlentry, "<Return>", processEntry)
+            tkfocus(rpubsDialog)
+        } else {
+            # interactively specify RPubs id
+            processEntry <- function() {
+                tkdestroy(rpubsDialog)
+                u <- rpubsUpload(title = NULL, htmlFile = h,
+                                 id = tclvalue(entry), method='internal')
+                                 # temporarily 'internal' due to SSL error
+                riteMsg("RPubs ID is: ", u$id)
+                browseURL(u$continueUrl) # browse to continueUrl
+                tkfocus(txt_edit)
+                return()
+            }
+
+            rpubsDialog <- tktoplevel()
+            tkwm.title(rpubsDialog, "Enter RPubs ID")
+            entryform <- tkframe(rpubsDialog, relief="groove", borderwidth=2)
+                entry <- tclVar()
+                tkgrid(ttklabel(entryform, text = "     "), row=1)
+                urlentry <- tkentry(entryform, width = 50, textvariable=entry)
+                tkgrid(tklabel(entryform, text = "RPubs ID: "), row=2, column=1)
+                tkgrid(urlentry, row=2, column=2, columnspan=4)
+                tkgrid(ttklabel(entryform, text = "     "), row=3)
+            tkgrid(entryform)
+            buttons <- tkframe(rpubsDialog)
+                OKbutton <- tkbutton(buttons, text="   OK   ", command=processEntry)
+                Cancelbutton <- tkbutton(buttons, text=" Cancel ",
+                    command=function() {tkdestroy(rpubsDialog); tkfocus(txt_edit)})
+                tkgrid(OKbutton, row=1, column=2)
+                tkgrid(Cancelbutton, row=1, column=3)
+            tkgrid(buttons)
+            tkbind(urlentry, "<Return>", processEntry)
+            tkfocus(rpubsDialog)
+        }
     }
         
     ## RUN FUNCTIONS ##
@@ -918,16 +993,29 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 command=function() loadScript(locals=FALSE,refonly=TRUE,new=FALSE), underline = 0)
             tkadd(menuFileWeb, "separator")
             tkadd(menuFileWeb, "command", label="Load Script from Gist",
-                command=function() loadScript(locals=FALSE,gist=TRUE), underline = 0)
+                command=function() loadScript(locals=FALSE,gist=TRUE))
             tkadd(menuFileWeb, "command", label="Append Script from Gist",
-                command=function() loadScript(locals=FALSE,gist=TRUE,new=FALSE), underline = 0)
+                command=function() loadScript(locals=FALSE,gist=TRUE,new=FALSE))
             tkadd(menuFileWeb, "command", label="Insert Gist Reference",
-                command=function() loadScript(locals=FALSE,gist=TRUE,refonly=TRUE,new=FALSE), underline = 0)
+                command=function() loadScript(locals=FALSE,gist=TRUE,refonly=TRUE,new=FALSE))
             tkadd(menuFileWeb, "separator")
             tkadd(menuFileWeb, "command", label="Save Script as Gist",
                 command=function() saveGist(), underline = 0)
             tkadd(menuFileWeb, "command", label="Save Script as Gist and Open",
-                command=function() saveGist(browse=TRUE), underline = 0)
+                command=function() saveGist(browse=TRUE))
+            tkadd(menuFileWeb, "separator")
+            tkadd(menuFileWeb, "command", label="Upload HTML as new RPubs",
+                command=function() uploadToRPubs(new=TRUE, render='html'))
+            tkadd(menuFileWeb, "command", label="Upload HTML to update RPubs",
+                command=function() uploadToRPubs(new=FALSE, render='html'))
+            tkadd(menuFileWeb, "command", label="Render md & upload as new RPubs",
+                command=function() uploadToRPubs(new=TRUE, render='md2html'))
+            tkadd(menuFileWeb, "command", label="Render md & update RPubs",
+                command=function() uploadToRPubs(new=FALSE, render='md2html'))
+            tkadd(menuFileWeb, "command", label="knit Rmd & upload as new RPubs",
+                command=function() uploadToRPubs(new=TRUE, render='rmd2html'))
+            tkadd(menuFileWeb, "command", label="knit Rmd & update RPubs",
+                command=function() uploadToRPubs(new=FALSE, render='rmd2html'))
             tkadd(menuFile, "cascade", label = "Remote scripts...", menu = menuFileWeb, underline = 0)
         tkadd(menuFile, "separator")
         tkadd(menuFile, "command", label="Change dir...", command=function(...){

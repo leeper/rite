@@ -8,3 +8,4 @@ importFrom(tcltk2, tk2notebook, tk2notetab, is.ttk) # tk2ctext: no longer callin
 importFrom(utils, available.packages, install.packages)
 importFrom(RCurl, getURL, postForm)
 importFrom(tools, texi2pdf, file_path_sans_ext)
+importFrom(markdown, rpubsUpload)
