@@ -4,8 +4,8 @@ Date: 2014-05-11
 Title: The Right Editor to Write R
 Author: Thomas J. Leeper
 Maintainer: Thomas J. Leeper <thosjleeper@gmail.com>
-Imports: tcltk, tcltk2, RCurl, tools, rmarkdown
-Suggests: knitr, markdown
+Imports: tcltk, tcltk2, RCurl, tools, markdown
+Suggests: knitr
 Description: A simple yet powerful script editor built natively in R with tcltk.
 License: GPL-2
 URL: https://github.com/leeper/rite
