@@ -1,6 +1,6 @@
 rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 fontFamily="Courier", fontSize=10, orientation="horizontal", fastinsert=FALSE,
-                highlight="r", color=NULL, autosave=TRUE, echo=TRUE, tab='\t', comment='#', ...){    
+                highlight="r", color=NULL, autosave=TRUE, echo=TRUE, tab='    ', comment='#', ...){
     ## STARTUP OPTIONS ##
     filename <- filename # script filename (if loaded or saved)
     scriptSaved <- TRUE # a logical for whether current edit file is saved

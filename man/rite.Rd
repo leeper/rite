@@ -6,7 +6,7 @@
 \usage{
 rite(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
      fontFamily="Courier", fontSize=10, orientation="horizontal", fastinsert=FALSE,
-	 highlight="r", color=NULL, autosave=TRUE, echo=TRUE, tab='\t', comment='#', ...)
+	 highlight="r", color=NULL, autosave=TRUE, echo=TRUE, tab='    ', comment='#', ...)
 
 riteout(...)
 }

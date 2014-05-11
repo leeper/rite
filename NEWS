@@ -1,6 +1,7 @@
 # CHANGES to rite 0.4 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
+* Changed default tab setting from "\t" to "    " (4 spaces).
 * Added ability to upload HTML or automatically rendered (R)markdown to [RPubs](https://rpubs.com/) using `markdown::rpubsUpload`.
 
 ## BUG FIXES ##
