@@ -2091,7 +2091,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     }
     # markdown
     if("markdown" %in% highlight){
-        message("Highlighting for markdown is only minimally supported")
+        riteMsg("Highlighting for markdown is only minimally supported")
         # something for the various kinds of markdown syntax
         .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdheader1 ', hcolors$rmd, ' =+', sep=''))
         .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdheader2 ', hcolors$rmd, ' -+', sep=''))
