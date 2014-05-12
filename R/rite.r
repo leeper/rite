@@ -1304,25 +1304,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             font=tkfont.create(family=fontFamily, size=fontSize, weight='bold'))
         checkbrackets <- function(direction='right'){
             insertpos <- tclvalue(tkindex(txt_edit,"insert"))
-            if(direction=='right')
-                lastchar <- tclvalue(tkget(txt_edit, "insert", "insert+1char"))
-            else
-                lastchar <- tclvalue(tkget(txt_edit, "insert-1char", "insert"))
+            lastchar <- switch(direction, right=tclvalue(tkget(txt_edit, "insert", "insert+1char")),
+                                          left=tclvalue(tkget(txt_edit, "insert-1char", "insert")))
             if(lastchar %in% c('{','[','(')){
-                if(lastchar=='{'){
-                    lastchar <- '\\{'
-                    check <- '\\}'
-                }
-                else if(lastchar=='['){
-                    lastchar <- '\\['
-                    check <- '\\]'
-                }
-                else if(lastchar=='(')
-                    check <- ')'
-                if(direction=='right')
-                    startpos <- 'insert+1char'
-                else
-                    startpos <- 'insert'
+                check <- switch(lastchar, `{`='\\}', `[`='\\]', `(`=')')
+                lastchar <- switch(lastchar, `{`='\\{', `[`='\\[', `(`='(')
+                startpos <- switch(direction, right='insert+1char', left='insert')
                 counter <- 1
                 while(counter > 0){
                     foundcheck <- lastcheck <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search",
@@ -1357,20 +1344,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 }
             }
             if(lastchar %in% c('}',']',')')){
-                if(lastchar=='}'){
-                    lastchar <- '\\}'
-                    check <- '\\{'
-                }
-                else if(lastchar==']'){
-                    lastchar <- '\\]'
-                    check <- '\\['
-                }
-                else if(lastchar==')')
-                    check <- '('
-                if(direction=='right')
-                    startpos <- 'insert'
-                else
-                    startpos <- 'insert-1char'
+                check <- switch(lastchar, `}`='\\{', `]`='\\[', `)`='(')
+                lastchar <- switch(lastchar, `}`='\\}', `]`='\\[', `)`=')')
+                startpos <- switch(direction, right='insert', left='insert-1char')
                 counter <- 1
                 while(counter > 0){
                     foundcheck <- lastcheck <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search",
