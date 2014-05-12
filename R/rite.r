@@ -1281,7 +1281,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         #tkadd(menuHelp, "separator")
         #tkadd(menuHelp, "command", label = "R language help", underline = 0, command = help.start)
         tkadd(menuHelp, "separator")
-        tkadd(menuHelp, "command", label = "rite Documentation", command = function() help(rite))
+        tkadd(menuHelp, "command", label = "rite Documentation", command = function() help('rite','rite'))
         tkadd(menuHelp, "command", label = "About rite Script Editor", command = about, underline = 0)
         tkadd(menuTop, "cascade", label = "Help", menu = menuHelp, underline = 0)
 
