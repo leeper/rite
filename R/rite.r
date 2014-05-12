@@ -2076,6 +2076,22 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     tkbind(txt_edit, "<Button-3>", rightClick)
     
     ## SYNTAX HIGHLIGHTING RULES ##
+    hl <- function(type, name = NULL, color, pattern){
+        if(is.null(name))
+            name <- paste('hl',paste(sample(letters,6,TRUE),collapse=''), sep='')
+        if(type=='regexp') {
+            .Tcl(paste('ctext::addHighlightClassForRegexp ',.Tk.ID(txt_edit), name, color, pattern))
+            return()
+        } else if(type=='class'){
+            .Tcl(paste('ctext::addHighlightClassForRegexp ',.Tk.ID(txt_edit), name, color, pattern))
+            return()
+        } else if(type=='chars') {
+            .Tcl(paste('ctext::addHighlightClassForRegexp ',.Tk.ID(txt_edit), name, color, pattern))
+            return()
+        }else
+            return()
+    }
+    
     # latex
     if("latex" %in% highlight){
         # a macro without any brackets
