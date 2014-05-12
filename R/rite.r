@@ -1299,10 +1299,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         # check for bracket completion
         tktag.configure(txt_edit,'tmpbracketclose', foreground='red',
             font=tkfont.create(family=fontFamily, size=fontSize, weight='bold'))
-        checkbrackets <- function(){
+        checkbrackets <- function(direction='right'){
             startpos <- 'insert'
             insertpos <- tclvalue(tkindex(txt_edit,"insert"))
-            lastchar <- tclvalue(tkget(txt_edit, "insert-1char", "insert"))
+            if(direction=='right')
+                lastchar <- tclvalue(tkget(txt_edit, "insert", "insert+1char"))
+            else
+                lastchar <- tclvalue(tkget(txt_edit, "insert-1char", "insert"))
             if(lastchar %in% c('{','[','(')){
                 if(lastchar=='{'){
                     lastchar <- '\\{'
@@ -1314,6 +1317,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 }
                 else if(lastchar=='(')
                     check <- ')'
+                # arrow right through opening brackets is incorrect
                 counter <- 1
                 while(counter > 0){
                     foundcheck <- lastcheck <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search",
@@ -1355,7 +1359,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 }
                 else if(lastchar==')')
                     check <- '('
-                startpos <- paste(startpos,'-1char',sep='')
+                # arrow left through closing brackets is close but still incorrect
+                # arrow right through closing brackets is incorrect
+                if(direction=='right')
+                    startpos <- paste(startpos,sep='')
+                if(direction=='left')
+                    startpos <- paste(startpos,'-1char',sep='')
                 counter <- 1
                 while(counter > 0){
                     foundcheck <- lastcheck <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search",
@@ -1382,15 +1391,20 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     return()
                 else{
                     tktag.add(txt_edit,'tmpbracketclose',lastcheck,paste(lastcheck,'+1char'))
-                    tktag.add(txt_edit,'tmpbracketclose',paste(insertpos,'-1char'),insertpos)
+                    if(direction=='right')
+                        tktag.add(txt_edit,'tmpbracketclose',insertpos,paste(insertpos,'+1char'))
+                    if(direction=='left')
+                        tktag.add(txt_edit,'tmpbracketclose',paste(insertpos,'-1char'),insertpos)
                 }
             }
         }
-        editkeypress <- function(){
+        editkeypress <- function(direction='right'){
             tktag.remove(txt_edit,'tmpbracketclose', '1.0', 'end')
-            checkbrackets()
+            checkbrackets(direction)
         }
-        tkbind(txt_edit, "<Key>", editkeypress) # change this to arrow keys?
+        tkbind(txt_edit, "<Right>", function() editkeypress('right'))
+        tkbind(txt_edit, "<Left>", function() editkeypress('left'))
+        tkbind(txt_edit, "<Key>", function() tktag.remove(txt_edit,'tmpbracketclose', '1.0', 'end'))
         
         editModified <- function(){
             scriptSaved <<- FALSE
