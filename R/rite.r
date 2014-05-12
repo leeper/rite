@@ -2083,97 +2083,85 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             .Tcl(paste('ctext::addHighlightClassForRegexp ',.Tk.ID(txt_edit), name, color, pattern))
             return()
         } else if(type=='class'){
-            .Tcl(paste('ctext::addHighlightClassForRegexp ',.Tk.ID(txt_edit), name, color, pattern))
+            .Tcl(paste('ctext::addHighlightClass ',.Tk.ID(txt_edit), name, color, pattern))
             return()
         } else if(type=='chars') {
-            .Tcl(paste('ctext::addHighlightClassForRegexp ',.Tk.ID(txt_edit), name, color, pattern))
+            .Tcl(paste('ctext::addHighlightClassForSpecialChars ',.Tk.ID(txt_edit), name, color, pattern))
             return()
-        }else
+        } else
             return()
     }
     
     # latex
     if("latex" %in% highlight){
         # a macro without any brackets
-        .Tcl(paste('ctext::addHighlightClassForRegexp ',.Tk.ID(txt_edit),' latex1 ',hcolors$latexmacros,' {\\\\[[:alnum:]|[:punct:]]+}',sep=''))
+        hl('regexp', 'latex1', hcolors$latexmacros,'{\\\\[[:alnum:]|[:punct:]]+}')
         # a macro with following brackets (and optionally [] brackets)
-        .Tcl(paste('ctext::addHighlightClassForRegexp ',.Tk.ID(txt_edit),
-            ' latex3 ',hcolors$latexmacros,' {\\\\[[:alnum:]|[:punct:]]+\\[[[:alnum:]*|[:punct:]*|[:space:]*|=*]*\\]\\{[[:alnum:]*|[:punct:]*|[:space:]*]*\\}}',
-            sep=''))
+        hl('regexp', 'latex3', hcolors$latexmacros,
+            '{\\\\[[:alnum:]|[:punct:]]+\\[[[:alnum:]*|[:punct:]*|[:space:]*|=*]*\\]\\{[[:alnum:]*|[:punct:]*|[:space:]*]*\\}}')
         # a macro with preceding brackets
-        .Tcl(paste('ctext::addHighlightClassForRegexp ',
-            .Tk.ID(txt_edit), ' latex4 ',hcolors$latexmacros,
-            ' {\\{\\\\[[:alnum:]|[:punct:]]*[[:space:]]*[[:alnum:]|[:punct:]|[:space:]]*\\}}',sep=''))
+        hl('regexp', 'latex4', hcolors$latexmacros,
+            '{\\{\\\\[[:alnum:]|[:punct:]]*[[:space:]]*[[:alnum:]|[:punct:]|[:space:]]*\\}}')
         # comments
-        .Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," latexcomments ",hcolors$latexcomments,
-            " {(^%[^%[:alnum:]?[:punct:]?].+|[^%[:alnum:]?[:punct:]?]%.+)}",sep=""))
+        hl('regexp', 'latexcomments', hcolors$latexcomments,
+            "{(^%[^%[:alnum:]?[:punct:]?].+|[^%[:alnum:]?[:punct:]?]%.+)}")
         ## AMEND ABOVE TO DEAL WITH %*% %in% type constructions
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rnwchunk1a ', hcolors$rnwchunk,
-            ' {<{2}[[:alnum:]?|[:punct:]?|[:space:]?|=?]*>{2}}', sep=''))
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rnwchunk1b ', hcolors$rnwchunk, ' @', sep=''))
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rnwchunk2 ', hcolors$rnwchunk, ' \\\\Sexpr\\{.?\\}', sep=''))
-        .Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," texchunks1 ",hcolors$rtexchunks,
-            " {%% begin.rcode.?}",sep=""))
-        .Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," texchunks2 ",hcolors$rtexchunks,
-            " {%% end.rcode.?}",sep=""))
+        hl('regexp', 'rnwchunk1a', hcolors$rnwchunk,'{<{2}[[:alnum:]?|[:punct:]?|[:space:]?|=?]*>{2}}')
+        hl('regexp', 'rnwchunk1b', hcolors$rnwchunk,'@')
+        hl('regexp', 'rnwchunk1c', hcolors$rnwchunk,'\\\\Sexpr\\{.?\\}')
+        hl('regexp', 'rtexchunk1a', hcolors$rtexchunks,'{%% begin.rcode.?}')
+        hl('regexp', 'rtexchunk1b', hcolors$rtexchunks,'{%% end.rcode.?}')
+        
         # equations
-        #.Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' latexeq ', hcolors$latexequations, ' \\${.+}\\$', sep=''))
+        #hl('regexp', 'latexeq', hcolors$rtexchunks,'\\${.+}\\$')
     }
     # markdown
     if("markdown" %in% highlight){
         riteMsg("Highlighting for markdown is only minimally supported")
         # something for the various kinds of markdown syntax
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdheader1 ', hcolors$rmd, ' =+', sep=''))
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdheader2 ', hcolors$rmd, ' -+', sep=''))
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdheader3 ', hcolors$rmd, ' {#{1,6} *.+ *#{0,6}$}', sep=''))
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdlist1 ', hcolors$rmd, ' {^ *[-] .+$}', sep=''))
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdlist2 ', hcolors$rmd, ' {^ *[+] .+$}', sep=''))
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdlist3 ', hcolors$rmd, ' {^ *[*] .+$}', sep=''))
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdlist4 ', hcolors$rmd, ' {[0-9]+[.] .+$}', sep=''))
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdquote ', hcolors$rmd, ' {^ *[>].+$}', sep=''))
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdlink ', hcolors$rmd, ' {\\[.+\\]\\(.+\\)}', sep=''))
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdcode ', hcolors$rmd, ' {`[^r].+`}', sep=''))
+        hl('regexp', 'rmdheader1', hcolors$rmd,'=+')
+        hl('regexp', 'rmdheader2', hcolors$rmd,'=-')
+        hl('regexp', 'rmdheader2', hcolors$rmd,'{#{1,6} *.+ *#{0,6}$}')
+        hl('regexp', 'rmdlist1', hcolors$rmd,'{^ *[-] .+$}')
+        hl('regexp', 'rmdlist2', hcolors$rmd,'{^ *[+] .+$}')
+        hl('regexp', 'rmdlist3', hcolors$rmd,'{^ *[*] .+$}')
+        hl('regexp', 'rmdlist4', hcolors$rmd,'{[0-9]+[.] .+$}')
+        hl('regexp', 'rmdquote', hcolors$rmd,'{^ *[>].+$}')
+        hl('regexp', 'rmdlink', hcolors$rmd,'{\\[.+\\]\\(.+\\)}')
+        hl('regexp', 'rmdcode', hcolors$rmd,'{`[^r].+`}')
         # code chunks of the form ```{} ... ```
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdchunk1 ', hcolors$rmdchunks, ' `{3}\\{r.+\\}', sep=''))
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdchunk2 ', hcolors$rmdchunks, ' `{3}', sep=''))
-        # inline code chunks of the form `r ...`
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rmdchunk3 ', hcolors$rmdchunks, ' {`r .+`}', sep=''))
+        hl('regexp', 'rmdchunk1a', hcolors$rmd,'`{3}\\{r.+\\}')
+        hl('regexp', 'rmdchunk1b', hcolors$rmd,'`{3}')
+        hl('regexp', 'rmdchunk1c', hcolors$rmd,'{`r .+`}')
     }
     # html
     if("xml" %in% highlight){
         # xml/html tags <...>, </...>, and <.../>
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' xml1 ', hcolors$xml,
-            ' {</?[[:alnum:]]*(\\s+[[:alnum:]]+=(\\\'|")?\\w*(\\\'|")?)*\\s*/?>}', sep=''))
+        hl('regexp', 'xml1', hcolors$xml,
+            '{</?[[:alnum:]]*(\\s+[[:alnum:]]+=(\\\'|")?\\w*(\\\'|")?)*\\s*/?>}')
         # xml/html comments
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' xml2 ', hcolors$xmlcomments,
-            ' {<!{1}-{2}.*(\\s+[[:alnum:]]+=(\\\'|")?\\w*(\\\'|")?)*\\s*-{2}>}', sep=''))
+        hl('regexp', 'xml2', hcolors$xmlcomments,
+            '{<!{1}-{2}.*(\\s+[[:alnum:]]+=(\\\'|")?\\w*(\\\'|")?)*\\s*-{2}>}')
     }
     # roxygen
     if("roxygen" %in% highlight){
-        # comments
-        .Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," comments ",hcolors$rcomments," {#[^\n\r]*}",sep=""))
-        # text
-        .Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," roxygen1 ",hcolors$roxygentext," {#'[^\n\r]*}",sep=""))
-        # chunks
-        .Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," roxygen2a ",hcolors$roxygenchunks," {#[+|-][^\n\r]*}",sep=""))
-        .Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," roxygen2b ",hcolors$roxygenchunks," {# (@knitr)[^\n\r]*}",sep=""))
+        hl('regexp', 'comments', hcolors$rcomments,'{#[^\n\r]*}')
+        hl('regexp', 'roxygen1', hcolors$roxygentext,"{#'[^\n\r]*}")
+        hl('regexp', 'roxygen2a', hcolors$roxygenchunks,"{#[+|-][^\n\r]*}")
+        hl('regexp', 'roxygen2b', hcolors$roxygenchunks,"{# (@knitr)[^\n\r]*}")
     }
     # brew
     if("brew" %in% highlight){
-        # chunks
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' brew1a ', hcolors$brewchunks, ' <%.+%>', sep=''))
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' brew1b ', hcolors$brewchunks, ' <%=.+%>', sep=''))
-        # comments
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' brew2 ', hcolors$brewcomments, ' <%#.+%>', sep=''))
-        # template
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' brew3 ', hcolors$brewtemplate, ' <%%.+%%>', sep=''))
+        hl('regexp', 'brew1a', hcolors$brewchunks,'<%.+%>')
+        hl('regexp', 'brew1b', hcolors$brewchunks,'<%=.+%>')
+        hl('regexp', 'brew2', hcolors$brewcomments,'<%#.+%>')
+        hl('regexp', 'brew3', hcolors$brewtemplate,'<%%.+%%>')
     }
     # reST
     if("rest" %in% highlight){
-        # chunks
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rest1 ', hcolors$restchunks, ' {[.]{2} \\{r.+\\}}', sep=''))
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rest2 ', hcolors$restchunks, ' {[.]{2} [.]{2}}', sep=''))
-        .Tcl(paste('ctext::addHighlightClassForRegexp ', .Tk.ID(txt_edit), ' rest3 ', hcolors$restchunks, ' {:r:`.+`.}', sep=''))
+        hl('regexp', 'rest1a', hcolors$restchunks,'{[.]{2} \\{r.+\\}}')
+        hl('regexp', 'rest1b', hcolors$restchunks,'{[.]{2} [.]{2}}')
+        hl('regexp', 'rest1c', hcolors$restchunks,'{:r:`.+`.}')
     }
     # r
     if("r" %in% highlight){
@@ -2185,26 +2173,20 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         tmpsplit <- split(uniq,tmpx[1:length(uniq)])
         uniqtmp <- sapply(tmpsplit, FUN=function(x) { paste(" [list",paste(x,collapse=" ")," ]") })
         for(j in 1:length(uniqtmp)){
-            .Tcl(paste("ctext::addHighlightClass ",.Tk.ID(txt_edit),
-                        " basefunctions",j," ", hcolors$functions, uniqtmp[j], sep=""))
+            hl('class', paste("basefunctions",j,sep=''), hcolors$functions,uniqtmp[j])
         }
         rm(HLfuns,uniq,tmpx,tmpsplit,uniqtmp)
-        # operators
-        .Tcl(paste("ctext::addHighlightClass ",.Tk.ID(txt_edit)," specials ",hcolors$operators,"  [list TRUE FALSE NULL NA if else ]",sep=""))
-        .Tcl(paste("ctext::addHighlightClassForSpecialChars ",.Tk.ID(txt_edit)," operators ",hcolors$operators," {@-+!~?:;*/^<>=&|$,.}",sep=""))
-        .Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," percoperators ",hcolors$operators," {%[[:alnum:][:punct:]]+%}",sep=""))
-        # brackets
-        .Tcl(paste("ctext::addHighlightClassForSpecialChars ",.Tk.ID(txt_edit)," brackets ",hcolors$brackets," {[]{}()}",sep=""))
-        # floating point numbers
-        .Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," digits ",hcolors$digits," {\\m[-+]?[0-9]*\\.?[0-9]+\\M}",sep=""))
+        hl('class', 'specials', hcolors$operators, '[list TRUE FALSE NULL NA if else ]')
+        hl('chars', 'operators', hcolors$operators, '{@-+!~?:;*/^<>=&|$,.}')
+        hl('regexp', 'infix', hcolors$operators, '{%[[:alnum:][:punct:]]+%}')
+        hl('chars', 'brackets', hcolors$brackets, '{[]{}()}')
+        hl('regexp', 'digits', hcolors$digits, '{\\m[-+]?[0-9]*\\.?[0-9]+\\M}')
         # numbers before letters
-        #.Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," digits2 ",hcolors$normal," {\\d+[A-Za-z]+[:space:]?}",sep=""))
-        # character
-        .Tcl(paste('ctext::addHighlightClassForRegexp ',.Tk.ID(txt_edit),' character1 ',hcolors$characters,' {"(?:[^\\"]|\\.)*"}',sep=""))
-        .Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," character2 ",hcolors$characters," {'(?:[^\\']|\\.)*'}",sep=""))
-        # comments
+        #hl('regexp', 'digits2', hcolors$normal, '{\\d+[A-Za-z]+[:space:]?}')
+        hl('regexp', 'character1', hcolors$characters, '{"(?:[^\\"]|\\.)*"}')
+        hl('regexp', 'character2', hcolors$characters, " {'(?:[^\\']|\\.)*'}")
         if(!"roxygen" %in% highlight)
-            .Tcl(paste("ctext::addHighlightClassForRegexp ",.Tk.ID(txt_edit)," comments ",hcolors$rcomments," {#[^\n\r]*}",sep=""))
+            hl('regexp', 'comments', hcolors$rcomments, '{#[^\n\r]*}')
     }
     
     ## DISPLAY EDITOR ##
