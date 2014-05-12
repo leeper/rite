@@ -904,18 +904,21 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     addHighlighting <- function(){
         addHighlight <- function(){
             if(!tclvalue(objectval)=="")
-                .Tcl(paste(    "ctext::addHighlightClass ",.Tk.ID(txt_edit),
-                            " functions ","purple","  [list ",tclvalue(objectval)," ]",sep=""))
+                hl('class', 'functions', hcolor$functions,
+                    paste(" [list ",tclvalue(objectval)," ]",sep=""))
             if(!tclvalue(envirval)=="" && paste("package:",tclvalue(envirval),sep="") %in% search()){
-                packs <- c(    tclvalue(envirval),
-                            gsub(" ","",strsplit(packageDescription(tclvalue(envirval), fields="Depends"),",")[[1]]))
+                packs <- c( tclvalue(envirval),
+                            gsub(" ","",strsplit(packageDescription(tclvalue(envirval),
+                                                                    fields="Depends"),",")[[1]]))
                 packs <- na.omit(packs)
                 for(i in 1:length(packs)){
-                    funs <- try(paste(    unique(gsub("<-","",
-                                        objects(paste("package:",tclvalue(envirval),sep="")))),collapse=" "), silent=TRUE)
-                    if(!inherits(funs,"try-error"))
-                        .Tcl(paste("ctext::addHighlightClass ",.Tk.ID(txt_edit)," ",tclvalue(envirval),
-                                    "functions ","purple","  [list ",funs," ]",sep=""))
+                    funs <- try(paste(unique(gsub("<-","",
+                                      objects(paste("package:",tclvalue(envirval),sep="")))),collapse=" "),
+                                silent=TRUE)
+                    if(!inherits(funs,"try-error")){
+                        hl('class', 'functions', hcolor$functions,
+                            paste(" [list ",funs," ]",sep=""))
+                    }
                 }
             }
         }
