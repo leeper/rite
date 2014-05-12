@@ -1303,15 +1303,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         tktag.configure(txt_edit,'tmpbracketclose', foreground='red',
             font=tkfont.create(family=fontFamily, size=fontSize, weight='bold'))
         checkbrackets <- function(direction='right'){
-            
             insertpos <- tclvalue(tkindex(txt_edit,"insert"))
-            if(direction=='right'){
-                startpos <- 'insert+1char'
+            if(direction=='right')
                 lastchar <- tclvalue(tkget(txt_edit, "insert", "insert+1char"))
-            } else {
-                startpos <- 'insert'
+            else
                 lastchar <- tclvalue(tkget(txt_edit, "insert-1char", "insert"))
-            }
             if(lastchar %in% c('{','[','(')){
                 if(lastchar=='{'){
                     lastchar <- '\\{'
@@ -1323,6 +1319,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 }
                 else if(lastchar=='(')
                     check <- ')'
+                if(direction=='right')
+                    startpos <- 'insert+1char'
+                else
+                    startpos <- 'insert'
                 counter <- 1
                 while(counter > 0){
                     foundcheck <- lastcheck <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search",
@@ -1368,9 +1368,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 else if(lastchar==')')
                     check <- '('
                 if(direction=='right')
-                    startpos <- paste(startpos,sep='')
-                if(direction=='left')
-                    startpos <- paste(startpos,'-1char',sep='')
+                    startpos <- 'insert'
+                else
+                    startpos <- 'insert-1char'
                 counter <- 1
                 while(counter > 0){
                     foundcheck <- lastcheck <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search",
@@ -1386,11 +1386,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                                 counter2 <- FALSE
                             else {
                                 counter <- counter+1
-                                startpos <- paste(foundbracket,'-1char',sep='')
+                                startpos <- foundbracket
                             }
                         }
                         counter <- counter-1
-                        startpos <- paste(foundcheck,'-1char',sep='')
+                        startpos <- foundcheck
                     }
                 }
                 if(lastcheck=='')
