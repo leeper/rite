@@ -387,10 +387,15 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     
     uploadToRPubs <- function(new = TRUE, render='html'){
         saveScript()
+        wasopen <- openreports
         if(render=='md2html'){
+            openreports <- tclVar(0)
             h <- knittxt(genmode="md2html", use='current')
+            openreports <- wasopen
         } else if(render=='rmd2html') {
+            openreports <- tclVar(0)
             h <- knittxt(genmode="rmd2html", use='current')
+            openreports <- wasopen
         } else {
             h <- filename
         }
