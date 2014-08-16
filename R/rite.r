@@ -13,6 +13,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         echorun <- tclVar(1)
     else
         echorun <- tclVar(0)
+    addtohistory <- tclVar(1)
     # optionally setup evaluation environment
     if(is.null(evalenv)){
         editenv <- new.env()
@@ -317,6 +318,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             }
         }
     }
+    loadHistory <- function(){
+        tmphistory <- tempfile("Rrawhist")
+        savehistory(tmphistory)
+        loadScript(tmphistory)
+        unlink(tmphistory)
+    }
     saveScript <- function(){
         if(is.null(filename) || !length(filename) || filename=="")
             return(saveAsScript())
@@ -552,6 +559,15 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         # a restart to 'discontinue' source(.)-ing
         discontinue = function(){invisible()}
         )
+        if(as.logical(as.numeric(tclvalue(addtohistory)))){
+            tmphistory <- tempfile()
+            savehistory(tmphistory)
+            histcon <- file(tmphistory, open="a")
+            writeLines(code, histcon)
+            close(histcon)
+            loadhistory(tmphistory)
+            unlink(tmphistory)
+        }
         if(catchOutput){
             # output to `output`
             if(length(osink)>length2){
@@ -994,6 +1010,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         tkadd(menuFile, "command", label="New Script", command=newScript, underline = 0)
         tkadd(menuFile, "command", label="Load Script",
             command=function() loadScript(locals=TRUE), underline = 0)
+        tkadd(menuFile, "command", label="Load Command History",
+            command=loadHistory)
         tkadd(menuFile, "command", label="Save Script", command=saveScript, underline = 0)
         tkadd(menuFile, "command", label="SaveAs Script", command=saveAsScript, underline = 1)
         tkadd(menuFile, "command", label="Append Script",
@@ -1057,6 +1075,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         tkadd(menuRun, "command", label = "Run Code Chunks (All)", command = runAllChunks, underline = 4)
         tkadd(menuRun, "separator")
         tkadd(menuRun, 'checkbutton', label='Echo code', onvalue=1L, variable=echorun)
+        tkadd(menuRun, 'checkbutton', label='Add commands to history', onvalue=1L, variable=addtohistory)
         tkadd(menuRun, "separator")
         if(catchOutput){
             tkadd(menuRun, "command", label="List all objects", command=function()
