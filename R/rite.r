@@ -14,6 +14,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     else
         echorun <- tclVar(0)
     addtohistory <- tclVar(1)
+    everWarn <- tclVar(1)
     # optionally setup evaluation environment
     if(is.null(evalenv)){
         editenv <- new.env()
@@ -523,6 +524,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkfocus(txt_edit)
             }
         }
+        displayWarningDialog <- tclVar(1)
         out <- withRestarts(withCallingHandlers(source(runtemp, print.eval=TRUE,
                 echo=as.logical(as.numeric(tclvalue(echorun)))),
             error = function(errmsg){
@@ -536,10 +538,22 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 errmsg <- paste(errmsg[-1],collapse=":")
                 if(catchOutput)
                     writeError(errmsg,"Warning")
-                errbox <- tkmessageBox(message = paste("Warning:",errmsg,"\nDo you want to continue evaluation?"),
-                                        icon = "error", type = "yesno", default = "no")
-                if(tclvalue(errbox)=="no")
-                    invokeRestart("discontinue")
+                a <- as.logical(as.numeric(tclvalue(displayWarningDialog)))
+                b <- as.logical(as.numeric(tclvalue(everWarn)))
+                if(a & b) {
+                    warnmess <- paste("Warning:", errmsg,
+                                  "Do you want to continue evaluation?",
+                                  "Choose \"Cancel\" to continue and suppress further warnings.",
+                                  sep="\n")
+                    errbox <- tkmessageBox(message = warnmess,
+                                           icon = "error", 
+                                           type = "yesnocancel", 
+                                           default = "no")
+                    if(tclvalue(errbox)=="no")
+                        invokeRestart("discontinue")
+                    else if(tclvalue(errbox)=="cancel")
+                        tclvalue(displayWarningDialog) <- 0
+                }
             },
             message = function(errmsg){
                 errmsg <- strsplit(as.character(errmsg),": ")[[1]]
@@ -1074,8 +1088,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         tkadd(menuRun, "command", label = "Run All", command = runAll, underline = 4)
         tkadd(menuRun, "command", label = "Run Code Chunks (All)", command = runAllChunks, underline = 4)
         tkadd(menuRun, "separator")
-        tkadd(menuRun, 'checkbutton', label='Echo code', onvalue=1L, variable=echorun)
-        tkadd(menuRun, 'checkbutton', label='Add commands to history', onvalue=1L, variable=addtohistory)
+        tkadd(menuRun, 'checkbutton', label='Echo code?', onvalue=1L, variable=echorun)
+        tkadd(menuRun, 'checkbutton', label='Wait on warnings?', onvalue=1L, variable=everWarn)
+        tkadd(menuRun, 'checkbutton', label='Add commands to history?', onvalue=1L, variable=addtohistory)
         tkadd(menuRun, "separator")
         if(catchOutput){
             tkadd(menuRun, "command", label="List all objects", command=function()

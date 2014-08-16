@@ -2,7 +2,8 @@
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
 * The "File" menu allows users to load the history directly into R as a new script. (#75)
-* The "Run" menu now includes an option (`TRUE` by default) to add executed commands to the R command history. (#73)
+* The "Run" menu now includes an option "Add commands to history?" (`TRUE` by default) to add executed commands to the R command history. (#73)
+* Multiple warning dialogs in the same "Run" execution can now be suppressed via the warning dialog. Warning dialogs can also be turned off entirely using the "Wait on warnings?" option on the "Run" menu. (#74)
 * Added ability to load a remote URL as initial script using new argument `url`. (#68)
 * Changed default tab setting from "\t" to "    " (4 spaces).
 * Added ability to upload HTML or automatically rendered (R)markdown to [RPubs](https://rpubs.com/) using `markdown::rpubsUpload`. (#71)
