@@ -76,66 +76,66 @@ The use of highlighting in general can be regulated by the \code{highlight} para
 \section{Shortcut keys in widget}{
 	\subsection{Key combinations}{
 	
-	\code{<Ctrl-o>}: Open script
+	\kbd{<Ctrl-o>}: Open script
 	
-	\code{<Ctrl-s>}: Save script as
+	\kbd{<Ctrl-s>}: Save script as
 	
-	\code{<Ctrl-r>}: Run/evaluate line (or selection, if applicable)
+	\kbd{<Ctrl-r>}: Run/evaluate line (or selection, if applicable)
 	
-	\code{<Control-Return>}: Run/evaluate line (or selection, if applicable)
+	\kbd{<Control-Return>}: Run/evaluate line (or selection, if applicable)
 	
-	\code{<Ctrl-c>}: Copy
+	\kbd{<Ctrl-c>}: Copy
 	
-	\code{<Ctrl-x>}: Cut
+	\kbd{<Ctrl-x>}: Cut
 	
-	\code{<Ctrl-p>}: Paste
+	\kbd{<Ctrl-p>}: Paste
 	
-	\code{<Ctrl-a>}: Select all
+	\kbd{<Ctrl-a>}: Select all
 	
-	\code{<Ctrl-e>}: Move cursor to end of current line
+	\kbd{<Ctrl-e>}: Move cursor to end of current line
 	
-	\code{<Shift-e>}: Adjust selection to end of current line
+	\kbd{<Shift-e>}: Adjust selection to end of current line
 	
-	\code{<Ctrl-f>}: Find/replace
+	\kbd{<Ctrl-f>}: Find/replace
 	
-	\code{<Ctrl-g>}: Go to line
+	\kbd{<Ctrl-g>}: Go to line
 	
-	\code{<Ctrl-z>}: Undo
+	\kbd{<Ctrl-z>}: Undo
 	
-	\code{<Ctrl-y>}: Redo
+	\kbd{<Ctrl-y>}: Redo
 	
-	\code{<Tab>}: Indent line
+	\kbd{<Tab>}: Indent line
 	
-	\code{<Ctrl-i>}: Indent line(s)
+	\kbd{<Ctrl-i>}: Indent line(s)
 	
-	\code{<Ctrl-u>}: Unindent line
+	\kbd{<Ctrl-u>}: Unindent line
 	
-	\code{<Ctrl-k>}: Toggle comment on/off for line(s)
+	\kbd{<Ctrl-k>}: Toggle comment on/off for line(s)
 	
-	%\code{<Shift-Tab>}: Open command completion context menu (based on cursor position)
+	%\kbd{<Shift-Tab>}: Open command completion context menu (based on cursor position)
 	
-	\code{<Ctrl-l>}: Clear output panel
+	\kbd{<Ctrl-l>}: Clear output panel
 	
-	\code{<Shift>} and \code{<Left>}, \code{<Right>}, or drag left mouse: Adjust selection by character
+	\kbd{<Shift>} and \kbd{<Left>}, \kbd{<Right>}, or drag left mouse: Adjust selection by character
 	
-	\code{<Control-Shift-Left>} or \code{<Control-Shift-Right>}: Adjust selection by word
+	\kbd{<Control-Shift-Left>} or \kbd{<Control-Shift-Right>}: Adjust selection by word
 	
-	\code{<Control-Up>} or \code{<Control-Down>}: Move insertion cursor by paragraphs
+	\kbd{<Control-Up>} or \kbd{<Control-Down>}: Move insertion cursor by paragraphs
 	
-	\code{<Control-Shift-Up>} or \code{<Control-Shift-Down>}: Adjust selection by paragraph
+	\kbd{<Control-Shift-Up>} or \kbd{<Control-Shift-Down>}: Adjust selection by paragraph
 	}
 
 	\subsection{Function keys}{
 	
-	\code{<F1>}: Open help for current function, if a known function (based on cursor position); or the results of help.search()
+	\kbd{<F1>}: Open help for current function, if a known function (based on cursor position); or the results of help.search()
 	
-	\code{<F2>}: Open command completion context menu (based on cursor position). A right-button mouse click closes the context menu if no selection is desired (not necessary on all platforms).
+	\kbd{<F2>}: Open command completion context menu (based on cursor position). A right-button mouse click closes the context menu if no selection is desired (not necessary on all platforms).
 	
-	\code{<F3>}: Find
+	\kbd{<F3>}: Find
 	
-	\code{<F7>}: Try to parse the script and return any syntax errors (does not evaluate the script)
+	\kbd{<F7>}: Try to parse the script and return any syntax errors (does not evaluate the script)
 	
-	\code{<F8>}: Run/evaluate all code
+	\kbd{<F8>}: Run/evaluate all code
 	}
 
 	\subsection{Mouse shortcuts}{
