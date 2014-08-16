@@ -904,7 +904,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     addHighlighting <- function(){
         addHighlight <- function(){
             if(!tclvalue(objectval)=="")
-                hl('class', 'functions', hcolor$functions,
+                hl('class', 'functions', hcolors$functions,
                     paste(" [list ",tclvalue(objectval)," ]",sep=""))
             if(!tclvalue(envirval)=="" && paste("package:",tclvalue(envirval),sep="") %in% search()){
                 packs <- c( tclvalue(envirval),
@@ -916,7 +916,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                                       objects(paste("package:",tclvalue(envirval),sep="")))),collapse=" "),
                                 silent=TRUE)
                     if(!inherits(funs,"try-error")){
-                        hl('class', 'functions', hcolor$functions,
+                        hl('class', 'functions', hcolors$functions,
                             paste(" [list ",funs," ]",sep=""))
                     }
                 }
