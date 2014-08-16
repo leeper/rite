@@ -490,17 +490,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             scriptSaved <<- TRUE
             tkwm.title(editor, wmtitle)
         }
-        if(chunks){
-            if(!require(knitr)){
-                install <- try(install.packages("knitr"), silent=TRUE)
-                if(inherits(install, "try-error")){
-                    riteMsg("knitr not installed and not installable", error=TRUE)
-                    return()
-                }
-            }
-            code <- knitr::purl(text=code, quiet=TRUE)
-        }
-        else{
+        if(chunks) {
+            code <- purl(text=code, quiet=TRUE)
+        } else{
             parsed <- tryparse(verbose=FALSE)
             if(!parsed)
                 return()
@@ -661,22 +653,6 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         
     ## KNITR, etc. INTEGRATION ##
     knittxt <- function(genmode="knit", use='text', spinformat=NULL){
-        if(!require(knitr)){
-            install <- try(install.packages("knitr"), silent=TRUE)
-            if(inherits(install, "try-error")){
-                riteMsg("knitr not installed and not installable", error=TRUE)
-                return()
-            }
-        }
-        if(genmode %in% c("md2html","rmd2html")){
-            if(!require(markdown)){
-                install <- try(install.packages("markdown"), silent=TRUE)
-                if(inherits(install, "try-error")){
-                    riteMsg("markdown not installed and not installable", error=TRUE)
-                    return()
-                }
-            }
-        }
         if(catchOutput)
             clearError()
         ksink1 <- ""

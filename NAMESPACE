@@ -4,6 +4,7 @@ export(sinkstart)
 export(sinkstop)
 
 import(tcltk)
+import(knitr)
 importFrom(tcltk2, tk2notebook, tk2notetab, is.ttk) # tk2ctext: no longer calling `tk2ctext` directly
 importFrom(utils, available.packages, install.packages)
 importFrom(RCurl, getURL, postForm)
