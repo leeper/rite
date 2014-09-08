@@ -26,12 +26,18 @@
 install.packages("rite")
 ```
 
-And the latest development version, available here can be installed directly using Hadley Wickham's [devtools](http://cran.r-project.org/web/packages/devtools/index.html) package:
+And the latest development version, [available here on GitHub](https://github.com/leeper/rite), can be installed directly using Hadley Wickham's [devtools](http://cran.r-project.org/web/packages/devtools/index.html) package:
 
 ```
 # install.packages("devtools")
 library("devtools")
 install_github("leeper/rite")
+```
+
+Once installed from GitHub, you should receive the pleasant confirmation message:
+
+```
+* DONE (rite)
 ```
 
 If you find that you use **rite** often, you may want to consider adding it to your [R startup profile](http://stat.ethz.ch/R-manual/R-devel/library/base/html/Startup.html).
