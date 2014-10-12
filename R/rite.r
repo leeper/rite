@@ -6,7 +6,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     ## STARTUP OPTIONS ##
     filename <- filename # script filename (if loaded or saved)
     scriptSaved <- TRUE # a logical for whether current edit file is saved
-    searchterm <- ""
+    searchopts <- list()
+        searchopts$searchterm <- ""
+        searchopts$replaceterm <- ""
+        searchopts$casevar <- 1
+        searchopts$regoptvar <- 0
+        searchopts$updownvar <- 1
+        searchopts$searchfromtop <- 0
     ritetmpfile <- tempfile(pattern="rite",fileext=".r")
     wmtitle <- packagetitle <- "rite"
     if(echo)
@@ -1661,23 +1667,30 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     #tkbind(txt_edit, "<Shift-Tab>", commandCompletion)
     tkbind(txt_edit, "<F2>", commandCompletion)
     
-    casevar <- tclVar(1)
-    regoptvar <- tclVar(0)
-    updownvar <- tclVar(1)
     findreplace <- function(){
+        casevar <- tclVar(searchopts$casevar)
+        regoptvar <- tclVar(searchopts$regoptvar)
+        updownvar <- tclVar(searchopts$updownvar)
+        searchfromtop <- tclVar(searchopts$searchfromtop)
         startpos <- tclvalue(tkindex(txt_edit,"insert"))
         faillabeltext <- tclVar("")
-        findtext <- function(string,startpos){
-            searchterm <<- string
-            if(string=="")
+        
+        findtext <- function(string, startpos, replaceval = NULL){
+            searchopts$searchterm <<- string
+            if(!is.null(replaceval))
+                searchopts$replaceterm <<- replaceval
+            searchopts$casevar <- tclvalue(casevar)
+            searchopts$regoptvar <- tclvalue(regoptvar)
+            searchopts$updownvar <- tclvalue(updownvar)
+            searchopts$searchfromtop <- tclvalue(searchfromtop)
+            if(string=="") {
                 return()
-            else{
+            } else {
                 found <- ""
                 if(tclvalue(updownvar)==1){
                     ud1 <- "-forwards"
                     si1 <- "end"
-                }
-                else{
+                } else{
                     ud1 <- "-backwards"
                     si1 <- "0.0"
                 }
@@ -1691,86 +1704,89 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     case1 <- ""
                 found <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search",ud1,reg1,case1,string,startpos,si1)))
                 if(!found==""){
-                    tkdestroy(searchDialog)
                     tktag.add(txt_edit, "sel", found, paste(found," +",nchar(string),"char",sep=""))
-                    if(tclvalue(updownvar)==1)
-                        tkmark.set(txt_edit, "insert", paste(found," +",nchar(string),"char",sep=""))
-                    else
-                        tkmark.set(txt_edit, "insert", found)
-                }
-                else
+                    if(!is.null(replaceval)) {
+                        if(tclvalue(updownvar)==1)
+                            tkdelete(txt_edit, "insert", paste(found," +",nchar(string),"char",sep=""))
+                        else
+                            tkdelete(txt_edit, "insert", paste(found," -",nchar(string),"char",sep=""))
+                        tkinsert(txt_edit, "insert", replaceval)
+                    } else {
+                        if(tclvalue(updownvar)==1)
+                            tkmark.set(txt_edit, "insert", paste(found," +",nchar(string),"char",sep=""))
+                        else
+                            tkmark.set(txt_edit, "insert", found)
+                    }
+                    tkdestroy(searchDialog)
+                    # if(tclvalue(searchfromtop)==1 && tclvalue(updownvar)==1) {
+                        # findtext(string, "0.0")
+                    # } else if(tclvalue(searchfromtop)==1 && tclvalue(updownvar)==0) {
+                        # findtext(string, "end")
+                    # }
+                } else {
                     tclvalue(faillabeltext) <- "Text not found"
+                }
             }
         }
-        replacetxt <- function(){
-            # delete selection, if present
-            # insert find text
-            # find-next
-        }
-        if(searchterm=="")
-            findval <- tclVar("")
-        else
-            findval <- tclVar(searchterm)
+        findval <- tclVar(searchopts$searchterm)
+        replaceval <- tclVar(searchopts$replaceterm)
         searchDialog <- tktoplevel()
         tcl("wm", "attributes", searchDialog, topmost=TRUE)
-        search1 <- function()
+        searchFocus <- function() {
             tcl("wm", "attributes", searchDialog, alpha="1.0")
-        searchTrans <- function()
+        }
+        searchTrans <- function() {
             tcl("wm", "attributes", searchDialog, alpha="0.4")
-        tkbind(searchDialog, "<FocusIn>", search1)
+        }
+        tkbind(searchDialog, "<FocusIn>", searchFocus)
         tkbind(searchDialog, "<FocusOut>", searchTrans)
         tkwm.title(searchDialog, paste("Search", sep=""))    # title
-        entryform <- tkframe(searchDialog, relief="groove", borderwidth=2)
-            find.entry <- tkentry(entryform, width = 40, textvariable=findval)
-            #replace.entry <- tkentry(entryform, width = 40, textvariable=replaceval)
-            # grid
-            tkgrid(tklabel(entryform, text = "   "), row=1, column=1, sticky="nsew")
-            tkgrid(tklabel(entryform, text = "Find:   "), row=2, column=1, sticky="nsew")
-            tkgrid(find.entry, row=2, column=2)
-            tkgrid.configure(find.entry, sticky="nsew")
-            #tkgrid(tklabel(entryform, text = "Replace:"), row=3, column=1, sticky="nsew")
-            #tkgrid(replace.entry, row=3, column=2)
-            #tkgrid.configure(replace.entry, sticky="nsew")
-            tkgrid(tklabel(entryform, text = "   "), row=4, column=3)
-            regform <- tkframe(entryform)
-                regexopt <- tkcheckbutton(regform, variable=regoptvar)
-                tkgrid(relabel <- tklabel(regform, text = "Use RegExp:   "), row=1, column=1, sticky="nsew")
-                tkgrid(regexopt, row=1, column=2, sticky="nsew")
+        lframe <- tkframe(searchDialog)
+            sframe <- ttklabelframe(lframe, text = "Find", relief="groove", borderwidth=2)
+                find.entry <- tkentry(sframe, width = 40, bg = "white", textvariable=findval)
+                tkgrid(find.entry)
+            rframe <- ttklabelframe(lframe, text = "Replace", relief="groove", borderwidth=2)
+                replace.entry <- tkentry(rframe, width = 40, bg = "white", textvariable=replaceval)
+                tkgrid(replace.entry)
+            tkgrid(sframe, row=1, column=1, columnspan = 2)
+            tkgrid(rframe, row=2, column=1, columnspan = 2)
+            oframe <- ttklabelframe(lframe, text = "Options")
+                regexopt <- tkcheckbutton(oframe, variable=regoptvar)
+                tkgrid(regexopt, row=1, column=1, sticky="nsew")
+                tkgrid(relabel <- tklabel(oframe, text = "Use RegExp?"), row=1, column=2, sticky="nsew")
                 tkbind(relabel, "<Button-3>", function() browseURL("http://www.tcl.tk/man/tcl8.4/TclCmd/re_syntax.htm"))
-            tkgrid(regform, row=5, column=2, sticky="nsew")
-            caseform <- tkframe(entryform)
-                caseopt <- tkcheckbutton(caseform, variable=casevar)
-                tkgrid(tklabel(caseform, text = "Ignore case? "), row=1, column=1, sticky="nsew")
-                tkgrid(caseopt, row=1, column=2, sticky="nsew")    
-            tkgrid(caseform, row=6, column=2, sticky="nsew")
-            searchoptions <- tkframe(entryform)
-                updown.up <- tkradiobutton(searchoptions, variable=updownvar, value=0)
-                updown.down <- tkradiobutton(searchoptions, variable=updownvar, value=1)
-                tkgrid(    tklabel(searchoptions, text = "Direction:   "),
-                        updown.up, 
-                        tklabel(searchoptions, text = "Up"), 
-                        updown.down,
-                        tklabel(searchoptions, text = "Down") )
-            tkgrid(searchoptions, row=7, column=2, sticky="nsew")
-            tkgrid.columnconfigure(entryform,1,weight=6)
-            tkgrid.columnconfigure(entryform,2,weight=10)
-            tkgrid.columnconfigure(entryform,3,weight=2)
-        tkgrid(entryform, row=1, column=2)
-        tkgrid.configure(entryform, sticky="nsew")
+                caseopt <- tkcheckbutton(oframe, variable=casevar)
+                tkgrid(caseopt, row=2, column=1, sticky="nsew")
+                tkgrid(tklabel(oframe, text = "Ignore case?"), row=2, column=2, sticky="nsew")
+            tkgrid(oframe, row=3, column=1)
+            searchoptions <- ttklabelframe(lframe, text = "Search Direction")
+                tkgrid(tkradiobutton(searchoptions, variable=updownvar, value=0), row = 1, column = 1) 
+                tkgrid(tklabel(searchoptions, text = "Up"),  row = 1, column = 2)
+                tkgrid(tkradiobutton(searchoptions, variable=updownvar, value=1), row = 1, column = 3)
+                tkgrid(tklabel(searchoptions, text = "Down"), row = 1, column = 4)
+                tkgrid(tkcheckbutton(searchoptions, variable=searchfromtop), row = 2, column = 1)
+                tkgrid(tklabel(searchoptions, text = "Search from top?"), row = 2, column = 2, columnspan = 3)
+            tkgrid(searchoptions, row=3, column=2, sticky="nsew")
+        tkgrid(lframe, row = 1, column = 1)
         buttons <- tkframe(searchDialog)
             # buttons
-            Findbutton <- tkbutton(buttons, text = " Find Next ", width=12, command = function() findtext(tclvalue(findval),startpos))
-            #Replacebutton <- tkbutton(buttons, text = "  Replace  ", width=12, command = function() replacetext(tclvalue(replaceval)))
-            Cancelbutton <- tkbutton(buttons, text = "     Close     ", width=12, command = function(){ tkdestroy(searchDialog); tkfocus(txt_edit) } )
+            Findbutton <- tkbutton(buttons, text = " Find Next ", width=12, 
+                                   command = function() findtext(tclvalue(findval),startpos))
+            Replacebutton <- tkbutton(buttons, text = "  Replace  ", width=12, 
+                                      command = function() {
+                                          findtext(tclvalue(findval),startpos, tclvalue(replaceval))
+                                      })
+            Cancelbutton <- tkbutton(buttons, text = "     Close     ", width=12, 
+                                     command = function(){ tkdestroy(searchDialog); tkfocus(txt_edit) } )
             tkgrid(tklabel(buttons, text = "        "), row=1, column=1)
             tkgrid(Findbutton, row=2, column=2)
             faillabel <- tklabel(buttons, text=tclvalue(faillabeltext), foreground="red")
             tkconfigure(faillabel,textvariable=faillabeltext)
             tkgrid(faillabel, row=3, column=1, columnspan=3)
-            #tkgrid(Replacebutton, row=3, column=2)
-            tkgrid(tklabel(buttons, text = "        "), row=4, column=2)
-            tkgrid(Cancelbutton, row=5, column=2)
-            tkgrid(tklabel(buttons, text = "        "), row=6, column=3)
+            tkgrid(Replacebutton, row=4, column=2)
+            tkgrid(tklabel(buttons, text = "        "), row=5, column=2)
+            tkgrid(Cancelbutton, row=6, column=2)
+            tkgrid(tklabel(buttons, text = "        "), row=7, column=3)
             tkgrid.columnconfigure(buttons,1,weight=2)
             tkgrid.columnconfigure(buttons,2,weight=10)
             tkgrid.columnconfigure(buttons,3,weight=2)
@@ -1798,12 +1814,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         }
         goDialog <- tktoplevel()
         tkwm.title(goDialog, paste("Go to line",sep=""))    # title
-        entryform <- tkframe(goDialog, relief="groove", borderwidth=2)
+        entryform <- ttklabelframe(goDialog, text = "Go to line", relief="groove", borderwidth=2, width = 20)
             lineval <- tclVar("")
-            line.entry <- tkentry(goDialog, width = 5, textvariable=lineval)
-            gobutton <- tkbutton(entryform, text = " Go ", command = jump)
-            tkgrid(tklabel(entryform, text = "    Line: "), line.entry, gobutton)
+            line.entry <- tkentry(entryform, width = 10, bg = "white", textvariable = lineval)
+            tkgrid(line.entry, row = 1, column = 1)
             tkbind(line.entry, "<Return>", jump)
+        tkgrid(tkbutton(entryform, text = " Go ", width = 10, command = jump), row = 1, column = 2)
+        tkgrid(tkbutton(entryform, text = "Cancel", command = function() {
+            tkdestroy(goDialog)
+            tksee(txt_edit,"insert")
+        }, width = 10), row = 1, column = 3)
         tkgrid(entryform)
         tkfocus(line.entry)
     }
