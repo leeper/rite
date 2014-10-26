@@ -635,6 +635,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         runCode(tclvalue(tkget(txt_edit,"1.0","end")), chunks=TRUE)
     }
 
+    tidyScript <- function(){
+        script <- tclvalue(tkget(txt_edit,"1.0","end"))
+        tkdelete(txt_edit, "1.0", "end")
+        tkinsert(txt_edit, "1.0", 
+                 paste0(tidy_source(text = script)$text.tidy, collapse="\n"))
+    }
     
     ## OUTPUT FUNCTIONS ##
     if(catchOutput){
@@ -1074,6 +1080,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         tkadd(menuRun, "command", label = "Run Selection", command = runSelection, underline = 4)
         tkadd(menuRun, "command", label = "Run All", command = runAll, underline = 4)
         tkadd(menuRun, "command", label = "Run Code Chunks (All)", command = runAllChunks, underline = 4)
+        tkadd(menuRun, "separator")
+        tkadd(menuRun, "command", label = "Tidy R Script", command = tidyScript)
         tkadd(menuRun, "separator")
         tkadd(menuRun, 'checkbutton', label='Echo code?', onvalue=1L, variable=echorun)
         tkadd(menuRun, 'checkbutton', label='Wait on warnings?', onvalue=1L, variable=everWarn)
