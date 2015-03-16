@@ -708,21 +708,25 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         
         riteMsg("Generating report...", error=TRUE)
         
-        if(genmode=="knit")
+        if(genmode=="knit") {
             knit_out <- try(knit(input=inputvalue, text=txtvalue))
-        else if(genmode=="purl")
+        } else if(genmode=="purl") {
             knit_out <- try(purl(input=inputvalue, text=txtvalue))
-        else if(genmode=="sweave"){
-            if(is.null(txtvalue))
+        } else if(genmode=="sweave"){
+            sweavesty <- file.path(R.home(),"share","texmf","tex","latex","Sweave.sty")
+            cdir <- dirname(inputvalue)
+            if((!"Sweave.sty" %in% cdir) && file.exists(sweavesty)) {
+                file.copy(from = sweavesty, to = file.path(cdir, "Sweave.sty"))
+            }
+            if(is.null(txtvalue)) {
                 knit_out <- Sweave(file=inputvalue, quiet=TRUE)
-            else if(!saveScript())
+            } else if(!saveScript()) {
                 knit_out <- Sweave(file=filename, quiet=TRUE)
-            else {
+            } else {
                 riteMsg("script not saved.", error=TRUE)
                 return()
             }
-        }
-        else if(genmode=="knitsweave"){
+        } else if(genmode=="knitsweave"){
             sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
             if(inherits(sweave_out, "try-error")){
                 riteMsg("Could not convert Sweave to knitr!", error=TRUE)
@@ -732,8 +736,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 knit_out <- try(knit(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
             else if(!is.null(txtvalue))
                 knit_out <- try(knit(text=sweave_out))
-        }
-        else if(genmode=="tangle"){
+        } else if(genmode=="tangle"){
             sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
             if(inherits(sweave_out, "try-error")){
                 riteMsg("Could not convert Sweave to knitr!", error=TRUE)
@@ -743,30 +746,26 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 knit_out <- try(purl(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
             else if(!is.null(txtvalue))
                 knit_out <- try(purl(text=sweave_out))
-        }
-        else if(genmode=="rmd2html"){
+        } else if(genmode=="rmd2html"){
             if(!is.null(inputvalue))
                 knit_out <- try(knit2html(input=inputvalue))
             else if(!is.null(txtvalue))
                 knit_out <- try(knit2html(text=txtvalue))
-        }
-        else if(genmode=="md2html"){
+        } else if(genmode=="md2html"){
             if(!is.null(inputvalue)){
                 outfile <- substring(basename(inputvalue),1,regexpr("\\.[[:alnum:]]+$",basename(inputvalue))-1)
                 outfile <- paste(outfile,'html',sep='.')
                 knit_out <- try(markdown::markdownToHTML(file=inputvalue, output=outfile))
             }else if(!is.null(txtvalue))
                 knit_out <- try(markdown::markdownToHTML(text=txtvalue))
-        }
-        else if(genmode=="md2html.fragment"){
+        } else if(genmode=="md2html.fragment"){
             if(!is.null(inputvalue)){
                 outfile <- substring(basename(inputvalue),1,regexpr("\\.[[:alnum:]]+$",basename(inputvalue))-1)
                 outfile <- paste(outfile,'html',sep='.')
                 knit_out <- try(markdown::markdownToHTML(file=inputvalue,output=outfile,fragment.only=TRUE))
             }else if(!is.null(txtvalue))
                 knit_out <- try(markdown::markdownToHTML(text=txtvalue,fragment.only=TRUE))
-        }
-        else if(genmode=="stitch.rnw"){
+        } else if(genmode=="stitch.rnw"){
             if(!is.null(inputvalue))
                 knit_out <- try(stitch(script=inputvalue))
             else if(!is.null(txtvalue))
@@ -775,32 +774,27 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 knit_out_pdf <- paste(file_path_sans_ext(knit_out),"pdf",sep=".")
             else
                 knit_out_pdf <- NULL
-        }
-        else if(genmode=="stitch.rhtml"){
+        } else if(genmode=="stitch.rhtml"){
             if(!is.null(inputvalue))
                 knit_out <- try(stitch_rhtml(script=inputvalue))
             else if(!is.null(txtvalue))
                 knit_out <- try(stitch_rhtml(text=txtvalue))
-        }
-        else if(genmode=="stitch.rmd"){
+        } else if(genmode=="stitch.rmd"){
             if(!is.null(inputvalue))
                 knit_out <- try(stitch_rmd(script=inputvalue))
             else if(!is.null(txtvalue))
                 knit_out <- try(stitch_rmd(text=txtvalue))
-        }
-        else if(genmode=="spin"){
+        } else if(genmode=="spin"){
             if(!is.null(inputvalue))
                 knit_out <- try(spin(hair=inputvalue, text=NULL, knit=FALSE, format=spinformat))
             else if(!is.null(txtvalue))
                 knit_out <- try(spin(hair=NULL, text=txtvalue, knit=FALSE, format=spinformat))
-        }
-        else if(genmode=="spinknit"){
+        } else if(genmode=="spinknit"){
             if(!is.null(inputvalue))
                 knit_out <- try(spin(hair=inputvalue, text=NULL, knit=TRUE, format=spinformat))
             else if(!is.null(txtvalue))
                 knit_out <- try(spin(hair=NULL, text=txtvalue, knit=TRUE, format=spinformat))
-        }
-        else{
+        } else{
             riteMsg("Unrecognized report type!", error=TRUE)
             return(invisible(NULL))
         }

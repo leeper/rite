@@ -1,6 +1,7 @@
 # CHANGES to rite 0.4 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
+* When attempting to run `Sweave`, if a Sweave.sty file is not available, one is copied from the R home directory to the directory containing the .Rnw file. (#79)
 * The "Run" menu now includes an option to "Tidy R Script", calling the **formatR** package on the open script. (#78)
 * The "File" menu allows users to load the history directly into R as a new script. (#75)
 * The "Run" menu now includes an option "Add commands to history?" (`TRUE` by default) to add executed commands to the R command history. (#73)
