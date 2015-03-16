@@ -15,10 +15,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         searchopts$searchfromtop <- 0
     ritetmpfile <- tempfile(pattern="rite",fileext=".r")
     wmtitle <- packagetitle <- "rite"
-    if(echo)
+    if(echo) {
         echorun <- tclVar(1)
-    else
+    } else {
         echorun <- tclVar(0)
+    }
+    echoprompt <- tclVar(1)
     if(!Sys.info()['sysname'] == "Darwin")
         addtohistory <- tclVar(1)
     everWarn <- tclVar(1)
@@ -512,14 +514,15 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         runtemp <- tempfile()
         writeLines(code,runtemp)
         writeError <- function(errmsg, type, focus=TRUE){
-            if(type=="Error")
+            if(type=="Error") {
                 tkinsert(err_out,"end",paste(type,": ",errmsg,"\n",sep=""),("error"))
-            else if(type=="Warning")
+            } else if(type=="Warning") {
                 tkinsert(err_out,"end",paste(type,": ",errmsg,"\n",sep=""),("warning"))
-            else if(type=="Message")
+            } else if(type=="Message") {
                 tkinsert(err_out,"end",paste(type,": ",errmsg,"\n",sep=""),("message"))
-            else
+            } else {
                 tkinsert(err_out,"end",paste(type,": ",errmsg,"\n",sep=""), ("text"))
+            }
             if(focus){
                 tkselect(nb2, 1)
                 tkfocus(txt_edit)
@@ -527,7 +530,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         }
         displayWarningDialog <- tclVar(1)
         out <- withRestarts(withCallingHandlers(source(runtemp, print.eval=TRUE,
-                echo=as.logical(as.numeric(tclvalue(echorun)))),
+                echo = as.logical(as.numeric(tclvalue(echorun))),
+                prompt.echo = if(as.numeric(tclvalue(echoprompt))) "> " else "",
+                continue.echo = if(as.numeric(tclvalue(echoprompt))) "+ " else ""),
             error = function(errmsg){
                 errmsg <- strsplit(as.character(errmsg),": ")[[1]]
                 errmsg <- paste(errmsg[-1],collapse=":")
@@ -1078,6 +1083,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         tkadd(menuRun, "command", label = "Tidy R Script", command = tidyScript)
         tkadd(menuRun, "separator")
         tkadd(menuRun, 'checkbutton', label='Echo code?', onvalue=1L, variable=echorun)
+        tkadd(menuRun, 'checkbutton', label="Print Prompt '>' and Continue '+'", onvalue=1L, variable=echoprompt)
         tkadd(menuRun, 'checkbutton', label='Wait on warnings?', onvalue=1L, variable=everWarn)
         if(!Sys.info()['sysname'] == "Darwin")
             tkadd(menuRun, 'checkbutton', label='Add commands to history?', onvalue=1L, variable=addtohistory)
@@ -1516,19 +1522,21 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 iwordend <- tclvalue(tkindex(txt_edit, paste(iwordend,'+2char wordend')))
             command <- tclvalue(tkget(txt_edit, iwordstart, iwordend))
         }
-        if(command %in% c("","\n","\t"," ",")","]","}","=",".",",","%"))
+        if(command %in% c("","\n","\t"," ",")","]","}","=",".",",","%")) {
             return()
-        else if(command %in% c("[","(","*","/","+","-","^","$","{","~",
+        } else if(command %in% c("[","(","*","/","+","-","^","$","{","~",
                                 "function","if","else","for","in",
-                                "repeat","while","break","next"))
+                                "repeat","while","break","next")) {
             command <- paste("`",command,"`",sep="")
-        else
+        } else {
             command <- gsub(" ","",command)
+        }
         helpresults <- help(command)
-        if(length(helpresults)>0)
+        if(length(helpresults)>0) {
             print(helpresults)
-        else
+        } else {
             print(help.search(command))
+        }
         invisible(NULL)
     }
     tkbind(txt_edit, "<F1>", f1)
@@ -1541,17 +1549,14 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             iwordstart <- strsplit(sel," ")[[1]][1]
             iwordend <- strsplit(sel," ")[[1]][2]
             command <- sel
-        }
-        else{
+        } else{
             if(tclvalue(tkget(txt_edit, iwordstart, iwordend))=="("){
                 # parentheses
                 iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
-            }
-            else if(tclvalue(tkget(txt_edit, iwordstart, iwordend))=="$"){
+            } else if(tclvalue(tkget(txt_edit, iwordstart, iwordend))=="$"){
                 # dollar signs
                 iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
-            }
-            else if(tclvalue(tkget(txt_edit, iwordstart, iwordend))=='.'){
+            } else if(tclvalue(tkget(txt_edit, iwordstart, iwordend))=='.'){
                 # periods
                 iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
                 iwordend <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordend')))
@@ -1583,29 +1588,25 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             insertCommand <- function(x)
                 tkinsert(txt_edit, "insert", paste(" ",fnlist[x],"=",sep=""))
             fnContextMenu <- tkmenu(txt_edit, tearoff = FALSE)
-        }
-        else if(substring(command,nchar(command),nchar(command))=="("){
+        } else if(substring(command,nchar(command),nchar(command))=="("){
             fnlist <- try(names(formals(substring(command,1,nchar(command)-1))),silent=TRUE)
             if(!inherits(fnlist,"try-error")) {
                 insertCommand <- function(x)
                     tkinsert(txt_edit, "insert", paste(fnlist[x],"=",sep=""))
             }
-        }
-        else if(substring(command,nchar(command),nchar(command))=="$"){
+        } else if(substring(command,nchar(command),nchar(command))=="$"){
             fnlist <- try(eval(parse(text=paste("objects(",substring(command,1,nchar(command)-1),")",sep=""))),silent=TRUE)
             if(!inherits(fnlist,"try-error")) {
                 insertCommand <- function(x)
                     tkinsert(txt_edit, "insert", fnlist[x])
             }
-        }
-        else if(substring(command,nchar(command),nchar(command)) %in% c("'",'"')){
+        } else if(substring(command,nchar(command),nchar(command)) %in% c("'",'"')){
             fnlist <- try(list.files(),silent=TRUE)
             if(!inherits(fnlist,"try-error")) {
                 insertCommand <- function(x)
                     tkinsert(txt_edit, "insert", fnlist[x])
             }
-        }
-        else{
+        } else{
             insertpos <- strsplit(tclvalue(tkindex(txt_edit,"insert")),".", fixed=TRUE)[[1]]
             fnlist <- apropos(paste("^", command,sep=""))
             if(length(fnlist<15))
