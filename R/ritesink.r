@@ -7,8 +7,8 @@ sinkstart <- function(
     if('outsink' %in% getTaskCallbackNames())
         stop('ritesink is already active')
     
-    riteenv$echo <- echo
-    riteenv$split <- split
+    ritesinkenv$echo <- echo
+    ritesinkenv$split <- split
     
     # setup colors
     if(is.null(col.bg) || is.na(col.bg) || col.bg=='')
@@ -43,22 +43,22 @@ sinkstart <- function(
         stop('Background and result foreground colors are the same')
     
     # sinks
-    riteenv$stdsink <- file(riteenv$otmp <- tempfile(),'w+')
-    sink(riteenv$stdsink, split=split, type='output') # output
-    writeLines('# rite output sink', riteenv$stdsink)
-    riteenv$lengtho <- paste(scan(riteenv$stdsink, what='character',
+    ritesinkenv$stdsink <- file(ritesinkenv$otmp <- tempfile(),'w+')
+    sink(ritesinkenv$stdsink, split=split, type='output') # output
+    writeLines('# rite output sink', ritesinkenv$stdsink)
+    ritesinkenv$lengtho <- paste(scan(ritesinkenv$stdsink, what='character',
                                 sep='\n', quiet=TRUE),collapse='\n')
     
-    riteenv$errsink <- file(riteenv$etmp <- tempfile(),'w+')
-    sink(riteenv$errsink, type='message') # message
-    writeLines('# rite error sink', riteenv$errsink)
-    riteenv$lengthe <- paste(scan(riteenv$errsink, what='character',
+    ritesinkenv$errsink <- file(ritesinkenv$etmp <- tempfile(),'w+')
+    sink(ritesinkenv$errsink, type='message') # message
+    writeLines('# rite error sink', ritesinkenv$errsink)
+    ritesinkenv$lengthe <- paste(scan(ritesinkenv$errsink, what='character',
                                 sep='\n', quiet=TRUE),collapse='\n')
     
     # error handler
-    riteenv$errhandler <- function(){
-        tkinsert(riteenv$output,'insert',paste('\n', geterrmessage(), sep=''), ('error'))
-        tksee(riteenv$output, 'insert')
+    ritesinkenv$errhandler <- function(){
+        tkinsert(ritesinkenv$output,'insert',paste('\n', geterrmessage(), sep=''), ('error'))
+        tksee(ritesinkenv$output, 'insert')
         invisible(NULL)
     }
         
@@ -68,128 +68,128 @@ sinkstart <- function(
             #e <- as.character(as.expression(expr))
             e <- deparse(expr)
             if(ok){
-                if(riteenv$echo)
-                    tkinsert(riteenv$output, 'insert', paste('\n>',e), ('call'))
+                if(ritesinkenv$echo)
+                    tkinsert(ritesinkenv$output, 'insert', paste('\n>',e), ('call'))
                 # Output sink (for `cat` and `print`)
-                osink <- paste(scan(riteenv$otmp, what='character',
+                osink <- paste(scan(ritesinkenv$otmp, what='character',
                                 sep='\n', quiet=TRUE),collapse='\n')
-                if(!identical(osink, riteenv$lengtho) && length(osink)>0){
-                    last <- substr(osink, nchar(riteenv$lengtho)+1, nchar(osink))
+                if(!identical(osink, ritesinkenv$lengtho) && length(osink)>0){
+                    last <- substr(osink, nchar(ritesinkenv$lengtho)+1, nchar(osink))
                     # handle `simpleError` etc. that trigger callback
                     if(grepl("simpleError", last))
-                        tkinsert(riteenv$output, 'insert', last, ('error'))
+                        tkinsert(ritesinkenv$output, 'insert', last, ('error'))
                     else if(grepl("simpleWarning", last))
-                        tkinsert(riteenv$output, 'insert', last, ('warning'))
+                        tkinsert(ritesinkenv$output, 'insert', last, ('warning'))
                     else if(grepl("simpleMessage", last))
-                        tkinsert(riteenv$output, 'insert', last, ('message'))
+                        tkinsert(ritesinkenv$output, 'insert', last, ('message'))
                     else if(grepl("simpleCondition", last))
-                        tkinsert(riteenv$output, 'insert', last, ('message'))
+                        tkinsert(ritesinkenv$output, 'insert', last, ('message'))
                     else
-                        tkinsert(riteenv$output, 'insert', last, ('result'))
-                    riteenv$lengtho <- osink
+                        tkinsert(ritesinkenv$output, 'insert', last, ('result'))
+                    ritesinkenv$lengtho <- osink
                 }
-                #tkinsert(riteenv$output,'insert','ok\n', ('message')) # print confirm 'ok' on non-printing calls
-                riteenv$lengtho <- paste(scan(riteenv$otmp, what='character',
+                #tkinsert(ritesinkenv$output,'insert','ok\n', ('message')) # print confirm 'ok' on non-printing calls
+                ritesinkenv$lengtho <- paste(scan(ritesinkenv$otmp, what='character',
                                         sep='\n', quiet=TRUE),collapse='\n')
             }
             else if(visible && !ok) # !ok doesn't happen
-                tkinsert(riteenv$output,'insert','Error\n', ('error'))
+                tkinsert(ritesinkenv$output,'insert','Error\n', ('error'))
             else if(!visible && !ok) # !ok doesn't happen
-                tkinsert(riteenv$output,'insert','Non-printing error\n', ('error'))
+                tkinsert(ritesinkenv$output,'insert','Non-printing error\n', ('error'))
             
             # Error sink (for `warning` and `message`)
-            esink <- paste(scan(riteenv$etmp, what='character',
+            esink <- paste(scan(ritesinkenv$etmp, what='character',
                             sep='\n', quiet=TRUE),collapse='\n')
-            if(!identical(esink, riteenv$lengthe) && length(esink)>0){
-                fromerr <- substr(esink,nchar(riteenv$lengthe)+1,nchar(esink))
+            if(!identical(esink, ritesinkenv$lengthe) && length(esink)>0){
+                fromerr <- substr(esink,nchar(ritesinkenv$lengthe)+1,nchar(esink))
                 if(any(grepl('error', fromerr))){
-                    tkinsert(riteenv$output, 'insert',
+                    tkinsert(ritesinkenv$output, 'insert',
                         paste(fromerr, '\n', collapse='\n'), ('error'))
                 }
                 else if(any(grepl('Warning', fromerr))){
-                    tkinsert(riteenv$output, 'insert',
+                    tkinsert(ritesinkenv$output, 'insert',
                         paste(fromerr, collapse='\n'), ('warning'))
                 }
                 else{
-                    tkinsert(riteenv$output, 'insert',
+                    tkinsert(ritesinkenv$output, 'insert',
                         paste(fromerr, collapse='\n'), ('message'))
                 }
-                riteenv$lengthe <- esink
+                ritesinkenv$lengthe <- esink
             }
-            tksee(riteenv$output, 'insert')
+            tksee(ritesinkenv$output, 'insert')
             TRUE
         }
     }
     addTaskCallback(outsink(), name='outsink')
         
-    if(!'thesink' %in% ls(riteenv)){
-        riteenv$thesink <- tktoplevel(borderwidth=0)
+    if(!'thesink' %in% ls(ritesinkenv)){
+        ritesinkenv$thesink <- tktoplevel(borderwidth=0)
         exitsink <- function() {
-            tkdestroy(riteenv$thesink)
+            tkdestroy(ritesinkenv$thesink)
             if(!sink.number()==0)
                 sink()
             if(!sink.number('message')==2)
                 sink(type='message')
-            rm(thesink, output, scr, stdsink, errsink, envir = riteenv)
+            rm(thesink, output, scr, stdsink, errsink, envir = ritesinkenv)
             sinkstop()
             invisible()
         }
 
         # widget
-        tkwm.protocol(riteenv$thesink, 'WM_DELETE_WINDOW', exitsink)
-        tkwm.title(riteenv$thesink, 'rite sink')        # title
-        riteenv$scr <- tkscrollbar(riteenv$thesink, 
+        tkwm.protocol(ritesinkenv$thesink, 'WM_DELETE_WINDOW', exitsink)
+        tkwm.title(ritesinkenv$thesink, 'rite sink')        # title
+        ritesinkenv$scr <- tkscrollbar(ritesinkenv$thesink, 
                         repeatinterval=25,
-                        command=function(...){ tkyview(riteenv$output,...) })
-        riteenv$output <- tktext(riteenv$thesink, bg=col.bg, fg=col.result[1], undo='true',
-                                   yscrollcommand=function(...) tkset(riteenv$scr,...),
+                        command=function(...){ tkyview(ritesinkenv$output,...) })
+        ritesinkenv$output <- tktext(ritesinkenv$thesink, bg=col.bg, fg=col.result[1], undo='true',
+                                   yscrollcommand=function(...) tkset(ritesinkenv$scr,...),
                                    font=tkfont.create(family=fontFamily, size=fontSize))
-        tcl('wm', 'attributes', riteenv$thesink, topmost=TRUE)
-        tkgrid(riteenv$output, sticky='nsew', column=1, row=1)
-        tkgrid(riteenv$scr, sticky='nsew', column=2, row=1)
-        tkgrid.columnconfigure(riteenv$thesink,1,weight=1)
-        tkgrid.columnconfigure(riteenv$thesink,2,weight=0)
-        tkgrid.rowconfigure(riteenv$thesink,1,weight=1)
+        tcl('wm', 'attributes', ritesinkenv$thesink, topmost=TRUE)
+        tkgrid(ritesinkenv$output, sticky='nsew', column=1, row=1)
+        tkgrid(ritesinkenv$scr, sticky='nsew', column=2, row=1)
+        tkgrid.columnconfigure(ritesinkenv$thesink,1,weight=1)
+        tkgrid.columnconfigure(ritesinkenv$thesink,2,weight=0)
+        tkgrid.rowconfigure(ritesinkenv$thesink,1,weight=1)
         
         # tags/fonts
-        if(!exists('riteenv$defaultfont'))
-            riteenv$defaultfont <- tkfont.create(family=fontFamily, size=fontSize)
-        tktag.configure(riteenv$output, 'call',
+        if(!exists('ritesinkenv$defaultfont'))
+            ritesinkenv$defaultfont <- tkfont.create(family=fontFamily, size=fontSize)
+        tktag.configure(ritesinkenv$output, 'call',
             foreground=col.call[1],
             background=col.call[2],
-            font=riteenv$defaultfont,
+            font=ritesinkenv$defaultfont,
             underline=0)
-        tktag.configure(riteenv$output, 'result',
+        tktag.configure(ritesinkenv$output, 'result',
             foreground=col.result[1],
             background=col.result[2],
-            font=riteenv$defaultfont,
+            font=ritesinkenv$defaultfont,
             underline=0)
-        if(!exists('riteenv$boldfont'))
-            riteenv$boldfont <- tkfont.create(family=fontFamily, size=fontSize, weight='bold')
-        tktag.configure(riteenv$output, 'error',
+        if(!exists('ritesinkenv$boldfont'))
+            ritesinkenv$boldfont <- tkfont.create(family=fontFamily, size=fontSize, weight='bold')
+        tktag.configure(ritesinkenv$output, 'error',
             foreground=col.err[1],
             background=col.err[2],
-            font=riteenv$boldfont,
+            font=ritesinkenv$boldfont,
             underline=0)
-        tktag.configure(riteenv$output, 'warning',
+        tktag.configure(ritesinkenv$output, 'warning',
             foreground=col.warn[1],
             background=col.warn[2],
-            font=riteenv$boldfont,
+            font=ritesinkenv$boldfont,
             underline=0)
-        tktag.configure(riteenv$output, 'message',
+        tktag.configure(ritesinkenv$output, 'message',
             foreground=col.msg[1],
             background=col.msg[2],
-            font=riteenv$boldfont,
+            font=ritesinkenv$boldfont,
             underline=0)
         
         # bind option('width') to window resize
         resize <- function(){
-            w <- tkwinfo('width',riteenv$output)
-            m <- tkfont.measure(riteenv$defaultfont,'m')
+            w <- tkwinfo('width',ritesinkenv$output)
+            m <- tkfont.measure(ritesinkenv$defaultfont,'m')
             nw <- round((as.numeric(w)-20)/as.numeric(m))
             options(width=nw)
         }
-        tkbind(riteenv$thesink, '<Configure>', resize)
+        tkbind(ritesinkenv$thesink, '<Configure>', resize)
         
         # context menu (and associated functions and bindings)
         saveSink <- function(){
@@ -200,24 +200,24 @@ sinkstart <- function(
             if(!length(outfilename) || outfilename=="")
                 invisible()
             chn <- tclopen(outfilename, 'w')
-            tclputs(chn, tclvalue(tkget(riteenv$output,'0.0','end')))
+            tclputs(chn, tclvalue(tkget(ritesinkenv$output,'0.0','end')))
             tclclose(chn)
         }
-        tkbind(riteenv$output, '<Control-S>', expression(saveSink, break))
-        tkbind(riteenv$output, '<Control-s>', expression(saveSink, break))
+        tkbind(ritesinkenv$output, '<Control-S>', expression(saveSink, break))
+        tkbind(ritesinkenv$output, '<Control-s>', expression(saveSink, break))
         selectAll <- function(){
-            tktag.add(riteenv$output,'sel','0.0','end')
-            tkmark.set(riteenv$output,'insert','end')
+            tktag.add(ritesinkenv$output,'sel','0.0','end')
+            tkmark.set(ritesinkenv$output,'insert','end')
         }
-        tkbind(riteenv$output, "<Control-A>", expression(selectAll, break))
-        tkbind(riteenv$output, "<Control-a>", expression(selectAll, break))
+        tkbind(ritesinkenv$output, "<Control-A>", expression(selectAll, break))
+        tkbind(ritesinkenv$output, "<Control-a>", expression(selectAll, break))
         copyText <- function(docut=FALSE){
-            selrange <- strsplit(tclvalue(tktag.ranges(riteenv$output,"sel"))," ")[[1]]
-            if(!tclvalue(tktag.ranges(riteenv$output,"sel"))==""){
+            selrange <- strsplit(tclvalue(tktag.ranges(ritesinkenv$output,"sel"))," ")[[1]]
+            if(!tclvalue(tktag.ranges(ritesinkenv$output,"sel"))==""){
                 tkclipboard.clear()
-                tkclipboard.append(tclvalue(tkget(riteenv$output, selrange[1], selrange[2])))
+                tkclipboard.append(tclvalue(tkget(ritesinkenv$output, selrange[1], selrange[2])))
                 if(docut==TRUE)
-                    tkdelete(riteenv$output, selrange[1], selrange[2])
+                    tkdelete(ritesinkenv$output, selrange[1], selrange[2])
             }
             else {
                 selectAll()
@@ -231,13 +231,13 @@ sinkstart <- function(
                 cbcontents <- readLines(pipe("pbpaste"))
             else
                 cbcontents <- ""
-            tkinsert(riteenv$output, "insert", paste(cbcontents,collapse="\n"))
+            tkinsert(ritesinkenv$output, "insert", paste(cbcontents,collapse="\n"))
         }
-        clearSink <- function() tkdelete(riteenv$output, '1.0', 'end')
-        tkbind(riteenv$output, "<Control-L>", expression(clearSink, break))
-        tkbind(riteenv$output, "<Control-l>", expression(clearSink, break))
+        clearSink <- function() tkdelete(ritesinkenv$output, '1.0', 'end')
+        tkbind(ritesinkenv$output, "<Control-L>", expression(clearSink, break))
+        tkbind(ritesinkenv$output, "<Control-l>", expression(clearSink, break))
         
-        contextMenu <- tkmenu(riteenv$output, tearoff = FALSE)
+        contextMenu <- tkmenu(ritesinkenv$output, tearoff = FALSE)
             tkadd(contextMenu, "command", label = "Save <Ctrl-S>",
                 command = saveSink)
             tkadd(contextMenu, "command", label = "Clear All <Ctrl-L>",
@@ -255,33 +255,33 @@ sinkstart <- function(
             tkadd(contextMenu, "command",
                 label = paste("Toggle echo on/off"),
                 command = function(){
-                    if(riteenv$echo)
-                        riteenv$echo <- FALSE
+                    if(ritesinkenv$echo)
+                        ritesinkenv$echo <- FALSE
                     else
-                        riteenv$echo <- TRUE
+                        ritesinkenv$echo <- TRUE
                 })
         rightClick <- function(x, y) {
-            rootx <- as.integer(tkwinfo("rootx", riteenv$output))
-            rooty <- as.integer(tkwinfo("rooty", riteenv$output))
+            rootx <- as.integer(tkwinfo("rootx", ritesinkenv$output))
+            rooty <- as.integer(tkwinfo("rooty", ritesinkenv$output))
             xTxt <- as.integer(x) + rootx
             yTxt <- as.integer(y) + rooty
-            tkmark.set(riteenv$output,"insert",paste("@",xTxt,",",yTxt,sep=""))
+            tkmark.set(ritesinkenv$output,"insert",paste("@",xTxt,",",yTxt,sep=""))
             .Tcl(paste("tk_popup", .Tcl.args(contextMenu, xTxt, yTxt)))
         }
-        tkbind(riteenv$output, "<Button-3>", rightClick)
+        tkbind(ritesinkenv$output, "<Button-3>", rightClick)
         tkbind(contextMenu, "<Button-3>", function() tkunpost(contextMenu))
     
     }
     
     options('show.error.messages'=FALSE) # default TRUE
-    options('error'=riteenv$errhandler) # default NULL
+    options('error'=ritesinkenv$errhandler) # default NULL
     
     invisible(NULL)
 }
 
 sinkstop <- function(quiet = TRUE){
     # check for active sink
-    if(!exists('riteenv'))
+    if(!exists('ritesinkenv'))
         stop('sink already closed and removed')
     # reset options defaults
     options('show.error.messages'=TRUE) # default TRUE
@@ -299,21 +299,21 @@ sinkstop <- function(quiet = TRUE){
         removeTaskCallback('outsink')
     
     # close connections
-    if(riteenv$otmp %in% showConnections()){
-        thiscon <- rownames(showConnections())[which(riteenv$otmp==showConnections()[,1])]
+    if(ritesinkenv$otmp %in% showConnections()){
+        thiscon <- rownames(showConnections())[which(ritesinkenv$otmp==showConnections()[,1])]
         close(getConnection(thiscon))
     }
-    if(riteenv$etmp %in% showConnections()){
-        thiscon <- rownames(showConnections())[which(riteenv$etmp==showConnections()[,1])]
+    if(ritesinkenv$etmp %in% showConnections()){
+        thiscon <- rownames(showConnections())[which(ritesinkenv$etmp==showConnections()[,1])]
         close(getConnection(thiscon))
     }
     
     # remove temporary sink files
-    unlink(riteenv$otmp)
-    unlink(riteenv$etmp)
+    unlink(ritesinkenv$otmp)
+    unlink(ritesinkenv$etmp)
     
-    # remove `riteenv`
-    if(!"thesink" %in% ls(riteenv)){
+    # remove `ritesinkenv`
+    if(!"thesink" %in% ls(ritesinkenv)){
         if(!quiet)
             message('rite sink closed and removed')
     }
@@ -323,7 +323,7 @@ sinkstop <- function(quiet = TRUE){
     invisible(NULL)
 }
 
-riteenv <- new.env()
+ritesinkenv <- new.env()
 
 if(getRversion() >= "2.15.1")
     utils::globalVariables(c('thesink', 'output', 'scr', 'stdsink', 'errsink'))
