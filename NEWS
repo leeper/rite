@@ -1,6 +1,7 @@
 # CHANGES to rite 0.4 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
+* The "File" menu now allows users to load various document template files (e.g., knitr, Sweave, etc.).
 * The "File" menu now allows users to open an additional `rite` window that uses the same options as the original `rite` call. (#62)
 * The "Run" menu now includes an option to turn off the printing of the prompt '>' and continuation prompt '+' symbols, thus making it easier to copy output (ala the knitr default output). (#80)
 * When attempting to run `Sweave`, if a Sweave.sty file is not available, one is copied from the R home directory to the directory containing the .Rnw file. (#79)

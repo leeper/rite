@@ -89,7 +89,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         cat <- function(..., sep=" ", catchOutput=catchOutput)
             writeLines(text=paste(as.character(unlist(list(...))), collapse=sep), sep="\n", con=ritecat)
     }
-            
+
     ## EXIT PROCEDURE ##
     exitWiz <- function() {
         if(catchOutput){
@@ -1025,6 +1025,18 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         tkadd(menuFile, "command", label="Insert Script Reference",
             command=function() loadScript(locals=TRUE, refonly=TRUE, new=FALSE), underline = 0)
         tkadd(menuFile, "separator")
+        menuTemplates <- tkmenu(menuFile, tearoff = FALSE)
+            tkadd(menuTemplates, "command", label="knitr LaTeX (.Rnw)", 
+                  command = function() loadScript(system.file("templates/knitr-minimal.Rnw", package = "rite")))
+            tkadd(menuTemplates, "command", label="knitr markdown (.Rmd)", 
+                  command = function() loadScript(system.file("templates/knitr-minimal.Rmd", package = "rite")))
+            tkadd(menuTemplates, "command", label="knitr HTML (.Rnw)", 
+                  command = function() loadScript(system.file("templates/knitr-minimal.Rhtml", package = "rite")))
+            tkadd(menuTemplates, "command", label="Sweave (.Rnw)", 
+                  command = function() loadScript(system.file("templates/Sweave.Rnw", package = "rite")))
+            tkadd(menuTemplates, "command", label="LaTeX (.tex)", 
+                  command = function() loadScript(system.file("templates/LaTeX.Rnw", package = "rite")))
+        tkadd(menuFile, "cascade", label = "Load file templates", menu = menuTemplates)
         menuFileWeb <- tkmenu(menuFile, tearoff = FALSE)
             tkadd(menuFileWeb, "command", label="Load Remote Script",
                 command=function() loadScript(locals=FALSE), underline = 0)
