@@ -1,6 +1,7 @@
 # The Right Editor to Write R #
 
 [![Build Status](https://travis-ci.org/leeper/rite.png?branch=master)](https://travis-ci.org/leeper/rite)
+![Downloads](http://cranlogs.r-pkg.org/badges/rite)
 
 ## What is rite? ##
 
