@@ -5,6 +5,7 @@
 \description{An experimental tcl/tk output widget}
 \usage{
 sinkstart(echo = TRUE, print.eval = TRUE, split = FALSE,
+          prompt.echo = getOption("prompt"),
           fontFamily = 'Courier', fontSize = 10,
           col.bg = 'white', col.call = c('black',col.bg),
           col.result = c('black',col.bg), col.err = c('red',col.bg),
@@ -14,8 +15,9 @@ sinkstop(quiet = TRUE)
 }
 \arguments{
   \item{echo}{A logical indicating whether calls should be output to the sink. Default is \code{TRUE}.}
-  \item{echo}{A logical indicating whether evaluated output from calls and/or messages should be sent to the sink. Default is \code{TRUE}.}
+  \item{print.eval}{A logical indicating whether evaluated output from calls and/or messages should be sent to the sink. Default is \code{TRUE}.}
   \item{split}{A logical indicating whether output (but not messages) should be split between the console and the sink. Default is \code{FALSE}.}
+  \item{prompt.echo}{A character string indicating the text to use for the prompt in the widget. The default is drawn from \code{options("prompt")}.  Ignored if \code{echo = FALSE}.}
   \item{fontFamily}{The font family used in rite. Default is \dQuote{\code{Courier}}. Available fonts can be retrieved by \code{.Tcl("font families")}.}
   \item{fontSize}{The font size used in rite. Default is \code{10}.}
   \item{col.bg}{A one-element character string indicating a tcl/tk color for the background color of the sink. A list of available tcl/tk colors can be found here: \url{http://www.tcl.tk/man/tcl8.5/TkCmd/colors.htm}.}

@@ -1,13 +1,18 @@
 sinkstart <- function(
     echo=TRUE, print.eval=TRUE, split=FALSE,
+    prompt.echo=getOption("prompt", "> "), 
     fontFamily='Courier', fontSize=10,
     col.bg='white', col.call=c('black',col.bg), col.result=c('black',col.bg),
     col.err=c('red',col.bg), col.warn=c('purple',col.bg), col.msg=c('blue',col.bg))
 {
-    if('outsink' %in% getTaskCallbackNames())
+    if('outsink' %in% getTaskCallbackNames()) {
         stop('ritesink is already active')
+    }
     
     ritesinkenv$echo <- echo
+    ritesinkenv$print.eval <- print.eval
+    ritesinkenv$prompt.echo <- prompt.echo
+    ritesinkenv$prompt.echo.old <- prompt.echo
     ritesinkenv$split <- split
     
     # setup colors
@@ -69,7 +74,7 @@ sinkstart <- function(
             e <- deparse(expr)
             if (ok) {
                 if (ritesinkenv$echo) {
-                    tkinsert(ritesinkenv$output, 'insert', paste('\n>',e), ('call'))
+                    tkinsert(ritesinkenv$output, 'insert', paste0('\n', ritesinkenv$prompt.echo, e), ('call'))
                 }
                 # Output sink (for `cat` and `print`)
                 osink <- paste(scan(ritesinkenv$otmp, what='character',
@@ -274,6 +279,19 @@ sinkstart <- function(
                         ritesinkenv$print.eval <- FALSE
                     } else {
                         ritesinkenv$print.eval <- TRUE
+                    }
+                })
+            tkadd(contextMenu, "command",
+                label = paste("Toggle prompt.echo on/off"),
+                command = function(){
+                    if (ritesinkenv$prompt.echo == "") {
+                        if (!exists(ritesinkenv$prompt.echo.old)) {
+                            ritesinkenv$prompt.echo.old <- getOption("prompt", "> ")
+                        }
+                        ritesinkenv$prompt.echo <- ritesinkenv$prompt.echo.old
+                    } else {
+                        ritesinkenv$prompt.echo.old <- ritesinkenv$prompt.echo
+                        ritesinkenv$prompt.echo <- ""
                     }
                 })
         rightClick <- function(x, y) {

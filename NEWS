@@ -1,6 +1,7 @@
 # CHANGES to rite 0.4 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
+* The sink widget now has `prompt.echo` argument (set to the value of `options("prompt")` by default) that controls the appearance of echoed code.
 * The sink widget now has `print.eval` argument (`TRUE` by default) that controls output of evaluated code and messages (a la `source()`). (#83)
 * The "File" menu now allows users to load various document template files (e.g., knitr, Sweave, etc.).
 * The "File" menu now allows users to open an additional `rite` window that uses the same options as the original `rite` call. (#62)
