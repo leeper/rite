@@ -1,5 +1,5 @@
 sinkstart <- function(
-    echo=TRUE, split=FALSE,
+    echo=TRUE, print.eval=TRUE, split=FALSE,
     fontFamily='Courier', fontSize=10,
     col.bg='white', col.call=c('black',col.bg), col.result=c('black',col.bg),
     col.err=c('red',col.bg), col.warn=c('purple',col.bg), col.msg=c('blue',col.bg))
@@ -67,50 +67,52 @@ sinkstart <- function(
         function(expr, value, ok, visible) {
             #e <- as.character(as.expression(expr))
             e <- deparse(expr)
-            if(ok){
-                if(ritesinkenv$echo)
+            if (ok) {
+                if (ritesinkenv$echo) {
                     tkinsert(ritesinkenv$output, 'insert', paste('\n>',e), ('call'))
+                }
                 # Output sink (for `cat` and `print`)
                 osink <- paste(scan(ritesinkenv$otmp, what='character',
                                 sep='\n', quiet=TRUE),collapse='\n')
                 if(!identical(osink, ritesinkenv$lengtho) && length(osink)>0){
                     last <- substr(osink, nchar(ritesinkenv$lengtho)+1, nchar(osink))
                     # handle `simpleError` etc. that trigger callback
-                    if(grepl("simpleError", last))
-                        tkinsert(ritesinkenv$output, 'insert', last, ('error'))
-                    else if(grepl("simpleWarning", last))
-                        tkinsert(ritesinkenv$output, 'insert', last, ('warning'))
-                    else if(grepl("simpleMessage", last))
-                        tkinsert(ritesinkenv$output, 'insert', last, ('message'))
-                    else if(grepl("simpleCondition", last))
-                        tkinsert(ritesinkenv$output, 'insert', last, ('message'))
-                    else
-                        tkinsert(ritesinkenv$output, 'insert', last, ('result'))
+                    if (ritesinkenv$print.eval) {
+                        if (grepl("simpleError", last)) {
+                            tkinsert(ritesinkenv$output, 'insert', last, ('error'))
+                        } else if(grepl("simpleWarning", last)) {
+                            tkinsert(ritesinkenv$output, 'insert', last, ('warning'))
+                        } else if(grepl("simpleMessage", last)) {
+                            tkinsert(ritesinkenv$output, 'insert', last, ('message'))
+                        } else if(grepl("simpleCondition", last)) {
+                            tkinsert(ritesinkenv$output, 'insert', last, ('message'))
+                        } else {
+                            tkinsert(ritesinkenv$output, 'insert', last, ('result'))
+                        }
+                    }
                     ritesinkenv$lengtho <- osink
                 }
                 #tkinsert(ritesinkenv$output,'insert','ok\n', ('message')) # print confirm 'ok' on non-printing calls
                 ritesinkenv$lengtho <- paste(scan(ritesinkenv$otmp, what='character',
                                         sep='\n', quiet=TRUE),collapse='\n')
-            }
-            else if(visible && !ok) # !ok doesn't happen
+            } else if(visible && !ok) { # !ok doesn't happen
                 tkinsert(ritesinkenv$output,'insert','Error\n', ('error'))
-            else if(!visible && !ok) # !ok doesn't happen
+            } else if(!visible && !ok) { # !ok doesn't happen
                 tkinsert(ritesinkenv$output,'insert','Non-printing error\n', ('error'))
+            }
             
             # Error sink (for `warning` and `message`)
             esink <- paste(scan(ritesinkenv$etmp, what='character',
                             sep='\n', quiet=TRUE),collapse='\n')
-            if(!identical(esink, ritesinkenv$lengthe) && length(esink)>0){
+            if (!identical(esink, ritesinkenv$lengthe) && length(esink)>0) {
                 fromerr <- substr(esink,nchar(ritesinkenv$lengthe)+1,nchar(esink))
-                if(any(grepl('error', fromerr))){
+                if (any(grepl('error', fromerr))){
                     tkinsert(ritesinkenv$output, 'insert',
                         paste(fromerr, '\n', collapse='\n'), ('error'))
-                }
-                else if(any(grepl('Warning', fromerr))){
+                } else if(any(grepl('Warning', fromerr))){
                     tkinsert(ritesinkenv$output, 'insert',
                         paste(fromerr, collapse='\n'), ('warning'))
-                }
-                else{
+                } else {
                     tkinsert(ritesinkenv$output, 'insert',
                         paste(fromerr, collapse='\n'), ('message'))
                 }
@@ -126,10 +128,12 @@ sinkstart <- function(
         ritesinkenv$thesink <- tktoplevel(borderwidth=0)
         exitsink <- function() {
             tkdestroy(ritesinkenv$thesink)
-            if(!sink.number()==0)
+            if (!sink.number()==0) {
                 sink()
-            if(!sink.number('message')==2)
+            }
+            if (!sink.number('message')==2) {
                 sink(type='message')
+            }
             rm(thesink, output, scr, stdsink, errsink, envir = ritesinkenv)
             sinkstop()
             invisible()
@@ -152,8 +156,9 @@ sinkstart <- function(
         tkgrid.rowconfigure(ritesinkenv$thesink,1,weight=1)
         
         # tags/fonts
-        if(!exists('ritesinkenv$defaultfont'))
+        if(!exists('ritesinkenv$defaultfont')) {
             ritesinkenv$defaultfont <- tkfont.create(family=fontFamily, size=fontSize)
+        }
         tktag.configure(ritesinkenv$output, 'call',
             foreground=col.call[1],
             background=col.call[2],
@@ -164,8 +169,9 @@ sinkstart <- function(
             background=col.result[2],
             font=ritesinkenv$defaultfont,
             underline=0)
-        if(!exists('ritesinkenv$boldfont'))
+        if(!exists('ritesinkenv$boldfont')) {
             ritesinkenv$boldfont <- tkfont.create(family=fontFamily, size=fontSize, weight='bold')
+        }
         tktag.configure(ritesinkenv$output, 'error',
             foreground=col.err[1],
             background=col.err[2],
@@ -213,24 +219,24 @@ sinkstart <- function(
         tkbind(ritesinkenv$output, "<Control-a>", expression(selectAll, break))
         copyText <- function(docut=FALSE){
             selrange <- strsplit(tclvalue(tktag.ranges(ritesinkenv$output,"sel"))," ")[[1]]
-            if(!tclvalue(tktag.ranges(ritesinkenv$output,"sel"))==""){
+            if (!tclvalue(tktag.ranges(ritesinkenv$output,"sel"))=="") {
                 tkclipboard.clear()
                 tkclipboard.append(tclvalue(tkget(ritesinkenv$output, selrange[1], selrange[2])))
                 if(docut==TRUE)
                     tkdelete(ritesinkenv$output, selrange[1], selrange[2])
-            }
-            else {
+            } else {
                 selectAll()
                 copyText()
             }
         }
-        pasteText <- function(){
-            if("windows"==.Platform$OS.type)
+        pasteText <- function() {
+            if("windows"==.Platform$OS.type) {
                 cbcontents <- readLines("clipboard")
-            else if("unix"==Sys.getenv("OS"))
+            } else if("unix"==Sys.getenv("OS")) {
                 cbcontents <- readLines(pipe("pbpaste"))
-            else
+            } else {
                 cbcontents <- ""
+            }
             tkinsert(ritesinkenv$output, "insert", paste(cbcontents,collapse="\n"))
         }
         clearSink <- function() tkdelete(ritesinkenv$output, '1.0', 'end')
@@ -255,10 +261,20 @@ sinkstart <- function(
             tkadd(contextMenu, "command",
                 label = paste("Toggle echo on/off"),
                 command = function(){
-                    if(ritesinkenv$echo)
+                    if (ritesinkenv$echo) {
                         ritesinkenv$echo <- FALSE
-                    else
+                    } else {
                         ritesinkenv$echo <- TRUE
+                    }
+                })
+            tkadd(contextMenu, "command",
+                label = paste("Toggle print.eval on/off"),
+                command = function(){
+                    if (ritesinkenv$print.eval) {
+                        ritesinkenv$print.eval <- FALSE
+                    } else {
+                        ritesinkenv$print.eval <- TRUE
+                    }
                 })
         rightClick <- function(x, y) {
             rootx <- as.integer(tkwinfo("rootx", ritesinkenv$output))
@@ -281,29 +297,33 @@ sinkstart <- function(
 
 sinkstop <- function(quiet = TRUE){
     # check for active sink
-    if(!exists('ritesinkenv'))
+    if (!exists('ritesinkenv')) {
         stop('sink already closed and removed')
+    }
     # reset options defaults
     options('show.error.messages'=TRUE) # default TRUE
     options('error'=NULL) # default NULL
     options('width'=80) # default 80
     
     # stop sinks
-    if(!sink.number()==0)
+    if (!sink.number()==0) {
         sink()
-    if(!sink.number('message')==2)
+    }
+    if (!sink.number('message')==2) {
         sink(type='message')
+    }
     
     # remove call back
-    if('outsink' %in% getTaskCallbackNames())
+    if ('outsink' %in% getTaskCallbackNames()) {
         removeTaskCallback('outsink')
+    }
     
     # close connections
-    if(ritesinkenv$otmp %in% showConnections()){
+    if (ritesinkenv$otmp %in% showConnections()) {
         thiscon <- rownames(showConnections())[which(ritesinkenv$otmp==showConnections()[,1])]
         close(getConnection(thiscon))
     }
-    if(ritesinkenv$etmp %in% showConnections()){
+    if (ritesinkenv$etmp %in% showConnections()) {
         thiscon <- rownames(showConnections())[which(ritesinkenv$etmp==showConnections()[,1])]
         close(getConnection(thiscon))
     }
@@ -313,17 +333,18 @@ sinkstop <- function(quiet = TRUE){
     unlink(ritesinkenv$etmp)
     
     # remove `ritesinkenv`
-    if(!"thesink" %in% ls(ritesinkenv)){
+    if (!"thesink" %in% ls(ritesinkenv)) {
         if(!quiet)
             message('rite sink closed and removed')
-    }
-    else if(!quiet)
+    } else if(!quiet) {
         message('rite sink closed')
+    }
     
     invisible(NULL)
 }
 
 ritesinkenv <- new.env()
 
-if(getRversion() >= "2.15.1")
+if (getRversion() >= "2.15.1") {
     utils::globalVariables(c('thesink', 'output', 'scr', 'stdsink', 'errsink'))
+}

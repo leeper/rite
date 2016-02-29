@@ -1,6 +1,7 @@
 # CHANGES to rite 0.4 #
 
 ## SIGNIFICANT USER-VISIBLE CHANGES ##
+* The sink widget now has `print.eval` argument (`TRUE` by default) that controls output of evaluated code and messages (a la `source()`). (#83)
 * The "File" menu now allows users to load various document template files (e.g., knitr, Sweave, etc.).
 * The "File" menu now allows users to open an additional `rite` window that uses the same options as the original `rite` call. (#62)
 * The "Run" menu now includes an option to turn off the printing of the prompt '>' and continuation prompt '+' symbols, thus making it easier to copy output (ala the knitr default output). (#80)
