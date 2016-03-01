@@ -28,7 +28,7 @@ But beyond a tool for beginners, **rite** is also designed to help advanced user
 
 ## Installation ##
 
-[![Build Status](https://travis-ci.org/leeper/rite.png?branch=master)](https://travis-ci.org/leeper/rite)
+[![CRAN Version](http://www.r-pkg.org/badges/version/rite)](http://cran.r-project.org/package=rite)
 ![Downloads](http://cranlogs.r-pkg.org/badges/rite)
 [![Travis-CI Build Status](https://travis-ci.org/leeper/rite.png?branch=master)](https://travis-ci.org/leeper/rite)
 [![codecov.io](http://codecov.io/github/leeper/rite/coverage.svg?branch=master)](http://codecov.io/github/leeper/rite?branch=master)
