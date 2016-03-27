@@ -39,13 +39,13 @@ But beyond a tool for beginners, **rite** is also designed to help advanced user
 install.packages("rite")
 ```
 
-To install the latest development version of **MTurkR** from GitHub:
+To install the latest development version of **rite** from GitHub:
 
 ```R
 # latest (unstable) version from GitHub
 if(!require("ghit")){
     install.packages("ghit")
 }
-ghit::install_github("leeper/MTurkR")
+ghit::install_github("leeper/rite")
 ```
 
