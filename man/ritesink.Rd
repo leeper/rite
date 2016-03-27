@@ -5,7 +5,7 @@
 \description{An experimental tcl/tk output widget}
 \usage{
 sinkstart(echo = TRUE, print.eval = TRUE, split = FALSE,
-          prompt.echo = getOption("prompt"),
+          prompt.echo = getOption("prompt", "> "),
           fontFamily = 'Courier', fontSize = 10,
           col.bg = 'white', col.call = c('black',col.bg),
           col.result = c('black',col.bg), col.err = c('red',col.bg),
