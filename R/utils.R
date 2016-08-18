@@ -1,5 +1,13 @@
 riteenv <- new.env()
 
+inserttext <- function(what, where, fastinsert = TRUE) {
+    if (fastinsert) {
+        .Tcl(.Tcl.args(.Tk.ID(where), 'fastinsert', 'insert', what))
+    } else {
+        tkinsert(where, "insert", what)
+    }
+    TRUE
+}
 
 checkbrackets <- function(txtedit, direction='right'){
     insertpos <- tclvalue(tkindex(txtedit,"insert"))

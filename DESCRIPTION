@@ -7,7 +7,7 @@ Imports:
     grDevices,
     tcltk,
     tcltk2,
-    RCurl,
+    curl,
     tools,
     knitr,
     markdown,

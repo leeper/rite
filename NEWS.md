@@ -14,6 +14,7 @@
 * Added ability to load a remote URL as initial script using new argument `url`. (#68)
 * Changed default tab setting from "\t" to "    " (4 spaces).
 * Added ability to upload HTML or automatically rendered (R)markdown to [RPubs](https://rpubs.com/) using `markdown::rpubsUpload`. (#71)
+* Switched from RCurl to curl.
 * Switched to roxygen2 documentation.
 
 ## BUG FIXES ##
