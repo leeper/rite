@@ -206,10 +206,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         evalenv <- editenv
     }
     # handle tab value
-    if (is.null(tab))
+    if (is.null(tab)) {
         tab <- '\t'
-    else if (is.numeric(tab))
+    } else if (is.numeric(tab)) {
         tab <- paste(rep(' ',round(tab)),collapse='')
+    }
     hcolors <- list(normal = "black", # txt_edit normal font color
                     background = "white", # txt_edit background color
                     functions = "purple",
@@ -408,7 +409,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 if (!inherits(content,"try-error")) {
                     inserttext(content, txt_edit, fastinsert)
                 } else {
-                    riteMsg("Script not loaded!", error=TRUE)
+                    riteMsg(output = output, error = err_out, "Script not loaded!", error=TRUE)
                 }
             } else {
                 processEntry <- function() {
@@ -419,7 +420,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                             entry <- regmatches(entry, regexpr("[0-9a-f]+$", entry))
                         entry <- getRawGistURL(entry)
                         if (is.null(entry)) {
-                            riteMsg("Gist not loaded!", error=TRUE)
+                            riteMsg(output = output, error = err_out, "Gist not loaded!", error=TRUE)
                             return()
                         } else if (length(entry)>1) {
                             gistDialog <- tktoplevel()
@@ -461,7 +462,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                         if (!inherits(content,"try-error")) {
                             inserttext(content, txt_edit, fastinsert)
                         } else
-                            riteMsg("Script not loaded!", error=TRUE)
+                            riteMsg(output = output, error = err_out, "Script not loaded!", error=TRUE)
                     }
                     scriptSaved <<- FALSE
                 }
@@ -558,7 +559,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         gistid <- strsplit(outsplit[grep("id",outsplit)],':"')[[1]][2]
         gistouturl <- paste("https://gist.github.com/",gistid,sep="")
         results <- paste("Script saved as Gist ",gistid," at: ",gistouturl,sep="")
-        riteMsg(results, error=TRUE)
+        riteMsg(output = output, error = err_out, results, error=TRUE)
         if (catchOutput) {
             tkselect(nb2, 1)
             tkfocus(txt_edit)
@@ -590,7 +591,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 u <- rpubsUpload(title = tclvalue(entry), htmlFile = h,
                                  id = NULL, method='internal')
                                  # temporarily 'internal' due to SSL error
-                riteMsg(paste("RPubs ID is:", u$id))
+                riteMsg(output = output, error = err_out, paste("RPubs ID is:", u$id))
                 browseURL(u$continueUrl) # browse to continueUrl
                 tkfocus(txt_edit)
                 return()
@@ -622,7 +623,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 u <- rpubsUpload(title = NULL, htmlFile = h,
                                  id = tclvalue(entry), method='internal')
                                  # temporarily 'internal' due to SSL error
-                riteMsg(paste("RPubs ID is:", u$id))
+                riteMsg(output = output, error = err_out, paste("RPubs ID is:", u$id))
                 browseURL(u$continueUrl) # browse to continueUrl
                 tkfocus(txt_edit)
                 return()
@@ -738,7 +739,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 if (catchOutput)
                     writeError("","Interruption")
                 else
-                    riteMsg("Evaluation interrupted!", error=TRUE)
+                    riteMsg(output = output, error = err_out, "Evaluation interrupted!", error=TRUE)
             }
         ),
         # a restart to 'discontinue' source(.)-ing
@@ -758,10 +759,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             if (length(osink)>length2) {
                 tryCatch(tkinsert(output,"end",paste(osink[(length2+1):length(osink)],"\n",collapse="")),
                     error = function(e) {
-                        riteMsg(paste("Printing error:",e,"!"), error=TRUE)
+                        riteMsg(output = output, error = err_out, paste("Printing error:",e,"!"), error=TRUE)
                     },
                     interrupt = function() {
-                        riteMsg("Printing interrupt!", error=TRUE)
+                        riteMsg(output = output, error = err_out, "Printing interrupt!", error=TRUE)
                     }
                 )
                 tkselect(nb2, 0)
@@ -868,7 +869,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         } else if (use=='file') {
             fname <- tclvalue(tkgetOpenFile(title="Load Script",filetypes=filetypelist))
             if (!length(fname) || fname=="") {
-                riteMsg('No file selected', error=TRUE)
+                riteMsg(output = output, error = err_out, 'No file selected', error=TRUE)
                 return()
             } else {
                 txtvalue <- NULL
@@ -876,7 +877,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             }
         }
         
-        riteMsg("Generating report...", error=TRUE)
+        riteMsg(output = output, error = err_out, "Generating report...", error=TRUE)
         
         if (genmode=="knit") {
             knit_out <- try(knit(input=inputvalue, text=txtvalue))
@@ -893,13 +894,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             } else if (!saveScript()) {
                 knit_out <- Sweave(file=filename, quiet=TRUE)
             } else {
-                riteMsg("script not saved.", error=TRUE)
+                riteMsg(output = output, error = err_out, "script not saved.", error=TRUE)
                 return()
             }
         } else if (genmode=="knitsweave") {
             sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
             if (inherits(sweave_out, "try-error")) {
-                riteMsg("Could not convert Sweave to knitr!", error=TRUE)
+                riteMsg(output = output, error = err_out, "Could not convert Sweave to knitr!", error=TRUE)
                 return()
             }
             else if (!is.null(inputvalue))
@@ -909,7 +910,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         } else if (genmode=="tangle") {
             sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
             if (inherits(sweave_out, "try-error")) {
-                riteMsg("Could not convert Sweave to knitr!", error=TRUE)
+                riteMsg(output = output, error = err_out, "Could not convert Sweave to knitr!", error=TRUE)
                 return()
             }
             else if (!is.null(inputvalue))
@@ -966,7 +967,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 knit_out <- try(spin(hair=NULL, text=txtvalue, knit=TRUE, format=spinformat))
             }
         } else {
-            riteMsg("Unrecognized report type!", error=TRUE)
+            riteMsg(output = output, error = err_out, "Unrecognized report type!", error=TRUE)
             return(invisible(NULL))
         }
         sink(type="output")
@@ -981,33 +982,33 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         }
         if (catchOutput) {
             tkselect(nb2, 1)
-            riteMsg(paste(ksink1,collapse="\n"), error=TRUE)
-            riteMsg(paste(ksink2,collapse="\n"), error=TRUE)
+            riteMsg(output = output, error = err_out, paste(ksink1,collapse="\n"), error=TRUE)
+            riteMsg(output = output, error = err_out, paste(ksink2,collapse="\n"), error=TRUE)
             tkfocus(txt_edit)
         } else {
-            riteMsg(paste(ksink1,collapse="\n"))
-            riteMsg(paste(ksink2,collapse="\n"))
+            riteMsg(output = output, error = err_out, paste(ksink1,collapse="\n"))
+            riteMsg(output = output, error = err_out, paste(ksink2,collapse="\n"))
         }
         if (catchOutput)
             sink(errsink, type="message")
         if (inherits(knit_out,"try-error")) {
-            riteMsg("Report generation failed!", error=TRUE)
+            riteMsg(output = output, error = err_out, "Report generation failed!", error=TRUE)
             return(knit_out)
         } else {
-            riteMsg('Report finished!\n', error=TRUE)
+            riteMsg(output = output, error = err_out, 'Report finished!\n', error=TRUE)
             if (catchOutput) {
                 clearOutput()
             } 
             if (use %in% c('current','file') || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd","sweave")) {
                 if (catchOutput) {
                     chn <- tclopen(knit_out, "r")
-                    riteMsg(tclvalue(tclread(chn)))
+                    riteMsg(output = output, error = err_out, tclvalue(tclread(chn)))
                     tclclose(chn)
                 } else if (use=='current' | (use=='file' & as.numeric(tclvalue(openreports))))
                     file.show(knit_out, title='Output')
             } else {
                 if (catchOutput) {
-                    riteMsg(knit_out)
+                    riteMsg(output = output, error = err_out, knit_out)
                 } else {
                     tmp <- tempfile()
                     writeLines(knit_out, tmp)
@@ -1060,16 +1061,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     tex1 <- system(paste("pdflatex",filetopdf), intern=TRUE)
                 else
                     tex1 <- system(paste("xelatex",filetopdf), intern=TRUE)
-                riteMsg(paste(tex1,collapse="\n"), error=TRUE)
+                riteMsg(output = output, error = err_out, paste(tex1,collapse="\n"), error=TRUE)
                 if (is.null(attributes(tex1)$status) && bibtex==TRUE) {
                     tex2 <- system(paste("bibtex",filetopdf), intern=TRUE)
-                    riteMsg(paste(tex2,collapse="\n"), error=TRUE)
+                    riteMsg(output = output, error = err_out, paste(tex2,collapse="\n"), error=TRUE)
                     if (is.null(attributes(tex2)$status)) {
                         tex3 <- system(paste("pdflatex",filetopdf), intern=TRUE)
-                        riteMsg(paste(tex3,collapse="\n"), error=TRUE)
+                        riteMsg(output = output, error = err_out, paste(tex3,collapse="\n"), error=TRUE)
                         if (is.null(attributes(tex3)$status)) {
                             tex4 <- system(paste("pdflatex",filetopdf), intern=TRUE)
-                            riteMsg(paste(tex4,collapse="\n"), error=TRUE)
+                            riteMsg(output = output, error = err_out, paste(tex4,collapse="\n"), error=TRUE)
                         }
                     }
                 }
@@ -1078,12 +1079,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tex1 <- texi2pdf(filetopdf, clean=TRUE)
             if (fstem %in% list.files()) {
                 if (as.numeric(tclvalue(openreports))) {
-                    riteMsg(paste("\nOpening pdf ",fstem,"...\n",sep=''), error=TRUE)
+                    riteMsg(output = output, error = err_out, paste("\nOpening pdf ",fstem,"...\n",sep=''), error=TRUE)
                     system2(getOption("pdfviewer"),fstem)
                 }
             }
             else
-                riteMsg("PDF not created!\n", error=TRUE)
+                riteMsg(output = output, error = err_out, "PDF not created!\n", error=TRUE)
         }
     }
     
@@ -1499,8 +1500,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 
     pw <- ttkpanedwindow(riteenv$editor, orient = orientation)
     nb1 <- tk2notebook(pw, tabs = c("Script")) # left pane
-        if (!is.ttk()) 
+        if (!is.ttk()) {
             stop("Tcl/Tk >= 8.5 is required")
+        }
         tclRequire("ctext")
         add_texttab <- function() {
             edittab <- tk2notetab(nb1, "Script")
@@ -1579,27 +1581,15 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         tkadd(pw, nb2, weight=1) # right pane
     }
     tkpack(pw, fill="both", expand = "yes") # pack panedwindow to editor
-
-    ## FUNCTION TO CONTROL PRINTING TO OUTPUT VERSUS CONSOLE ##
-    riteMsg <- function(value, error=FALSE) {
-        if (catchOutput & error)
-            tkinsert(err_out, "end", value)
-        else if (catchOutput)
-            tkinsert(output, "end", value)
-        else
-            message(value, appendLF = FALSE)
-        return(invisible(NULL))
-    }
-    
     
     ## KEY BINDINGS ##
     f1 <- function() {
         iwordstart <- tclvalue(tkindex(txt_edit,"insert-1char wordstart"))
         iwordend <- tclvalue(tkindex(txt_edit,"insert-1char wordend"))
         sel <- tclvalue(tktag.ranges(txt_edit,"sel"))
-        if (!sel=="")
+        if (!sel=="") {
             command <- tclvalue(tkget(txt_edit,"sel.first","sel.last"))
-        else {
+        } else {
             # periods
             if (tclvalue(tkget(txt_edit, iwordstart, iwordend))=='.') {
                 iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
@@ -1953,7 +1943,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         }
         else {
             if (verbose==TRUE) {
-                riteMsg("No syntax errors found", error=TRUE)
+                riteMsg(output = output, error = err_out, "No syntax errors found", error=TRUE)
                 tkfocus(txt_edit)
             }
             invisible(TRUE)
@@ -2218,5 +2208,5 @@ riteout <- function(...)
     rite(catchOutput=TRUE, ...)
 
 if (getRversion() >= "2.15.1") {
-    utils::globalVariables(c("osink", "riteoutcon"))
+    utils::globalVariables(c("osink", "riteoutcon", "addHighlighting"))
 }

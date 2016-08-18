@@ -1,5 +1,17 @@
 riteenv <- new.env()
 
+# FUNCTION TO CONTROL PRINTING TO OUTPUT VERSUS CONSOLE
+riteMsg <- function(output, error, value, error=FALSE) {
+    if (catchOutput & error) {
+        tkinsert(error, "end", value)
+    } else if (catchOutput) {
+        tkinsert(output, "end", value)
+    } else {
+        message(value, appendLF = FALSE)
+    }
+    return(invisible(NULL))
+}
+
 inserttext <- function(what, where, fastinsert = TRUE) {
     if (fastinsert) {
         .Tcl(.Tcl.args(.Tk.ID(where), 'fastinsert', 'insert', what))
@@ -142,7 +154,6 @@ highlight <- function(txtedit, highlight, hcolors) {
     }
     # markdown
     if("markdown" %in% highlight){
-        riteMsg("Highlighting for markdown is only minimally supported")
         # something for the various kinds of markdown syntax
         hl('regexp', 'rmdheader1', hcolors$rmd,'=+')
         hl('regexp', 'rmdheader2', hcolors$rmd,'=-')
