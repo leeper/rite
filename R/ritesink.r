@@ -1,3 +1,48 @@
+#' @rdname sink
+#' @title ritesink
+#' @description An experimental tcl/tk output widget
+#' @param echo A logical indicating whether calls should be output to the sink. Default is \code{TRUE}.
+#' @param print.eval A logical indicating whether evaluated output from calls and/or messages should be sent to the sink. Default is \code{TRUE}.
+#' @param split A logical indicating whether output (but not messages) should be split between the console and the sink. Default is \code{FALSE}.
+#' @param prompt.echo A character string indicating the text to use for the prompt in the widget. The default is drawn from \code{options("prompt")}.  Ignored if \code{echo = FALSE}.
+#' @param fontFamily The font family used in rite. Default is \dQuote{\code{Courier}}. Available fonts can be retrieved by \code{.Tcl("font families")}.
+#' @param fontSize The font size used in rite. Default is \code{10}.
+#' @param col.bg A one-element character string indicating a tcl/tk color for the background color of the sink. A list of available tcl/tk colors can be found here: \url{http://www.tcl.tk/man/tcl8.5/TkCmd/colors.htm}.
+#' @param col.call A two-element character vector indicating tcl/tk colors for the foreground and background, respectively, of evaluated R calls (only visible if \code{echo=TRUE}..
+#' @param col.result A two-element character vector indicating tcl/tk colors for the foreground and background, respectively, of standard output.
+#' @param col.err A two-element character vector indicating tcl/tk colors for the foreground and background, respectively, of errors.
+#' @param col.warn A two-element character vector indicating tcl/tk colors for the foreground and background, respectively, of warnings.
+#' @param col.msg A two-element character vector indicating tcl/tk colors for the foreground and background, respectively, of messages.
+#' @param quiet A logical indicating whether to suppress confirmation that everything is cleaned up. Default is \code{TRUE}.
+#' @details
+#' These functions make use of a couple of different R features to build a color-coded output window for the R console. While the console is limited to displaying output in monochrome plain text, the rite sink allows multi-colored output and messages to be piped to a single widget that highlights errors, warning, and messages. Unlike a traditional sink, rite sink is a tcl/tk widget that updates output as commands and messages occur. Accomplishing this requires the use of \code{sink}, task callbacks, and a custom error handler. (This is similar to the R2HTML package.) 
+#' 
+#' \code{sinkstart} starts the sink and \code{sinkstop} stops the sink without destroying the widget. Closing the sink widget invisibly calls \code{sinkstop} and cleans up. The sink can be turned on and off repeatedly without closing the widget.
+#' @return \code{NULL}
+#' @section Shortcut keys in widget:
+#'   \code{<Ctrl-c>}: Copy
+#' 
+#'   \code{<Ctrl-x>}: Cut
+#' 
+#'   \code{<Ctrl-p>}: Paste
+#' 
+#'   \code{<Ctrl-a>}: Select all
+#' 
+#'   \code{<Ctrl-s>}: Save output
+#' 
+#'   \code{<Ctrl-l>}: Clear output
+#' @references
+#' \href{http://developer.r-project.org/TaskHandlers.pdf}{Top-level Task Callbacks in R}
+#' 
+#' \href{http://cran.r-project.org/web/packages/R2HTML/index.html}{R2HTML package}
+#' @author Thomas J. Leeper 
+#' @examples
+#' \dontrun{
+#' sinkstart() # open the sink
+#' sinkstop() # close the sink
+#' }
+#' @keywords IO 
+#' @export
 sinkstart <- function(
     echo=TRUE, print.eval=TRUE, split=FALSE,
     prompt.echo=getOption("prompt", "> "), 
@@ -313,6 +358,8 @@ sinkstart <- function(
     invisible(NULL)
 }
 
+#' @rdname sink
+#' @export
 sinkstop <- function(quiet = TRUE){
     # check for active sink
     if (!exists('ritesinkenv')) {

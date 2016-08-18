@@ -1,11 +1,19 @@
 Package: rite
-Version: 0.3.6
-Date: 2016-02-29
+Version: 0.3.7
+Date: 2016-08-18
 Title: The Right Editor to Write R
-Author: Thomas J. Leeper
-Maintainer: Thomas J. Leeper <thosjleeper@gmail.com>
-Imports: tcltk, tcltk2, RCurl, tools, knitr, markdown, formatR
+Authors@R: person("Thomas J.", "Leeper", role = c("aut", "cre"), email = "thosjleeper@gmail.com")
+Imports:
+    grDevices,
+    tcltk,
+    tcltk2,
+    RCurl,
+    tools,
+    knitr,
+    markdown,
+    formatR
 Description: A simple yet powerful script editor built natively in R with tcltk.
 License: GPL-2
 URL: https://github.com/leeper/rite
 BugReports: https://github.com/leeper/rite/issues
+RoxygenNote: 5.0.1

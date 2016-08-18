@@ -14,6 +14,7 @@
 * Added ability to load a remote URL as initial script using new argument `url`. (#68)
 * Changed default tab setting from "\t" to "    " (4 spaces).
 * Added ability to upload HTML or automatically rendered (R)markdown to [RPubs](https://rpubs.com/) using `markdown::rpubsUpload`. (#71)
+* Switched to roxygen2 documentation.
 
 ## BUG FIXES ##
 * Sometimes in January 2014, `tcltk2::ctext` started producing a catastrophic error of the form `Error in structure(.External(.C_dotTclObjv, objv), class = "tclObj"): [tcl] unknown color name "".` In response, `rite` now creates the "ctext" object directly rather than through its **tcltk2** wrapper.

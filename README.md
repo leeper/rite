@@ -43,7 +43,7 @@ To install the latest development version of **rite** from GitHub:
 
 ```R
 # latest (unstable) version from GitHub
-if(!require("ghit")){
+if (!require("ghit")) {
     install.packages("ghit")
 }
 ghit::install_github("leeper/rite")
