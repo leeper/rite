@@ -1753,31 +1753,44 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             ## adding them programmatically failed to work (always added last command)
                 if (length(fnlist)>0) {
                     tkadd(fnContextMenu, "command", label = fnlist[1], command = function() insertCommand(1))
+                }
                 if (length(fnlist)>1) {
                     tkadd(fnContextMenu, "command", label = fnlist[2], command = function() insertCommand(2))
+                }
                 if (length(fnlist)>2) {
                     tkadd(fnContextMenu, "command", label = fnlist[3], command = function() insertCommand(3))
+                }
                 if (length(fnlist)>3) {
                     tkadd(fnContextMenu, "command", label = fnlist[4], command = function() insertCommand(4))
+                }
                 if (length(fnlist)>4) {
                     tkadd(fnContextMenu, "command", label = fnlist[5], command = function() insertCommand(5))
+                }
                 if (length(fnlist)>5) {
                     tkadd(fnContextMenu, "command", label = fnlist[6], command = function() insertCommand(6))
+                }
                 if (length(fnlist)>6) {
                     tkadd(fnContextMenu, "command", label = fnlist[7], command = function() insertCommand(7))
+                }
                 if (length(fnlist)>7) {
                     tkadd(fnContextMenu, "command", label = fnlist[8], command = function() insertCommand(8))
+                }
                 if (length(fnlist)>8) {
                     tkadd(fnContextMenu, "command", label = fnlist[9], command = function() insertCommand(9))
+                }
                 if (length(fnlist)>9) {
                     tkadd(fnContextMenu, "command", label = fnlist[10], command = function() insertCommand(10))
+                }
                 if (length(fnlist)>10) {
                     tkadd(fnContextMenu, "command", label = fnlist[11], command = function() insertCommand(11))
+                }
                 if (length(fnlist)>11) {
                     tkadd(fnContextMenu, "command", label = fnlist[12], command = function() insertCommand(12))
+                }
                 if (length(fnlist)>12) {
                     tkadd(fnContextMenu, "command", label = fnlist[13], command = function() insertCommand(13))
-                }if (length(fnlist)>13) {
+                }
+                if (length(fnlist)>13) {
                     tkadd(fnContextMenu, "command", label = fnlist[14], command = function() insertCommand(14))
                 }
                 if (length(fnlist)>14) {
@@ -1813,45 +1826,50 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         
         findtext <- function(string, startpos, replaceval = NULL) {
             searchopts$searchterm <<- string
-            if (!is.null(replaceval))
+            if (!is.null(replaceval)) {
                 searchopts$replaceterm <<- replaceval
+            }
             searchopts$casevar <- tclvalue(casevar)
             searchopts$regoptvar <- tclvalue(regoptvar)
             searchopts$updownvar <- tclvalue(updownvar)
             searchopts$searchfromtop <- tclvalue(searchfromtop)
-            if (string=="") {
+            if (string == "") {
                 return()
             } else {
                 found <- ""
-                if (tclvalue(updownvar)==1) {
+                if (tclvalue(updownvar) == 1) {
                     ud1 <- "-forwards"
                     si1 <- "end"
                 } else {
                     ud1 <- "-backwards"
                     si1 <- "0.0"
                 }
-                if (tclvalue(regoptvar)==0)
+                if (tclvalue(regoptvar) == 0) {
                     reg1 <- "-exact"
-                else
+                } else {
                     reg1 <- "-regexp"
-                if (tclvalue(casevar)==1)
+                }
+                if (tclvalue(casevar) == 1) {
                     case1 <- "-nocase"
-                else
+                } else {
                     case1 <- ""
+                }
                 found <- tclvalue(.Tcl(paste(.Tk.ID(txt_edit),"search",ud1,reg1,case1,string,startpos,si1)))
-                if (!found=="") {
+                if (!found == "") {
                     tktag.add(txt_edit, "sel", found, paste(found," +",nchar(string),"char",sep=""))
                     if (!is.null(replaceval)) {
-                        if (tclvalue(updownvar)==1)
+                        if (tclvalue(updownvar) == 1) {
                             tkdelete(txt_edit, "insert", paste(found," +",nchar(string),"char",sep=""))
-                        else
+                        } else {
                             tkdelete(txt_edit, "insert", paste(found," -",nchar(string),"char",sep=""))
+                        }
                         tkinsert(txt_edit, "insert", replaceval)
                     } else {
-                        if (tclvalue(updownvar)==1)
+                        if (tclvalue(updownvar) == 1) {
                             tkmark.set(txt_edit, "insert", paste(found," +",nchar(string),"char",sep=""))
-                        else
+                        } else {
                             tkmark.set(txt_edit, "insert", found)
+                        }
                     }
                     tkdestroy(searchDialog)
                     # if (tclvalue(searchfromtop)==1 && tclvalue(updownvar)==1) {
@@ -1943,8 +1961,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     gotoline <- function() {
         jump <- function() {
             lineval <- tclvalue(lineval)
-            if (!lineval=="")
+            if (!lineval == "") {
                 tkmark.set(txt_edit,"insert",paste(lineval,".0",sep=""))
+            }
             tkdestroy(goDialog)
             tksee(txt_edit,"insert")
         }
@@ -1966,27 +1985,28 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     tkbind(txt_edit, "<Control-G>", gotoline)
     tkbind(txt_edit, "<Control-g>", gotoline)
     
-    tryparse <- function(verbose=TRUE) {
+    tryparse <- function(verbose = TRUE) {
         sel <- tclvalue(tktag.ranges(txt_edit,"sel"))
-        if (!sel=="")
+        if (!sel == "") {
             e <- try(parse(text=tclvalue(tkget(txt_edit,"sel.first","sel.last"))), silent=TRUE)
-        else
+        } else {
             e <- try(parse(text=tclvalue(tkget(txt_edit,"1.0","end"))), silent=TRUE)
+        }
         if (inherits(e, "try-error")) {
             e <- strsplit(e,"<text>")[[1]][2]
-            if (!sel=="")
+            if (!sel == "") {
                 linen <- paste(    (as.numeric(strsplit(e,":")[[1]][2]) + as.numeric(strsplit(sel,"[.]")[[1]][1]) - 1), 
                                 (as.numeric(strsplit(e,":")[[1]][3])-1), sep=".")
-            else
+            } else {
                 linen <- paste(    strsplit(e,":")[[1]][2], strsplit(e,":")[[1]][3], sep=".")
+            }
             content <- strsplit(e,":")[[1]]
             tktag.add(txt_edit,"sel",paste(linen,"linestart"),paste(linen,"lineend"))
             tkmark.set(txt_edit,"insert",paste(linen,"-1char",sep=""))
             cat("\a")
             invisible(FALSE)
-        }
-        else {
-            if (verbose==TRUE) {
+        } else {
+            if (isTRUE(verbose)) {
                 riteMsg(output = output, error = err_out, "No syntax errors found", error=TRUE)
                 tkfocus(txt_edit)
             }
@@ -1996,10 +2016,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     tkbind(txt_edit, "<F7>", tryparse)
     
     runkey <- function() {
-        if (!tclvalue(tktag.ranges(txt_edit,"sel"))=="")
+        if (!tclvalue(tktag.ranges(txt_edit,"sel")) == "") {
             runCode(tclvalue(tkget(txt_edit,"sel.first","sel.last")))
-        else
+        } else {
             runLine()
+        }
     }
     tkbind(txt_edit, "<Control-r>", runkey)
     tkbind(txt_edit, "<Control-R>", runkey)
@@ -2028,24 +2049,25 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     toggleComment <- function() {
         checkandtoggle <- function(pos) {
             n <- nchar(comment)
-            if (tclvalue(tkget(txt_edit, pos, paste(pos,"+",n+1,"char",sep="")))==paste(comment," ",sep=""))
+            if (tclvalue(tkget(txt_edit, pos, paste(pos,"+",n+1,"char",sep=""))) == paste(comment," ",sep="")) {
                 tkdelete(txt_edit, pos, paste(pos,"+",n+1,"char",sep=""))
-            else if (tclvalue(tkget(txt_edit, pos, paste(pos,"+",n,"char",sep="")))==comment)
+            } else if (tclvalue(tkget(txt_edit, pos, paste(pos,"+",n,"char",sep=""))) == comment) {
                 tkdelete(txt_edit, pos, paste(pos,"+",n,"char",sep=""))
-            else {
+            } else {
                 tkmark.set(txt_edit,"insert",pos)
                 tkinsert(txt_edit, "insert", paste(comment," ",sep=""))
             }
         }
         selrange <- tclvalue(tktag.ranges(txt_edit,"sel"))
-        if (!selrange=="") {
+        if (!selrange == "") {
             selrange <- floor(as.numeric(strsplit(selrange," ")[[1]]))
-            for(i in selrange[1]:selrange[2])
+            for (i in selrange[1]:selrange[2]) {
                 checkandtoggle(paste(i,".0 linestart",sep=""))
+            }
             tktag.add(txt_edit,"sel",paste(selrange[1],'.0',sep=''), paste(selrange[2],".0 lineend",sep=''))
-        }
-        else
+        } else {
             checkandtoggle("insert linestart")
+        }
     }
     tkbind(txt_edit, "<Control-k>", expression(toggleComment, break))
     tkbind(txt_edit, "<Control-k>", expression(toggleComment, break))
@@ -2054,15 +2076,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         insertpos <- strsplit(tclvalue(tkindex(txt_edit,"insert")),".", fixed=TRUE)[[1]]
         insertpos2 <- paste(insertpos[1],".",as.numeric(insertpos[2])+1,sep="")
         selrange <- tclvalue(tktag.ranges(txt_edit,"sel"))
-        if (selrange=="")
+        if (selrange == "") {
             tkinsert(txt_edit, 'insert', tab)
-        else {
+        } else {
             selrange2 <- floor(as.numeric(strsplit(selrange," ")[[1]]))
-            if (selrange2[1]==selrange2[2])
+            if (selrange2[1] == selrange2[2]) {
                 tkinsert(txt_edit, 'insert', tab)
-            else {
-                for(i in selrange2[1]:selrange2[2])
+            } else {
+                for (i in selrange2[1]:selrange2[2]) {
                     tkinsert(txt_edit, paste(i,".0 linestart",sep=""), tab)
+                }
             }
             tktag.add(txt_edit,"sel",paste(selrange2[1],'.0',sep=''), paste(selrange2[2],".0 lineend",sep=''))
         }
@@ -2074,16 +2097,17 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         selrange <- tclvalue(tktag.ranges(txt_edit,"sel"))
         if (selrange=="") {
             check <- tclvalue(tkget(txt_edit, "insert linestart", "insert linestart+1char"))
-            if (grepl('^[[:space:]]+',check)[[1]])
+            if (grepl('^[[:space:]]+',check)[[1]]) {
                 tkdelete(txt_edit, "insert linestart", "insert linestart+1char")
-        }
-        else {
+            }
+        } else {
             selrange2 <- round(as.numeric(strsplit(selrange," ")[[1]]),0)
-            for(i in selrange2[1]:selrange2[2]) {
+            for (i in selrange2[1]:selrange2[2]) {
                 pos <- paste(i,".0 linestart",sep="")
                 check <- tclvalue(tkget(txt_edit, pos, paste(pos,"+1char",sep="")))
-                if (grepl('^[[:space:]]+',check)[[1]])
+                if (grepl('^[[:space:]]+',check)[[1]]) {
                     tkdelete(txt_edit, pos, paste(pos,"+1char",sep=""))
+                }
             }
             tktag.add(txt_edit,"sel",paste(selrange2[1],'.0',sep=''), paste(selrange2[2],".0 lineend",sep=''))
             #tkmark.set(txt_edit, "insert", insertpos2)
@@ -2100,17 +2124,19 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         # detect tab(s) and other whitespace
         thisline <- tclvalue(tkget(txt_edit, "insert linestart", "insert lineend"))
         spaces <- gregexpr('[[:space:]]',thisline)[[1]]
-        if (spaces[1]==-1)
-            lead <- ''
-        else {
+        if (spaces[1] == -1) {
+            lead <- ""
+        } else {
             linechars <- strsplit(thisline,'')[[1]]
             leadn <- which(spaces[1:length(linechars)]==seq_along(linechars))
-            if (!is.na(leadn[1]))
+            if (!is.na(leadn[1])) {
                 lead <- substring(thisline,range(leadn)[1],range(leadn)[2])
-            else
-                lead <- ''
-            if (is.na(lead))
-                lead <- ''
+            } else {
+                lead <- ""
+            }
+            if (is.na(lead)) {
+                lead <- ""
+            }
         }
         tkinsert(txt_edit, "insert ", paste("\n",lead,sep=""))
         tksee(txt_edit, "insert")
@@ -2122,21 +2148,24 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         if (insertpos[2]=='0') {
             thisline <- tclvalue(tkget(txt_edit, "insert linestart", "insert lineend"))
             firstchar <- regexpr('[[:alnum:]]',thisline)[1]
-            if (!is.null(firstchar) && length(firstchar)>0 && !firstchar==-1)
+            if (!is.null(firstchar) && length(firstchar)>0 && !firstchar == -1) {
                 tkmark.set(txt_edit,'insert',paste(insertpos[1],firstchar-1,sep='.'))
-        }
-        else
+            }
+        } else {
             tkmark.set(txt_edit,'insert','insert linestart')
+        }
         tksee(txt_edit, 'insert')
         # handle selection
         selrange <- tclvalue(tktag.ranges(txt_edit,"sel"))
-        if (!selrange=='') {
+        if (!selrange == "") {
             selrange <- strsplit(selrange,' ')[[1]]
             tktag.remove(txt_edit,'sel',selrange[1],selrange[2])
-            if (strsplit(selrange[1],'.',fixed=TRUE)[[1]][1]==insertpos[1])
+            if (strsplit(selrange[1],'.',fixed=TRUE)[[1]][1] == insertpos[1]) {
                 tktag.add(txt_edit,"sel",'insert',selrange[2])
-            if (strsplit(selrange[2],'.',fixed=TRUE)[[1]][1]==insertpos[1])
+            }
+            if (strsplit(selrange[2],'.',fixed=TRUE)[[1]][1] == insertpos[1]) {
                 tktag.add(txt_edit,"sel",selrange[1],'insert')
+            }
         }
     }
     tkbind(txt_edit, "<Home>", expression(togglehome, break))
@@ -2160,7 +2189,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     tkbind(txt_edit, "<Control-A>", expression(selectAllEdit, break))
     tkbind(txt_edit, "<Control-a>", expression(selectAllEdit, break))
     
-    if (catchOutput) {
+    if (isTRUE(catchOutput)) {
         selectAllOutput <- function() {
             tktag.add(output,"sel","0.0","end")
             tkmark.set(output,"insert","end")
@@ -2174,29 +2203,32 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         if (!tclvalue(tktag.ranges(txt_edit,"sel"))=="") {
             tkclipboard.clear()
             tkclipboard.append(tclvalue(tkget(txt_edit, selrange[1], selrange[2])))
-            if (docut==TRUE)
+            if (isTRUE(docut)) {
                 tkdelete(txt_edit, selrange[1], selrange[2])
-        }
-        else
+            }
+        } else {
             cat("\a")
+        }
     }
     pasteText <- function() {
-        if ("windows"==.Platform$OS.type)
+        if (.Platform$OS.type %in% "windows") {
             cbcontents <- readLines("clipboard")
-        else if ("unix"==Sys.getenv("OS"))
+        } else if (Sys.getenv("OS") %in% "unix") {
             cbcontents <- readLines(pipe("pbpaste"))
-        else
+        } else {
             cbcontents <- ""
+        }
         tkinsert(txt_edit, "insert", paste(cbcontents,collapse="\n"))
     }
     
     editcase <- function(type) {
         if (!tclvalue(tktag.ranges(txt_edit,"sel"))=="") {
             seltxt <- tclvalue(tkget(txt_edit,"sel.first","sel.last"))
-            if (type=="toupper")
+            if (type == "toupper") {
                 seltxt <- toupper(seltxt)
-            else
+            } else {
                 seltxt <- tolower(seltxt)
+            }
             tkdelete(txt_edit, "sel.first", "sel.last")
             tkinsert(txt_edit, "insert", seltxt)
         }
@@ -2233,14 +2265,15 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     highlight(txt_edit, highlight = highlight, hcolors = hcolors)
     
     ## DISPLAY EDITOR ##
-    if (!is.null(filename))
+    if (!is.null(filename)) {
         loadScript(fname=filename)
-    else if (!is.null(url))
+    } else if (!is.null(url)) {
         loadScript(fname=url, locals=FALSE)
+    }
     tkmark.set(txt_edit,"insert","1.0")
     tkfocus(txt_edit)
     tksee(txt_edit, "insert")
-    if (catchOutput && "windows"==.Platform$OS.type) {
+    if (isTRUE(catchOutput) && .Platform$OS.type %in% "windows") {
         tcl("wm", "state", riteenv$editor, "zoomed")
         #tcl("wm", "attributes", riteenv$editor, "fullscreen")
     }
@@ -2248,8 +2281,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 
 #' @rdname rite
 #' @export
-riteout <- function(...)
-    rite(catchOutput=TRUE, ...)
+riteout <- function(catchOutput = TRUE, ...) {
+    rite(catchOutput = catchOutput, ...)
+}
 
 if (getRversion() >= "2.15.1") {
     utils::globalVariables(c("osink", "riteoutcon", "addHighlighting"))
