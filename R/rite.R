@@ -191,7 +191,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         searchopts$searchfromtop <- 0
     ritetmpfile <- tempfile(pattern="rite",fileext=".r")
     riteenv$wmtitle <- packagetitle <- "rite"
-    if (echo) {
+    if (isTRUE(echo)) {
         echorun <- tclVar(1)
     } else {
         echorun <- tclVar(0)
@@ -256,7 +256,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 hcolors[[names(color)[i]]] <- color[[i]]
         }
     }
-    if (catchOutput) {
+    if (isTRUE(catchOutput)) {
         outputSaved <- TRUE # a logical for whether current output file is saved
         outsink <- textConnection("osink", "w") # create connection for stdout
         sink(outsink, type="output") # sink stdout
@@ -269,41 +269,42 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 
     ## EXIT PROCEDURE ##
     exitWiz <- function() {
-        if (catchOutput) {
-            if (!outputSaved) {
+        if (isTRUE(catchOutput)) {
+            if (!isTRUE(outputSaved)) {
                 exit <- tkmessageBox(message = "Do you want to save the output?", icon = "question", type = "yesnocancel", default = "yes")            
-                if (tclvalue(exit)=="yes")
+                if (tclvalue(exit) == "yes") {
                     saveOutput()
-                else if (tclvalue(exit)=="no") {}
-                else {
+                } else if (tclvalue(exit) == "no") {
+                } else {
                     tkfocus(txt_edit)
                     return()
                 }
             }
         }
-        if (!scriptSaved) {
+        if (!isTRUE(scriptSaved)) {
             exit <- tkmessageBox(message = "Do you want to save the script?", icon = "question", type = "yesnocancel", default = "yes")            
-            if (tclvalue(exit)=="yes")
+            if (tclvalue(exit) == "yes") {
                 saveScript()
-            else if (tclvalue(exit)=="no") {}
-            else {
+            } else if (tclvalue(exit)=="no") {
+            } else {
                 tkfocus(txt_edit)
                 return()
             }
-        }
-        else {
+        } else {
             exit <- tkmessageBox(message = "Are you sure you want to close rite?", icon = "question", type = "yesno", default = "yes")
-            if (tclvalue(exit)=="yes") {}
-            else if (tclvalue(exit)=="no") {
+            if (tclvalue(exit) == "yes") {
+            } else if (tclvalue(exit) == "no") {
                 tkfocus(txt_edit)
                 return()
             }
         }
         if (catchOutput) {
-            if (!sink.number()==0)
+            if (!sink.number() == 0) {
                 sink(type="output")
-            if (!sink.number('message')==2)
+            }
+            if (!sink.number('message') == 2) {
                 sink(type="message")
+            }
             if ('riteoutcon' %in% showConnections()) {
                 thiscon <- rownames(showConnections())[which('riteoutcon'==showConnections()[,1])]
                 close(getConnection(thiscon))
@@ -326,8 +327,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             thiscon <- rownames(showConnections())[which('esink'==showConnections()[,1])]
             close(getConnection(thiscon))
         }
-        if ("windows"==.Platform$OS.type)
+        if (.Platform$OS.type %in% "windows") {
             bringToTop(-1)
+        }
         tkdestroy(riteenv$editor)
         unlink(ritetmpfile)
     }
@@ -338,10 +340,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             exit <- tkmessageBox(message = "Do you want to save the current script?",
                                  icon = "question", type = "yesnocancel",
                                  default = "yes")
-            if (tclvalue(exit)=="yes")
+            if (tclvalue(exit) == "yes") {
                 saveScript()
-            else if (tclvalue(exit)=="no") {}
-            else {
+            } else if (tclvalue(exit) == "no") {
+            } else {
                 tkfocus(txt_edit)
                 return(1)
             }
@@ -356,13 +358,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     getRawGistURL <- function(entry) {
         if (is.numeric(entry) || grepl("^[0-9a-f]+$", entry)) {
             entry <- paste("https://api.github.com/gists/", entry, sep = "")
-        }
-        else if (grepl("((^https://)|^)gist.github.com/([^/]+/)?[0-9a-f]+$", entry)) {
+        } else if (grepl("((^https://)|^)gist.github.com/([^/]+/)?[0-9a-f]+$", entry)) {
             entry <- paste("https://api.github.com/gists/",
                         regmatches(entry, regexpr("[0-9a-f]+$", entry)), sep = "")
-        }
-        else
+        } else {
             return(NULL)
+        }
         content <- try(rawToChar(curl_fetch_memory(entry)[["content"]]))
         if (!inherits(content,"try-error")) {
             tmp <- regmatches(content, gregexpr('"raw_url": ?"(.*?\\.[[:alpha:]]*)"', content))[[1]]
@@ -375,26 +376,27 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     
     loadScript <- function(fname=NULL, locals=TRUE, gist=FALSE, refonly=FALSE, new=TRUE) {
         if (is.null(fname) & new) {
-            if (newScript())
+            if (newScript()) {
                 return(1)
+            }
         }
-        if (locals==TRUE) {
+        if (isTRUE(locals)) {
             if (is.null(fname) & new) {
                 fname <- tclvalue(tkgetOpenFile(title="Load Script",filetypes=filetypelist))
             } else if (is.null(fname) & !new) {
                 fname <- tclvalue(tkgetOpenFile(title="Append Script",filetypes=filetypelist))
             }
-            if (!length(fname) || fname=="") {
+            if (!length(fname) || fname == "") {
                 return()
             } else {
-                if (refonly) {
+                if (isTRUE(refonly)) {
                     tkinsert(txt_edit, "insert", paste("source(\"",filename,"\")\n",sep=""))
                 } else {
                     chn <- tclopen(fname, "r")
                     inserttext(tclvalue(tclread(chn)), txt_edit, fastinsert)
                     tclclose(chn)
                 }
-                if (new) {
+                if (isTRUE(new)) {
                     scriptSaved <<- TRUE
                     filename <<- fname
                     riteenv$wmtitle <<- paste(filename,"-",packagetitle)
@@ -415,7 +417,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 processEntry <- function() {
                     tkdestroy(gistDialog)
                     entry <- tclvalue(entry)
-                    if (gist) {
+                    if (isTRUE(gist)) {
                         if (grepl("((^https://)|^)gist.github.com/([^/]+/)?[0-9a-f]+$", entry))
                             entry <- regmatches(entry, regexpr("[0-9a-f]+$", entry))
                         entry <- getRawGistURL(entry)
@@ -433,25 +435,27 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                             tkgrid.columnconfigure(gistDialog,1,weight=1)
                             tkgrid.columnconfigure(gistDialog,2,weight=0)
                             tkgrid.rowconfigure(gistDialog,1,weight=1)
-                            for(i in 1:length(entry))
+                            for (i in 1:length(entry)) {
                                 tkinsert(gist_list, "end", entry[i])
+                            }
                             buttons <- tkframe(gistDialog)
                                 OKbutton <- tkbutton(buttons, text="   OK   ",
-                                    command=function() {
+                                    command = function() {
                                         entry <<- entry[as.numeric(tclvalue(tkcurselection(gist_list)))+1]
                                         tkdestroy(gistDialog)
                                         tkfocus(riteenv$editor)
                                     })
                                 Cancelbutton <- tkbutton(buttons,text=" Cancel ",
-                                    command=function() {tkdestroy(gistDialog); tkfocus(riteenv$editor)})
+                                    command = function() {tkdestroy(gistDialog); tkfocus(riteenv$editor)})
                                 tkgrid(OKbutton, row = 1, column = 1)
                                 tkgrid(Cancelbutton, row = 1, column = 2)
                             tkgrid(buttons, row=3, column=1, columnspan=3)
                             tkwait.window(gistDialog)
                         }
-                    } else
+                    } else {
                         entry <- entry[1]
-                    if (refonly) {
+                    }
+                    if (isTRUE(refonly)) {
                         if (gist || grepl("https",entry)) {
                             tkinsert(txt_edit, "insert", "source(rawConnection(curl::curl_fetch_memory('",entry,"')[['content']]))\n")
                         } else {
@@ -461,24 +465,27 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                         content <- try(rawToChar(curl_fetch_memory(fname)[["content"]]))
                         if (!inherits(content,"try-error")) {
                             inserttext(content, txt_edit, fastinsert)
-                        } else
+                        } else {
                             riteMsg(output = output, error = err_out, "Script not loaded!", error=TRUE)
+                        }
                     }
                     scriptSaved <<- FALSE
                 }
                 gistDialog <- tktoplevel()
-                if (gist)
+                if (isTRUE(gist)) {
                     tkwm.title(gistDialog, "Enter Gist ID or raw URL")
-                else
+                } else {
                     tkwm.title(gistDialog, "Enter URL")
+                }
                 entryform <- tkframe(gistDialog, relief="groove", borderwidth=2)
                     entry <- tclVar()
                     tkgrid(ttklabel(entryform, text = "     "), row=1)
                     urlentry <- tkentry(entryform, width = 50, textvariable=entry)
-                    if (gist)
+                    if (isTRUE(gist)) {
                         tkgrid(tklabel(entryform, text = "ID/URL: "), row=2, column=1)
-                    else
+                    } else {
                         tkgrid(tklabel(entryform, text = "URL: "), row=2, column=1)
+                    }
                     tkgrid(urlentry, row=2, column=2, columnspan=4)
                     tkgrid(ttklabel(entryform, text = "     "), row=3)
                 tkgrid(entryform)
@@ -503,9 +510,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         }
     }
     saveScript <- function() {
-        if (is.null(filename) || !length(filename) || filename=="")
+        if (is.null(filename) || !length(filename) || filename=="") {
             return(saveAsScript())
-        else {
+        } else {
             chn <- tclopen(filename, "w")
             tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
             tclclose(chn)
@@ -524,8 +531,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         if (!length(fname) || fname=="") {
             filename <<- ""
             return(1)
-        }
-        else {
+        } else {
             chn <- tclopen(fname, "w")
             tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
             tclclose(chn)
@@ -584,7 +590,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         } else {
             h <- filename
         }
-        if (new) {
+        if (isTRUE(new)) {
             # interactively specify title
             processEntry <- function() {
                 tkdestroy(rpubsDialog)
@@ -653,14 +659,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         
     ## RUN FUNCTIONS ##
     runCode <- function(code, chunks=FALSE) {
-        if (autosave & (is.null(filename) || filename=="")) {
+        if (isTRUE(autosave) & (is.null(filename) || filename=="")) {
             chn <- tclopen(ritetmpfile, "w")
             tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
             tclclose(chn)
             #scriptSaved <<- TRUE
             #tkwm.title(riteenv$editor, riteenv$wmtitle)
-        }
-        else if (autosave & (!is.null(filename) && !filename=="")) {
+        } else if (isTRUE(autosave) & (!is.null(filename) && !filename=="")) {
             chn <- tclopen(filename, "w")
             tclputs(chn, tclvalue(tkget(txt_edit,"0.0","end")))
             tclclose(chn)
@@ -675,8 +680,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 return()
         }
         search1 <- search()
-        if (catchOutput)
+        if (isTRUE(catchOutput)) {
             length2 <- length(osink)
+        }
         runtemp <- tempfile()
         writeLines(code,runtemp)
         writeError <- function(errmsg, type, focus=TRUE) {
@@ -721,25 +727,28 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                                            icon = "error", 
                                            type = "yesnocancel", 
                                            default = "no")
-                    if (tclvalue(errbox)=="no")
+                    if (tclvalue(errbox) == "no") {
                         invokeRestart("discontinue")
-                    else if (tclvalue(errbox)=="cancel")
+                    } else if (tclvalue(errbox) == "cancel") {
                         tclvalue(displayWarningDialog) <- 0
+                    }
                 }
             },
             message = function(errmsg) {
                 errmsg <- strsplit(as.character(errmsg),": ")[[1]]
                 errmsg <- paste(errmsg[-1],collapse=":")
-                if (catchOutput)
-                    writeError(errmsg,"Message")
-                else
+                if (isTRUE(catchOutput)) {
+                    writeError(errmsg, "Message")
+                } else {
                     cat(errmsg)
+                }
             },
             interrupt = function() {
-                if (catchOutput)
-                    writeError("","Interruption")
-                else
+                if (catchOutput) {
+                    writeError("", "Interruption")
+                } else {
                     riteMsg(output = output, error = err_out, "Evaluation interrupted!", error=TRUE)
+                }
             }
         ),
         # a restart to 'discontinue' source(.)-ing
@@ -775,14 +784,14 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         # syntax highlighting for new packages
         search2 <- search()[!search() %in% search1]
         if (length(search2)>0) {
-            for(i in 1:length(search2)) {
+            for (i in seq_along(search2)) {
                 packagename <- strsplit(search2[i],":")[[1]][2]
                 funs <- objects(search2[i])
                 if (!inherits(funs,"try-error")) {
                     tmpx <- sort(rep(1:ceiling(length(funs)/30),30))
-                    tmpsplit <- split(funs,tmpx[1:length(funs)])
+                    tmpsplit <- split(funs,tmpx[seq_along(funs)])
                     uniqtmp <- sapply(tmpsplit, FUN=function(x) { paste(" [list",paste(x,collapse=" ")," ]") })
-                    for(j in 1:length(uniqtmp)) {
+                    for (j in seq_along(uniqtmp)) {
                         .Tcl(paste("ctext::addHighlightClass ",.Tk.ID(txt_edit),
                                     " basefunctions",j," ", hcolors$functions, uniqtmp[j], sep=""))
                     }
@@ -792,12 +801,14 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     }
     runLine <- function() {
         code <- tclvalue(tkget(txt_edit, "insert linestart", "insert lineend"))
-        if (!code=="")
+        if (!code=="") {
             runCode(code)
+        }
     }
     runSelection <- function() {
-        if (!tclvalue(tktag.ranges(txt_edit,"sel"))=="")
+        if (!tclvalue(tktag.ranges(txt_edit,"sel"))=="") {
             runCode(tclvalue(tkget(txt_edit,"sel.first","sel.last")))
+        }
     }
     runAll <- function() {
         runCode(tclvalue(tkget(txt_edit,"1.0","end")))
@@ -814,14 +825,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     }
     
     ## OUTPUT FUNCTIONS ##
-    if (catchOutput) {
-        saveOutput <- function(outfilename="") {
-            if (outfilename=="")
+    if (isTRUE(catchOutput)) {
+        saveOutput <- function(outfilename = "") {
+            if (outfilename == "") {
                 outfilename <- tclvalue(tkgetSaveFile(    initialdir=getwd(),
                                                         title="Save Output",
                                                         filetypes=filetypelist))
-            if (!length(outfilename) || outfilename=="")
+            }
+            if (!length(outfilename) || outfilename=="") {
                 invisible()
+            }
             chn <- tclopen(outfilename, "w")
             tclputs(chn, tclvalue(tkget(output,"0.0","end")))
             tclclose(chn)
@@ -839,8 +852,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         
     ## KNITR, etc. INTEGRATION ##
     knittxt <- function(genmode="knit", use='text', spinformat=NULL) {
-        if (catchOutput)
+        if (isTRUE(catchOutput)) {
             clearError()
+        }
         ksink1 <- ""
         ksink2 <- ""
         if ('ksink1' %in% showConnections()) {
@@ -856,17 +870,19 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         sink(knitsink1, type="output") # sink stdout
         sink(knitsink2, type="message") # sink stderr
         
-        if (use=='text') {
-            if (saveScript())
+        if (use == 'text') {
+            if (saveScript()) {
                 return(1)
+            }
             txtvalue <- tclvalue(tkget(txt_edit,"0.0","end"))
             inputvalue <- NULL
-        } else if (use=='current') {
-            if (saveScript())
+        } else if (use == 'current') {
+            if (saveScript()) {
                 return(1)
+            }
             txtvalue <- NULL
             inputvalue <- filename
-        } else if (use=='file') {
+        } else if (use == 'file') {
             fname <- tclvalue(tkgetOpenFile(title="Load Script",filetypes=filetypelist))
             if (!length(fname) || fname=="") {
                 riteMsg(output = output, error = err_out, 'No file selected', error=TRUE)
@@ -902,64 +918,72 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             if (inherits(sweave_out, "try-error")) {
                 riteMsg(output = output, error = err_out, "Could not convert Sweave to knitr!", error=TRUE)
                 return()
-            }
-            else if (!is.null(inputvalue))
+            } else if (!is.null(inputvalue)) {
                 knit_out <- try(knit(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
-            else if (!is.null(txtvalue))
+            } else if (!is.null(txtvalue))
                 knit_out <- try(knit(text=sweave_out))
-        } else if (genmode=="tangle") {
+            }
+        } else if (genmode == "tangle") {
             sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
             if (inherits(sweave_out, "try-error")) {
                 riteMsg(output = output, error = err_out, "Could not convert Sweave to knitr!", error=TRUE)
                 return()
-            }
-            else if (!is.null(inputvalue))
+            } else if (!is.null(inputvalue)) {
                 knit_out <- try(purl(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
-            else if (!is.null(txtvalue))
+            } else if (!is.null(txtvalue)) {
                 knit_out <- try(purl(text=sweave_out))
+            }
         } else if (genmode=="rmd2html") {
-            if (!is.null(inputvalue))
+            if (!is.null(inputvalue)) {
                 knit_out <- try(knit2html(input=inputvalue))
-            else if (!is.null(txtvalue))
+            } else if (!is.null(txtvalue)) {
                 knit_out <- try(knit2html(text=txtvalue))
+            }
         } else if (genmode=="md2html") {
             if (!is.null(inputvalue)) {
                 outfile <- substring(basename(inputvalue),1,regexpr("\\.[[:alnum:]]+$",basename(inputvalue))-1)
                 outfile <- paste(outfile,'html',sep='.')
                 knit_out <- try(markdown::markdownToHTML(file=inputvalue, output=outfile))
-            }else if (!is.null(txtvalue))
+            } else if (!is.null(txtvalue)) {
                 knit_out <- try(markdown::markdownToHTML(text=txtvalue))
+            }
         } else if (genmode=="md2html.fragment") {
             if (!is.null(inputvalue)) {
                 outfile <- substring(basename(inputvalue),1,regexpr("\\.[[:alnum:]]+$",basename(inputvalue))-1)
                 outfile <- paste(outfile,'html',sep='.')
                 knit_out <- try(markdown::markdownToHTML(file=inputvalue,output=outfile,fragment.only=TRUE))
-            }else if (!is.null(txtvalue))
+            } else if (!is.null(txtvalue)) {
                 knit_out <- try(markdown::markdownToHTML(text=txtvalue,fragment.only=TRUE))
+            }
         } else if (genmode=="stitch.rnw") {
-            if (!is.null(inputvalue))
+            if (!is.null(inputvalue)) {
                 knit_out <- try(stitch(script=inputvalue))
-            else if (!is.null(txtvalue))
+            } else if (!is.null(txtvalue)) {
                 knit_out <- try(stitch(text=txtvalue))
-            if (!inherits(knit_out,"try-error"))
+            }
+            if (!inherits(knit_out,"try-error")) {
                 knit_out_pdf <- paste(file_path_sans_ext(knit_out),"pdf",sep=".")
-            else
+            } else {
                 knit_out_pdf <- NULL
+            }
         } else if (genmode=="stitch.rhtml") {
-            if (!is.null(inputvalue))
+            if (!is.null(inputvalue)) {
                 knit_out <- try(stitch_rhtml(script=inputvalue))
-            else if (!is.null(txtvalue))
+            } else if (!is.null(txtvalue)) {
                 knit_out <- try(stitch_rhtml(text=txtvalue))
+            }
         } else if (genmode=="stitch.rmd") {
-            if (!is.null(inputvalue))
+            if (!is.null(inputvalue)) {
                 knit_out <- try(stitch_rmd(script=inputvalue))
-            else if (!is.null(txtvalue))
+            } else if (!is.null(txtvalue)) {
                 knit_out <- try(stitch_rmd(text=txtvalue))
+            }
         } else if (genmode=="spin") {
-            if (!is.null(inputvalue))
+            if (!is.null(inputvalue)) {
                 knit_out <- try(spin(hair=inputvalue, text=NULL, knit=FALSE, format=spinformat))
-            else if (!is.null(txtvalue))
+            } else if (!is.null(txtvalue)) {
                 knit_out <- try(spin(hair=NULL, text=txtvalue, knit=FALSE, format=spinformat))
+            }
         } else if (genmode=="spinknit") {
             if (!is.null(inputvalue)) {
                 knit_out <- try(spin(hair=inputvalue, text=NULL, knit=TRUE, format=spinformat))
@@ -980,7 +1004,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             thiscon <- rownames(showConnections())[which('ksink2'==showConnections()[,1])]
             close(getConnection(thiscon))
         }
-        if (catchOutput) {
+        if (isTRUE(catchOutput)) {
             tkselect(nb2, 1)
             riteMsg(output = output, error = err_out, paste(ksink1,collapse="\n"), error=TRUE)
             riteMsg(output = output, error = err_out, paste(ksink2,collapse="\n"), error=TRUE)
@@ -989,14 +1013,15 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             riteMsg(output = output, error = err_out, paste(ksink1,collapse="\n"))
             riteMsg(output = output, error = err_out, paste(ksink2,collapse="\n"))
         }
-        if (catchOutput)
+        if (isTRUE(catchOutput)) {
             sink(errsink, type="message")
+        }
         if (inherits(knit_out,"try-error")) {
             riteMsg(output = output, error = err_out, "Report generation failed!", error=TRUE)
             return(knit_out)
         } else {
             riteMsg(output = output, error = err_out, 'Report finished!\n', error=TRUE)
-            if (catchOutput) {
+            if (isTRUE(catchOutput)) {
                 clearOutput()
             } 
             if (use %in% c('current','file') || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd","sweave")) {
@@ -1007,7 +1032,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 } else if (use=='current' | (use=='file' & as.numeric(tclvalue(openreports))))
                     file.show(knit_out, title='Output')
             } else {
-                if (catchOutput) {
+                if (isTRUE(catchOutput)) {
                     riteMsg(output = output, error = err_out, knit_out)
                 } else {
                     tmp <- tempfile()
@@ -1032,20 +1057,22 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         }
     }
     pdffromfile <- function(filetopdf=NULL, texttopdf=FALSE, textype="texi2pdf", bibtex=TRUE) {
-        if (texttopdf) {
-            if (!scriptSaved)
+        if (isTRUE(texttopdf)) {
+            if (!isTRUE(scriptSaved)) {
                 saveScript()
-            if (filename=="")
+            }
+            if (filename=="") {
                 invisible()
-            else
+            } else {
                 filetopdf <- filename
-        }
-        else if (is.null(filetopdf))
+            }
+        } else if (is.null(filetopdf)) {
             filetopdf <- tclvalue(tkgetOpenFile(title="Open File",
                                                 filetypes=filetypelist))
+        }
         if (!filetopdf=="") {
-            if (dirname(filetopdf) %in% c(".",getwd())) {}
-            else {
+            if (dirname(filetopdf) %in% c(".",getwd())) {
+            } else {
                 file.copy(filetopdf,paste(getwd(),basename(filetopdf),sep="/"), overwrite=TRUE)
                 filetopdf <- paste(getwd(),basename(filetopdf),sep="/")
             }
@@ -1057,10 +1084,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 tkfocus(txt_edit)
             }
             if (textype %in% c('latex','xelatex')) {
-                if (textype=="latex")
+                if (textype=="latex") {
                     tex1 <- system(paste("pdflatex",filetopdf), intern=TRUE)
-                else
+                } else {
                     tex1 <- system(paste("xelatex",filetopdf), intern=TRUE)
+                }
                 riteMsg(output = output, error = err_out, paste(tex1,collapse="\n"), error=TRUE)
                 if (is.null(attributes(tex1)$status) && bibtex==TRUE) {
                     tex2 <- system(paste("bibtex",filetopdf), intern=TRUE)
@@ -1074,32 +1102,33 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                         }
                     }
                 }
-            }
-            else if (textype=="texi2pdf")
+            } else if (textype=="texi2pdf") {
                 tex1 <- texi2pdf(filetopdf, clean=TRUE)
+            }
             if (fstem %in% list.files()) {
                 if (as.numeric(tclvalue(openreports))) {
                     riteMsg(output = output, error = err_out, paste("\nOpening pdf ",fstem,"...\n",sep=''), error=TRUE)
                     system2(getOption("pdfviewer"),fstem)
                 }
-            }
-            else
+            } else {
                 riteMsg(output = output, error = err_out, "PDF not created!\n", error=TRUE)
+            }
         }
     }
     
     ## HELP MENU FUNCTIONS ##
     addHighlighting <- function() {
         addHighlight <- function() {
-            if (!tclvalue(objectval)=="")
+            if (!tclvalue(objectval) == "") {
                 hl('class', 'functions', hcolors$functions,
                     paste(" [list ",tclvalue(objectval)," ]",sep=""))
+            }
             if (!tclvalue(envirval)=="" && paste("package:",tclvalue(envirval),sep="") %in% search()) {
                 packs <- c( tclvalue(envirval),
                             gsub(" ","",strsplit(packageDescription(tclvalue(envirval),
                                                                     fields="Depends"),",")[[1]]))
                 packs <- na.omit(packs)
-                for(i in 1:length(packs)) {
+                for (i in seq_along(packs)) {
                     funs <- try(paste(unique(gsub("<-","",
                                       objects(paste("package:",tclvalue(envirval),sep="")))),collapse=" "),
                                 silent=TRUE)
@@ -1245,7 +1274,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 setwd(tkdir)
             }, underline = 7)
         tkadd(menuFile, "separator")
-        if (!catchOutput) {
+        if (!isTRUE(catchOutput)) {
             tkadd(menuFile, "command", label = "Open another rite", command = function() { 
                 do.call("rite", as.list(match.call(expand.dots=FALSE))[-1]) 
             }, underline = 0)
@@ -1268,13 +1297,12 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         if (!Sys.info()['sysname'] == "Darwin")
             tkadd(menuRun, 'checkbutton', label='Add commands to history?', onvalue=1L, variable=addtohistory)
         tkadd(menuRun, "separator")
-        if (catchOutput) {
+        if (isTRUE(catchOutput)) {
             tkadd(menuRun, "command", label="List all objects", command=function()
                 tkinsert(output,"end",capture.output(ls(envir=evalenv))))
             tkadd(menuRun, "command", label="List search path", command=function()
                 tkinsert(output,"end",capture.output(search())))
-        }
-        else {
+        } else {
             tkadd(menuRun, "command", label="List all objects", command=function()
                 print(ls(envir=evalenv)))
             tkadd(menuRun, "command", label="List search path", command=function()
@@ -1295,7 +1323,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         #tkadd(menuRun, "command", label = "Interrupt", command = function() {pskill(Sys.getpid(),SIGINT) }, underline = 0)
         #tkadd(menuRun, "command", label = "Interrupt", command = function() tkdestroy(txt_edit), underline = 0)
         tkadd(menuTop, "cascade", label = "Run", menu = menuRun, underline = 0)
-    if (catchOutput) {
+    if (isTRUE(catchOutput)) {
         menuOutput <- tkmenu(menuTop, tearoff = FALSE)
             copyOutput <- function() {
                 tkclipboard.clear()
@@ -1534,15 +1562,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     # pack left notebook
     tkadd(pw, nb1, weight=1) # left pane
     
-    if (catchOutput) {
+    if (isTRUE(catchOutput)) {
         nb2 <- tk2notebook(pw, tabs = c("Output", "Message"))#, "Plot")) # right pane
             # output
             out_tab1 <- tk2notetab(nb2, "Output")
             out_scr <- tkscrollbar(out_tab1, repeatinterval=25, command=function(...)tkyview(output,...))
             output <- tktext(out_tab1, height=25, bg="white", font="courier", yscrollcommand=function(...)tkset(out_scr,...),
                                         font=tkfont.create(family=fontFamily,size=fontSize))
-            outModified <- function()
+            outModified <- function() {
                 outputSaved <<- FALSE
+            }
             tkbind(output, "<<Modified>>", outModified)
             tkgrid(output, column=1, row=1, sticky="nsew")
             tkgrid(out_scr, column=2, row=1, sticky="nsew")
@@ -1587,7 +1616,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         iwordstart <- tclvalue(tkindex(txt_edit,"insert-1char wordstart"))
         iwordend <- tclvalue(tkindex(txt_edit,"insert-1char wordend"))
         sel <- tclvalue(tktag.ranges(txt_edit,"sel"))
-        if (!sel=="") {
+        if (!sel == "") {
             command <- tclvalue(tkget(txt_edit,"sel.first","sel.last"))
         } else {
             # periods
@@ -1596,19 +1625,25 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 iwordend <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordend')))
             }
             # preceding periods
-            if (tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.')
+            if (tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.') {
                 iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
-            if (tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.')
+            }
+            if (tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.') {
                 iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
-            if (tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.')
+            }
+            if (tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.') {
                 iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
+            }
             # following periods
-            if (tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.')
+            if (tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.') {
                 iwordend <- tclvalue(tkindex(txt_edit, paste(iwordend,'+2char wordend')))
-            if (tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.')
+            }
+            if (tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.') {
                 iwordend <- tclvalue(tkindex(txt_edit, paste(iwordend,'+2char wordend')))
-            if (tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.')
+            }
+            if (tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.') {
                 iwordend <- tclvalue(tkindex(txt_edit, paste(iwordend,'+2char wordend')))
+            }
             command <- tclvalue(tkget(txt_edit, iwordstart, iwordend))
         }
         if (command %in% c("","\n","\t"," ",")","]","}","=",".",",","%")) {
@@ -1621,7 +1656,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             command <- gsub(" ","",command)
         }
         helpresults <- help(command)
-        if (length(helpresults)>0) {
+        if (length(helpresults) > 0) {
             print(helpresults)
         } else {
             print(help.search(command))
@@ -1651,19 +1686,25 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 iwordend <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordend')))
             }
             # preceding periods
-            if (tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.')
+            if (tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.') {
                 iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
-            if (tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.')
+            }
+            if (tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.') {
                 iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
-            if (tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.')
+            }
+            if (tclvalue(tkget(txt_edit, paste(iwordstart,'-1char'), iwordstart))=='.') {
                 iwordstart <- tclvalue(tkindex(txt_edit, paste(iwordstart,'-2char wordstart')))
+            }
             # following periods
-            if (tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.')
+            if (tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.') {
                 iwordend <- tclvalue(tkindex(txt_edit, paste(iwordend,'+2char wordend')))
-            if (tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.')
+            }
+            if (tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.') {
                 iwordend <- tclvalue(tkindex(txt_edit, paste(iwordend,'+2char wordend')))
-            if (tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.')
+            }
+            if (tclvalue(tkget(txt_edit, iwordend, paste(iwordend,'+1char')))=='.') {
                 iwordend <- tclvalue(tkindex(txt_edit, paste(iwordend,'+2char wordend')))
+            }
             command <- tclvalue(tkget(txt_edit, iwordstart, iwordend))
         }
         fnlist <- vector(mode="character")
@@ -1698,47 +1739,50 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         } else {
             insertpos <- strsplit(tclvalue(tkindex(txt_edit,"insert")),".", fixed=TRUE)[[1]]
             fnlist <- apropos(paste("^", command,sep=""))
-            if (length(fnlist<15))
+            if (length(fnlist<15)) {
                 fnlist <- unique(c(fnlist, apropos(command)))
+            }
             insertCommand <- function(x) {
                 tkdelete(txt_edit, iwordstart, iwordend)
                 tkinsert(txt_edit, "insert", fnlist[x])
             }
         }
-        if (length(fnlist)>0) {
+        if (length(fnlist) > 0) {
             fnContextMenu <- tkmenu(txt_edit, tearoff = FALSE)
             # conditionally add menu items
             ## adding them programmatically failed to work (always added last command)
-                if (length(fnlist)>0)
+                if (length(fnlist)>0) {
                     tkadd(fnContextMenu, "command", label = fnlist[1], command = function() insertCommand(1))
-                if (length(fnlist)>1)
+                if (length(fnlist)>1) {
                     tkadd(fnContextMenu, "command", label = fnlist[2], command = function() insertCommand(2))
-                if (length(fnlist)>2)
+                if (length(fnlist)>2) {
                     tkadd(fnContextMenu, "command", label = fnlist[3], command = function() insertCommand(3))
-                if (length(fnlist)>3)
+                if (length(fnlist)>3) {
                     tkadd(fnContextMenu, "command", label = fnlist[4], command = function() insertCommand(4))
-                if (length(fnlist)>4)
+                if (length(fnlist)>4) {
                     tkadd(fnContextMenu, "command", label = fnlist[5], command = function() insertCommand(5))
-                if (length(fnlist)>5)
+                if (length(fnlist)>5) {
                     tkadd(fnContextMenu, "command", label = fnlist[6], command = function() insertCommand(6))
-                if (length(fnlist)>6)
+                if (length(fnlist)>6) {
                     tkadd(fnContextMenu, "command", label = fnlist[7], command = function() insertCommand(7))
-                if (length(fnlist)>7)
+                if (length(fnlist)>7) {
                     tkadd(fnContextMenu, "command", label = fnlist[8], command = function() insertCommand(8))
-                if (length(fnlist)>8)
+                if (length(fnlist)>8) {
                     tkadd(fnContextMenu, "command", label = fnlist[9], command = function() insertCommand(9))
-                if (length(fnlist)>9)
+                if (length(fnlist)>9) {
                     tkadd(fnContextMenu, "command", label = fnlist[10], command = function() insertCommand(10))
-                if (length(fnlist)>10)
+                if (length(fnlist)>10) {
                     tkadd(fnContextMenu, "command", label = fnlist[11], command = function() insertCommand(11))
-                if (length(fnlist)>11)
+                if (length(fnlist)>11) {
                     tkadd(fnContextMenu, "command", label = fnlist[12], command = function() insertCommand(12))
-                if (length(fnlist)>12)
+                if (length(fnlist)>12) {
                     tkadd(fnContextMenu, "command", label = fnlist[13], command = function() insertCommand(13))
-                if (length(fnlist)>13)
+                }if (length(fnlist)>13) {
                     tkadd(fnContextMenu, "command", label = fnlist[14], command = function() insertCommand(14))
-                if (length(fnlist)>14)
+                }
+                if (length(fnlist)>14) {
                     tkadd(fnContextMenu, "command", label = fnlist[15], command = function() insertCommand(15))
+                }
             # root x,y
             rootx <- as.integer(tkwinfo("rootx", txt_edit))
             rooty <- as.integer(tkwinfo("rooty", txt_edit))
