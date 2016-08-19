@@ -1,93 +1,93 @@
-highlight <- function(txtedit, highlight, hcolors) {
-    ## SYNTAX HIGHLIGHTING RULES ##
-    hl <- function(type, name = NULL, color, pattern){
-        if(is.null(name))
-            name <- paste('hl',paste(sample(letters,6,TRUE),collapse=''), sep='')
-        if(type=='regexp') {
-            .Tcl(paste('ctext::addHighlightClassForRegexp ',.Tk.ID(txtedit), name, color, pattern))
-            return()
-        } else if(type=='class'){
-            .Tcl(paste('ctext::addHighlightClass ',.Tk.ID(txtedit), name, color, pattern))
-            return()
-        } else if(type=='chars') {
-            .Tcl(paste('ctext::addHighlightClassForSpecialChars ',.Tk.ID(txtedit), name, color, pattern))
-            return()
-        } else
-            return()
+hl <- function(where, type, name = NULL, color, pattern){
+    if (is.null(name)) {
+        name <- paste('hl',paste(sample(letters,6,TRUE),collapse=''), sep='')
     }
+    if (type == 'regexp') {
+        .Tcl(paste('ctext::addHighlightClassForRegexp ',.Tk.ID(where), name, color, pattern))
+    } else if (type == 'class'){
+        .Tcl(paste('ctext::addHighlightClass ',.Tk.ID(where), name, color, pattern))
+    } else if (type == 'chars') {
+        .Tcl(paste('ctext::addHighlightClassForSpecialChars ',.Tk.ID(where), name, color, pattern))
+    }
+    retrun()
+}
+    
+
+highlight <- function(where, highlight, hcolors) {
+    ## SYNTAX HIGHLIGHTING RULES ##
     
     # latex
-    if("latex" %in% highlight){
+    if ("latex" %in% highlight) {
         # a macro without any brackets
-        hl('regexp', 'latex1', hcolors$latexmacros,'{\\\\[[:alnum:]|[:punct:]]+}')
+        hl(where = where, 'regexp', 'latex1', hcolors$latexmacros,'{\\\\[[:alnum:]|[:punct:]]+}')
         # a macro with following brackets (and optionally [] brackets)
-        hl('regexp', 'latex3', hcolors$latexmacros,
+        hl(where = where, 'regexp', 'latex3', hcolors$latexmacros,
             '{\\\\[[:alnum:]|[:punct:]]+\\[[[:alnum:]*|[:punct:]*|[:space:]*|=*]*\\]\\{[[:alnum:]*|[:punct:]*|[:space:]*]*\\}}')
         # a macro with preceding brackets
-        hl('regexp', 'latex4', hcolors$latexmacros,
+        hl(where = where, 'regexp', 'latex4', hcolors$latexmacros,
             '{\\{\\\\[[:alnum:]|[:punct:]]*[[:space:]]*[[:alnum:]|[:punct:]|[:space:]]*\\}}')
         # comments
-        hl('regexp', 'latexcomments', hcolors$latexcomments,
+        hl(where = where, 'regexp', 'latexcomments', hcolors$latexcomments,
             "{(^%[^%[:alnum:]?[:punct:]?].+|[^%[:alnum:]?[:punct:]?]%.+)}")
         ## AMEND ABOVE TO DEAL WITH %*% %in% type constructions
-        hl('regexp', 'rnwchunk1a', hcolors$rnwchunk,'{<{2}[[:alnum:]?|[:punct:]?|[:space:]?|=?]*>{2}}')
-        hl('regexp', 'rnwchunk1b', hcolors$rnwchunk,'@')
-        hl('regexp', 'rnwchunk1c', hcolors$rnwchunk,'\\\\Sexpr\\{.?\\}')
-        hl('regexp', 'rtexchunk1a', hcolors$rtexchunks,'{%% begin.rcode.?}')
-        hl('regexp', 'rtexchunk1b', hcolors$rtexchunks,'{%% end.rcode.?}')
+        hl(where = where, 'regexp', 'rnwchunk1a', hcolors$rnwchunk,'{<{2}[[:alnum:]?|[:punct:]?|[:space:]?|=?]*>{2}}')
+        hl(where = where, 'regexp', 'rnwchunk1b', hcolors$rnwchunk,'@')
+        hl(where = where, 'regexp', 'rnwchunk1c', hcolors$rnwchunk,'\\\\Sexpr\\{.?\\}')
+        hl(where = where, 'regexp', 'rtexchunk1a', hcolors$rtexchunks,'{%% begin.rcode.?}')
+        hl(where = where, 'regexp', 'rtexchunk1b', hcolors$rtexchunks,'{%% end.rcode.?}')
         
         # equations
-        #hl('regexp', 'latexeq', hcolors$rtexchunks,'\\${.+}\\$')
+        #hl(where = where, 'regexp', 'latexeq', hcolors$rtexchunks,'\\${.+}\\$')
     }
     # markdown
-    if("markdown" %in% highlight){
+    if ("markdown" %in% highlight) {
         # something for the various kinds of markdown syntax
-        hl('regexp', 'rmdheader1', hcolors$rmd,'=+')
-        hl('regexp', 'rmdheader2', hcolors$rmd,'=-')
-        hl('regexp', 'rmdheader2', hcolors$rmd,'{#{1,6} *.+ *#{0,6}$}')
-        hl('regexp', 'rmdlist1', hcolors$rmd,'{^ *[-] .+$}')
-        hl('regexp', 'rmdlist2', hcolors$rmd,'{^ *[+] .+$}')
-        hl('regexp', 'rmdlist3', hcolors$rmd,'{^ *[*] .+$}')
-        hl('regexp', 'rmdlist4', hcolors$rmd,'{[0-9]+[.] .+$}')
-        hl('regexp', 'rmdquote', hcolors$rmd,'{^ *[>].+$}')
-        hl('regexp', 'rmdlink', hcolors$rmd,'{\\[.+\\]\\(.+\\)}')
-        hl('regexp', 'rmdcode', hcolors$rmd,'{`[^r].+`}')
+        hl(where = where, 'regexp', 'rmdheader1', hcolors$rmd,'=+')
+        hl(where = where, 'regexp', 'rmdheader2', hcolors$rmd,'=-')
+        hl(where = where, 'regexp', 'rmdheader2', hcolors$rmd,'{#{1,6} *.+ *#{0,6}$}')
+        hl(where = where, 'regexp', 'rmdlist1', hcolors$rmd,'{^ *[-] .+$}')
+        hl(where = where, 'regexp', 'rmdlist2', hcolors$rmd,'{^ *[+] .+$}')
+        hl(where = where, 'regexp', 'rmdlist3', hcolors$rmd,'{^ *[*] .+$}')
+        hl(where = where, 'regexp', 'rmdlist4', hcolors$rmd,'{[0-9]+[.] .+$}')
+        hl(where = where, 'regexp', 'rmdquote', hcolors$rmd,'{^ *[>].+$}')
+        hl(where = where, 'regexp', 'rmdlink', hcolors$rmd,'{\\[.+\\]\\(.+\\)}')
+        hl(where = where, 'regexp', 'rmdcode', hcolors$rmd,'{`[^r].+`}')
         # code chunks of the form ```{} ... ```
-        hl('regexp', 'rmdchunk1a', hcolors$rmd,'`{3}\\{r.+\\}')
-        hl('regexp', 'rmdchunk1b', hcolors$rmd,'`{3}')
-        hl('regexp', 'rmdchunk1c', hcolors$rmd,'{`r .+`}')
+        hl(where = where, 'regexp', 'rmdchunk1a', hcolors$rmd,'`{3}\\{r.+\\}')
+        hl(where = where, 'regexp', 'rmdchunk1b', hcolors$rmd,'`{3}')
+        hl(where = where, 'regexp', 'rmdchunk1c', hcolors$rmd,'{`r .+`}')
     }
     # html
-    if("xml" %in% highlight){
+    if ("xml" %in% highlight) {
         # xml/html tags <...>, </...>, and <.../>
-        hl('regexp', 'xml1', hcolors$xml,
+        hl(where = where, 'regexp', 'xml1', hcolors$xml,
             '{</?[[:alnum:]]*(\\s+[[:alnum:]]+=(\\\'|")?\\w*(\\\'|")?)*\\s*/?>}')
         # xml/html comments
-        hl('regexp', 'xml2', hcolors$xmlcomments,
+        hl(where = where, 'regexp', 'xml2', hcolors$xmlcomments,
             '{<!{1}-{2}.*(\\s+[[:alnum:]]+=(\\\'|")?\\w*(\\\'|")?)*\\s*-{2}>}')
     }
     # roxygen
-    if("roxygen" %in% highlight){
-        hl('regexp', 'comments', hcolors$rcomments,'{#[^\n\r]*}')
-        hl('regexp', 'roxygen1', hcolors$roxygentext,"{#'[^\n\r]*}")
-        hl('regexp', 'roxygen2a', hcolors$roxygenchunks,"{#[+|-][^\n\r]*}")
-        hl('regexp', 'roxygen2b', hcolors$roxygenchunks,"{# (@knitr)[^\n\r]*}")
+    if ("roxygen" %in% highlight) {
+        hl(where = where, 'regexp', 'comments', hcolors$rcomments,'{#[^\n\r]*}')
+        hl(where = where, 'regexp', 'roxygen1', hcolors$roxygentext,"{#'[^\n\r]*}")
+        hl(where = where, 'regexp', 'roxygen2a', hcolors$roxygenchunks,"{#[+|-][^\n\r]*}")
+        hl(where = where, 'regexp', 'roxygen2b', hcolors$roxygenchunks,"{# (@knitr)[^\n\r]*}")
     }
     # brew
-    if("brew" %in% highlight){
-        hl('regexp', 'brew1a', hcolors$brewchunks,'<%.+%>')
-        hl('regexp', 'brew1b', hcolors$brewchunks,'<%=.+%>')
-        hl('regexp', 'brew2', hcolors$brewcomments,'<%#.+%>')
-        hl('regexp', 'brew3', hcolors$brewtemplate,'<%%.+%%>')
+    if ("brew" %in% highlight) {
+        hl(where = where, 'regexp', 'brew1a', hcolors$brewchunks,'<%.+%>')
+        hl(where = where, 'regexp', 'brew1b', hcolors$brewchunks,'<%=.+%>')
+        hl(where = where, 'regexp', 'brew2', hcolors$brewcomments,'<%#.+%>')
+        hl(where = where, 'regexp', 'brew3', hcolors$brewtemplate,'<%%.+%%>')
     }
     # reST
-    if("rest" %in% highlight){
-        hl('regexp', 'rest1a', hcolors$restchunks,'{[.]{2} \\{r.+\\}}')
-        hl('regexp', 'rest1b', hcolors$restchunks,'{[.]{2} [.]{2}}')
-        hl('regexp', 'rest1c', hcolors$restchunks,'{:r:`.+`.}')
+    if ("rest" %in% highlight) {
+        hl(where = where, 'regexp', 'rest1a', hcolors$restchunks,'{[.]{2} \\{r.+\\}}')
+        hl(where = where, 'regexp', 'rest1b', hcolors$restchunks,'{[.]{2} [.]{2}}')
+        hl(where = where, 'regexp', 'rest1c', hcolors$restchunks,'{:r:`.+`.}')
     }
     # r
-    if("r" %in% highlight){
+    if ("r" %in% highlight) {
         # functions
         HLfuns <- lapply(search(),FUN=function(x) { paste(unique(gsub("<-","",objects(x))),collapse=" ") })
         uniq <- sort(unique(unlist(lapply(search(), FUN=function(x) {strsplit(gsub("<-","",objects(x)),".",fixed=TRUE)} ))))
@@ -95,20 +95,21 @@ highlight <- function(txtedit, highlight, hcolors) {
         tmpx <- sort(rep(1:ceiling(length(uniq)/30),30))
         tmpsplit <- split(uniq,tmpx[1:length(uniq)])
         uniqtmp <- sapply(tmpsplit, FUN=function(x) { paste(" [list",paste(x,collapse=" ")," ]") })
-        for(j in 1:length(uniqtmp)){
-            hl('class', paste("basefunctions",j,sep=''), hcolors$functions,uniqtmp[j])
+        for (j in 1:length(uniqtmp)) {
+            hl(where = where, 'class', paste("basefunctions",j,sep=''), hcolors$functions,uniqtmp[j])
         }
         rm(HLfuns,uniq,tmpx,tmpsplit,uniqtmp)
-        hl('class', 'specials', hcolors$operators, '[list TRUE FALSE NULL NA if else ]')
-        hl('chars', 'operators', hcolors$operators, '{@-+!~?:;*/^<>=&|$,.}')
-        hl('regexp', 'infix', hcolors$operators, '{%[[:alnum:][:punct:]]+%}')
-        hl('chars', 'brackets', hcolors$brackets, '{[]{}()}')
-        hl('regexp', 'digits', hcolors$digits, '{\\m[-+]?[0-9]*\\.?[0-9]+\\M}')
+        hl(where = where, 'class', 'specials', hcolors$operators, '[list TRUE FALSE NULL NA if else ]')
+        hl(where = where, 'chars', 'operators', hcolors$operators, '{@-+!~?:;*/^<>=&|$,.}')
+        hl(where = where, 'regexp', 'infix', hcolors$operators, '{%[[:alnum:][:punct:]]+%}')
+        hl(where = where, 'chars', 'brackets', hcolors$brackets, '{[]{}()}')
+        hl(where = where, 'regexp', 'digits', hcolors$digits, '{\\m[-+]?[0-9]*\\.?[0-9]+\\M}')
         # numbers before letters
-        #hl('regexp', 'digits2', hcolors$normal, '{\\d+[A-Za-z]+[:space:]?}')
-        hl('regexp', 'character1', hcolors$characters, '{"(?:[^\\"]|\\.)*"}')
-        hl('regexp', 'character2', hcolors$characters, " {'(?:[^\\']|\\.)*'}")
-        if(!"roxygen" %in% highlight)
-            hl('regexp', 'comments', hcolors$rcomments, '{#[^\n\r]*}')
+        #hl(where = where, 'regexp', 'digits2', hcolors$normal, '{\\d+[A-Za-z]+[:space:]?}')
+        hl(where = where, 'regexp', 'character1', hcolors$characters, '{"(?:[^\\"]|\\.)*"}')
+        hl(where = where, 'regexp', 'character2', hcolors$characters, " {'(?:[^\\']|\\.)*'}")
+        if (!"roxygen" %in% highlight) {
+            hl(where = where, 'regexp', 'comments', hcolors$rcomments, '{#[^\n\r]*}')
+        }
     }
 }

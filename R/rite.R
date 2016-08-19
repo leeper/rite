@@ -170,25 +170,40 @@
 #' @importFrom markdown rpubsUpload
 #' @importFrom formatR tidy_source tidy_eval
 #' @importFrom stats na.omit
-#' @importFrom grDevices bringToTop
 #' @importFrom utils Sweave apropos browseURL capture.output help help.search
 #' @importFrom utils loadhistory packageDescription savehistory update.packages
+#' @rawNamespace
+#' if (.Platform$OS.type %in% "windows") {
+#'     importFrom(grDevices, bringToTop)
+#' }
 #' @export
-rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
-                fontFamily="Courier", fontSize=10, orientation="horizontal",
-                fastinsert=FALSE, highlight="r", color=NULL,
-                autosave=TRUE, echo=TRUE, tab='    ', comment='#', 
-                url = NULL, ...) {
+rite <- 
+function(filename = NULL, 
+         catchOutput = FALSE, 
+         evalenv = .GlobalEnv,
+         fontFamily = "Courier", 
+         fontSize = 10, 
+         orientation = "horizontal",
+         fastinsert = FALSE, 
+         highlight = "r", 
+         color = NULL,
+         autosave = TRUE, 
+         echo = TRUE, 
+         tab = '    ', 
+         comment = '#', 
+         url = NULL, 
+         ...) {
     ## STARTUP OPTIONS ##
     filename <- filename # script filename (if loaded or saved)
     scriptSaved <- TRUE # a logical for whether current edit file is saved
-    searchopts <- list()
-        searchopts$searchterm <- ""
-        searchopts$replaceterm <- ""
-        searchopts$casevar <- 1
-        searchopts$regoptvar <- 0
-        searchopts$updownvar <- 1
-        searchopts$searchfromtop <- 0
+    searchopts <- list(
+        searchterm = "",
+        replaceterm = "",
+        casevar = 1,
+        regoptvar = 0,
+        updownvar = 1,
+        searchfromtop = 0
+    )
     ritetmpfile <- tempfile(pattern="rite",fileext=".r")
     riteenv$wmtitle <- packagetitle <- "rite"
     if (isTRUE(echo)) {
@@ -197,8 +212,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         echorun <- tclVar(0)
     }
     echoprompt <- tclVar(1)
-    if (!Sys.info()['sysname'] == "Darwin")
+    if (!Sys.info()['sysname'] %in% "Darwin") {
         addtohistory <- tclVar(1)
+    }
     everWarn <- tclVar(1)
     # optionally setup evaluation environment
     if (is.null(evalenv)) {
@@ -263,8 +279,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         errsink <- textConnection("esink", "w") # create connection for stderr
         sink(errsink, type="message") # sink stderr
         ritecat <- textConnection("riteoutcon","w")
-        cat <- function(..., sep=" ", catchOutput=catchOutput)
+        cat <- function(..., sep=" ", catchOutput=catchOutput) {
             writeLines(text=paste(as.character(unlist(list(...))), collapse=sep), sep="\n", con=ritecat)
+        }
     }
 
     ## EXIT PROCEDURE ##
@@ -298,7 +315,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 return()
             }
         }
-        if (catchOutput) {
+        if (isTRUE(catchOutput)) {
             if (!sink.number() == 0) {
                 sink(type="output")
             }
@@ -328,7 +345,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             close(getConnection(thiscon))
         }
         if (.Platform$OS.type %in% "windows") {
-            bringToTop(-1)
+            grDevices::bringToTop(-1)
         }
         tkdestroy(riteenv$editor)
         unlink(ritetmpfile)
@@ -566,7 +583,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         gistouturl <- paste("https://gist.github.com/",gistid,sep="")
         results <- paste("Script saved as Gist ",gistid," at: ",gistouturl,sep="")
         riteMsg(output = output, errorout = err_out, results, error=TRUE)
-        if (catchOutput) {
+        if (isTRUE(catchOutput)) {
             tkselect(nb2, 1)
             tkfocus(txt_edit)
         }
@@ -708,17 +725,19 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             error = function(errmsg) {
                 errmsg <- strsplit(as.character(errmsg),": ")[[1]]
                 errmsg <- paste(errmsg[-1],collapse=":")
-                if (catchOutput)
+                if (isTRUE(catchOutput)) {
                     writeError(errmsg,"Error")
+                }
             },
             warning = function(errmsg) {
                 errmsg <- strsplit(as.character(errmsg),": ")[[1]]
                 errmsg <- paste(errmsg[-1],collapse=":")
-                if (catchOutput)
+                if (isTRUE(catchOutput)) {
                     writeError(errmsg,"Warning")
+                }
                 a <- as.logical(as.numeric(tclvalue(displayWarningDialog)))
                 b <- as.logical(as.numeric(tclvalue(everWarn)))
-                if (a & b) {
+                if (a && b) {
                     warnmess <- paste("Warning:", errmsg,
                                   "Do you want to continue evaluation?",
                                   "Choose \"Cancel\" to continue and suppress further warnings.",
@@ -744,7 +763,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 }
             },
             interrupt = function() {
-                if (catchOutput) {
+                if (isTRUE(catchOutput)) {
                     writeError("", "Interruption")
                 } else {
                     riteMsg(output = output, errorout = err_out, "Evaluation interrupted!", error=TRUE)
@@ -763,7 +782,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             loadhistory(tmphistory)
             unlink(tmphistory)
         }
-        if (catchOutput) {
+        if (isTRUE(catchOutput)) {
             # output to `output`
             if (length(osink)>length2) {
                 tryCatch(tkinsert(output,"end",paste(osink[(length2+1):length(osink)],"\n",collapse="")),
@@ -1025,7 +1044,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 clearOutput()
             } 
             if (use %in% c('current','file') || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd","sweave")) {
-                if (catchOutput) {
+                if (isTRUE(catchOutput)) {
                     chn <- tclopen(knit_out, "r")
                     riteMsg(output = output, errorout = err_out, tclvalue(tclread(chn)))
                     tclclose(chn)
@@ -1049,7 +1068,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     browseURL(knit_out_pdf)
                 }
             }
-            if (catchOutput) {
+            if (isTRUE(catchOutput)) {
                 tkselect(nb2, 0)
                 tkfocus(txt_edit)
             }
@@ -1061,7 +1080,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             if (!isTRUE(scriptSaved)) {
                 saveScript()
             }
-            if (filename=="") {
+            if (filename == "") {
                 invisible()
             } else {
                 filetopdf <- filename
@@ -1070,7 +1089,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             filetopdf <- tclvalue(tkgetOpenFile(title="Open File",
                                                 filetypes=filetypelist))
         }
-        if (!filetopdf=="") {
+        if (!filetopdf == "") {
             if (dirname(filetopdf) %in% c(".",getwd())) {
             } else {
                 file.copy(filetopdf,paste(getwd(),basename(filetopdf),sep="/"), overwrite=TRUE)
@@ -1078,7 +1097,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             }
             fstem <- substring(basename(filetopdf),1,regexpr("\\.[[:alnum:]]+$",basename(filetopdf))-1)
             fstem <- paste(fstem,".pdf",sep="")
-            if (catchOutput) {
+            if (isTRUE(catchOutput)) {
                 tkmark.set(err_out, "insert", "end")
                 tkselect(nb2, 1)
                 tkfocus(txt_edit)
@@ -1120,7 +1139,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     addHighlighting <- function() {
         addHighlight <- function() {
             if (!tclvalue(objectval) == "") {
-                hl('class', 'functions', hcolors$functions,
+                hl(where = txtedit, 'class', 'functions', hcolors$functions,
                     paste(" [list ",tclvalue(objectval)," ]",sep=""))
             }
             if (!tclvalue(envirval)=="" && paste("package:",tclvalue(envirval),sep="") %in% search()) {
@@ -1133,7 +1152,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                                       objects(paste("package:",tclvalue(envirval),sep="")))),collapse=" "),
                                 silent=TRUE)
                     if (!inherits(funs,"try-error")) {
-                        hl('class', 'functions', hcolors$functions,
+                        hl(where = txtedit, 'class', 'functions', hcolors$functions,
                             paste(" [list ",funs," ]",sep=""))
                     }
                 }
@@ -2036,7 +2055,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
     tkbind(txt_edit, "<Control-o>", expression(loadScript(fname=NULL), break))
     tkbind(txt_edit, "<Control-O>", expression(loadScript(fname=NULL), break))
     
-    if (catchOutput) {
+    if (isTRUE(catchOutput)) {
         tkbind(txt_edit, "<Control-l>", clearOutput)
         tkbind(output, "<Control-l>", clearOutput)
         tkbind(txt_edit, "<Control-L>", clearOutput)
@@ -2284,6 +2303,8 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
 riteout <- function(catchOutput = TRUE, ...) {
     rite(catchOutput = catchOutput, ...)
 }
+
+riteenv <- new.env()
 
 if (getRversion() >= "2.15.1") {
     utils::globalVariables(c("osink", "riteoutcon", "addHighlighting"))
