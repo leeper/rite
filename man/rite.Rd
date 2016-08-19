@@ -10,7 +10,7 @@ rite(filename = NULL, catchOutput = FALSE, evalenv = .GlobalEnv,
   fastinsert = FALSE, highlight = "r", color = NULL, autosave = TRUE,
   echo = TRUE, tab = "    ", comment = "#", url = NULL, ...)
 
-riteout(...)
+riteout(catchOutput = TRUE, ...)
 }
 \arguments{
 \item{filename}{Optionally, a character string specifying a file name in the working directory (or file path) to open in rite.}

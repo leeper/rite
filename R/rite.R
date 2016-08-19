@@ -393,7 +393,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     tkinsert(txt_edit, "insert", paste("source(\"",filename,"\")\n",sep=""))
                 } else {
                     chn <- tclopen(fname, "r")
-                    inserttext(tclvalue(tclread(chn)), txt_edit, fastinsert)
+                    insertText(tclvalue(tclread(chn)), txt_edit, fastinsert)
                     tclclose(chn)
                 }
                 if (isTRUE(new)) {
@@ -409,9 +409,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             if (!is.null(fname)) {
                 content <- try(rawToChar(curl_fetch_memory(fname)[["content"]]))
                 if (!inherits(content,"try-error")) {
-                    inserttext(content, txt_edit, fastinsert)
+                    insertText(content, txt_edit, fastinsert)
                 } else {
-                    riteMsg(output = output, error = err_out, "Script not loaded!", error=TRUE)
+                    riteMsg(output = output, errorout = err_out, "Script not loaded!", error=TRUE)
                 }
             } else {
                 processEntry <- function() {
@@ -422,7 +422,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                             entry <- regmatches(entry, regexpr("[0-9a-f]+$", entry))
                         entry <- getRawGistURL(entry)
                         if (is.null(entry)) {
-                            riteMsg(output = output, error = err_out, "Gist not loaded!", error=TRUE)
+                            riteMsg(output = output, errorout = err_out, "Gist not loaded!", error=TRUE)
                             return()
                         } else if (length(entry)>1) {
                             gistDialog <- tktoplevel()
@@ -464,9 +464,9 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     } else {
                         content <- try(rawToChar(curl_fetch_memory(fname)[["content"]]))
                         if (!inherits(content,"try-error")) {
-                            inserttext(content, txt_edit, fastinsert)
+                            insertText(content, txt_edit, fastinsert)
                         } else {
-                            riteMsg(output = output, error = err_out, "Script not loaded!", error=TRUE)
+                            riteMsg(output = output, errorout = err_out, "Script not loaded!", error=TRUE)
                         }
                     }
                     scriptSaved <<- FALSE
@@ -565,7 +565,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         gistid <- strsplit(outsplit[grep("id",outsplit)],':"')[[1]][2]
         gistouturl <- paste("https://gist.github.com/",gistid,sep="")
         results <- paste("Script saved as Gist ",gistid," at: ",gistouturl,sep="")
-        riteMsg(output = output, error = err_out, results, error=TRUE)
+        riteMsg(output = output, errorout = err_out, results, error=TRUE)
         if (catchOutput) {
             tkselect(nb2, 1)
             tkfocus(txt_edit)
@@ -597,7 +597,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 u <- rpubsUpload(title = tclvalue(entry), htmlFile = h,
                                  id = NULL, method='internal')
                                  # temporarily 'internal' due to SSL error
-                riteMsg(output = output, error = err_out, paste("RPubs ID is:", u$id))
+                riteMsg(output = output, errorout = err_out, paste("RPubs ID is:", u$id))
                 browseURL(u$continueUrl) # browse to continueUrl
                 tkfocus(txt_edit)
                 return()
@@ -629,7 +629,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 u <- rpubsUpload(title = NULL, htmlFile = h,
                                  id = tclvalue(entry), method='internal')
                                  # temporarily 'internal' due to SSL error
-                riteMsg(output = output, error = err_out, paste("RPubs ID is:", u$id))
+                riteMsg(output = output, errorout = err_out, paste("RPubs ID is:", u$id))
                 browseURL(u$continueUrl) # browse to continueUrl
                 tkfocus(txt_edit)
                 return()
@@ -747,7 +747,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 if (catchOutput) {
                     writeError("", "Interruption")
                 } else {
-                    riteMsg(output = output, error = err_out, "Evaluation interrupted!", error=TRUE)
+                    riteMsg(output = output, errorout = err_out, "Evaluation interrupted!", error=TRUE)
                 }
             }
         ),
@@ -768,10 +768,10 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             if (length(osink)>length2) {
                 tryCatch(tkinsert(output,"end",paste(osink[(length2+1):length(osink)],"\n",collapse="")),
                     error = function(e) {
-                        riteMsg(output = output, error = err_out, paste("Printing error:",e,"!"), error=TRUE)
+                        riteMsg(output = output, errorout = err_out, paste("Printing error:",e,"!"), error=TRUE)
                     },
                     interrupt = function() {
-                        riteMsg(output = output, error = err_out, "Printing interrupt!", error=TRUE)
+                        riteMsg(output = output, errorout = err_out, "Printing interrupt!", error=TRUE)
                     }
                 )
                 tkselect(nb2, 0)
@@ -885,7 +885,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         } else if (use == 'file') {
             fname <- tclvalue(tkgetOpenFile(title="Load Script",filetypes=filetypelist))
             if (!length(fname) || fname=="") {
-                riteMsg(output = output, error = err_out, 'No file selected', error=TRUE)
+                riteMsg(output = output, errorout = err_out, 'No file selected', error=TRUE)
                 return()
             } else {
                 txtvalue <- NULL
@@ -893,13 +893,13 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             }
         }
         
-        riteMsg(output = output, error = err_out, "Generating report...", error=TRUE)
+        riteMsg(output = output, errorout = err_out, "Generating report...", error=TRUE)
         
-        if (genmode=="knit") {
+        if (genmode == "knit") {
             knit_out <- try(knit(input=inputvalue, text=txtvalue))
-        } else if (genmode=="purl") {
+        } else if (genmode == "purl") {
             knit_out <- try(purl(input=inputvalue, text=txtvalue))
-        } else if (genmode=="sweave") {
+        } else if (genmode == "sweave") {
             sweavesty <- file.path(R.home(),"share","texmf","tex","latex","Sweave.sty")
             cdir <- dirname(inputvalue)
             if ((!"Sweave.sty" %in% cdir) && file.exists(sweavesty)) {
@@ -910,36 +910,36 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             } else if (!saveScript()) {
                 knit_out <- Sweave(file=filename, quiet=TRUE)
             } else {
-                riteMsg(output = output, error = err_out, "script not saved.", error=TRUE)
+                riteMsg(output = output, errorout = err_out, "script not saved.", error=TRUE)
                 return()
             }
-        } else if (genmode=="knitsweave") {
+        } else if (genmode == "knitsweave") {
             sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
             if (inherits(sweave_out, "try-error")) {
-                riteMsg(output = output, error = err_out, "Could not convert Sweave to knitr!", error=TRUE)
+                riteMsg(output = output, errorout = err_out, "Could not convert Sweave to knitr!", error=TRUE)
                 return()
             } else if (!is.null(inputvalue)) {
                 knit_out <- try(knit(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
-            } else if (!is.null(txtvalue))
+            } else if (!is.null(txtvalue)) {
                 knit_out <- try(knit(text=sweave_out))
             }
         } else if (genmode == "tangle") {
             sweave_out <- try(Sweave2knitr(file=inputvalue, text=txtvalue))
             if (inherits(sweave_out, "try-error")) {
-                riteMsg(output = output, error = err_out, "Could not convert Sweave to knitr!", error=TRUE)
+                riteMsg(output = output, errorout = err_out, "Could not convert Sweave to knitr!", error=TRUE)
                 return()
             } else if (!is.null(inputvalue)) {
                 knit_out <- try(purl(input=gsub("[.]([^.]+)$", "-knitr.\\1", inputvalue), text=txtvalue))
             } else if (!is.null(txtvalue)) {
                 knit_out <- try(purl(text=sweave_out))
             }
-        } else if (genmode=="rmd2html") {
+        } else if (genmode == "rmd2html") {
             if (!is.null(inputvalue)) {
                 knit_out <- try(knit2html(input=inputvalue))
             } else if (!is.null(txtvalue)) {
                 knit_out <- try(knit2html(text=txtvalue))
             }
-        } else if (genmode=="md2html") {
+        } else if (genmode == "md2html") {
             if (!is.null(inputvalue)) {
                 outfile <- substring(basename(inputvalue),1,regexpr("\\.[[:alnum:]]+$",basename(inputvalue))-1)
                 outfile <- paste(outfile,'html',sep='.')
@@ -947,7 +947,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             } else if (!is.null(txtvalue)) {
                 knit_out <- try(markdown::markdownToHTML(text=txtvalue))
             }
-        } else if (genmode=="md2html.fragment") {
+        } else if (genmode == "md2html.fragment") {
             if (!is.null(inputvalue)) {
                 outfile <- substring(basename(inputvalue),1,regexpr("\\.[[:alnum:]]+$",basename(inputvalue))-1)
                 outfile <- paste(outfile,'html',sep='.')
@@ -955,7 +955,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             } else if (!is.null(txtvalue)) {
                 knit_out <- try(markdown::markdownToHTML(text=txtvalue,fragment.only=TRUE))
             }
-        } else if (genmode=="stitch.rnw") {
+        } else if (genmode == "stitch.rnw") {
             if (!is.null(inputvalue)) {
                 knit_out <- try(stitch(script=inputvalue))
             } else if (!is.null(txtvalue)) {
@@ -966,32 +966,32 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             } else {
                 knit_out_pdf <- NULL
             }
-        } else if (genmode=="stitch.rhtml") {
+        } else if (genmode == "stitch.rhtml") {
             if (!is.null(inputvalue)) {
                 knit_out <- try(stitch_rhtml(script=inputvalue))
             } else if (!is.null(txtvalue)) {
                 knit_out <- try(stitch_rhtml(text=txtvalue))
             }
-        } else if (genmode=="stitch.rmd") {
+        } else if (genmode == "stitch.rmd") {
             if (!is.null(inputvalue)) {
                 knit_out <- try(stitch_rmd(script=inputvalue))
             } else if (!is.null(txtvalue)) {
                 knit_out <- try(stitch_rmd(text=txtvalue))
             }
-        } else if (genmode=="spin") {
+        } else if (genmode == "spin") {
             if (!is.null(inputvalue)) {
                 knit_out <- try(spin(hair=inputvalue, text=NULL, knit=FALSE, format=spinformat))
             } else if (!is.null(txtvalue)) {
                 knit_out <- try(spin(hair=NULL, text=txtvalue, knit=FALSE, format=spinformat))
             }
-        } else if (genmode=="spinknit") {
+        } else if (genmode == "spinknit") {
             if (!is.null(inputvalue)) {
                 knit_out <- try(spin(hair=inputvalue, text=NULL, knit=TRUE, format=spinformat))
             } else if (!is.null(txtvalue)) {
                 knit_out <- try(spin(hair=NULL, text=txtvalue, knit=TRUE, format=spinformat))
             }
         } else {
-            riteMsg(output = output, error = err_out, "Unrecognized report type!", error=TRUE)
+            riteMsg(output = output, errorout = err_out, "Unrecognized report type!", error=TRUE)
             return(invisible(NULL))
         }
         sink(type="output")
@@ -1006,34 +1006,34 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
         }
         if (isTRUE(catchOutput)) {
             tkselect(nb2, 1)
-            riteMsg(output = output, error = err_out, paste(ksink1,collapse="\n"), error=TRUE)
-            riteMsg(output = output, error = err_out, paste(ksink2,collapse="\n"), error=TRUE)
+            riteMsg(output = output, errorout = err_out, paste(ksink1,collapse="\n"), error=TRUE)
+            riteMsg(output = output, errorout = err_out, paste(ksink2,collapse="\n"), error=TRUE)
             tkfocus(txt_edit)
         } else {
-            riteMsg(output = output, error = err_out, paste(ksink1,collapse="\n"))
-            riteMsg(output = output, error = err_out, paste(ksink2,collapse="\n"))
+            riteMsg(output = output, errorout = err_out, paste(ksink1,collapse="\n"))
+            riteMsg(output = output, errorout = err_out, paste(ksink2,collapse="\n"))
         }
         if (isTRUE(catchOutput)) {
             sink(errsink, type="message")
         }
         if (inherits(knit_out,"try-error")) {
-            riteMsg(output = output, error = err_out, "Report generation failed!", error=TRUE)
+            riteMsg(output = output, errorout = err_out, "Report generation failed!", error=TRUE)
             return(knit_out)
         } else {
-            riteMsg(output = output, error = err_out, 'Report finished!\n', error=TRUE)
+            riteMsg(output = output, errorout = err_out, 'Report finished!\n', error=TRUE)
             if (isTRUE(catchOutput)) {
                 clearOutput()
             } 
             if (use %in% c('current','file') || genmode %in% c("stitch.rnw","stitch.rhtml","stitch.rmd","sweave")) {
                 if (catchOutput) {
                     chn <- tclopen(knit_out, "r")
-                    riteMsg(output = output, error = err_out, tclvalue(tclread(chn)))
+                    riteMsg(output = output, errorout = err_out, tclvalue(tclread(chn)))
                     tclclose(chn)
                 } else if (use=='current' | (use=='file' & as.numeric(tclvalue(openreports))))
                     file.show(knit_out, title='Output')
             } else {
                 if (isTRUE(catchOutput)) {
-                    riteMsg(output = output, error = err_out, knit_out)
+                    riteMsg(output = output, errorout = err_out, knit_out)
                 } else {
                     tmp <- tempfile()
                     writeLines(knit_out, tmp)
@@ -1045,7 +1045,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                     browseURL(outfile)
                 } else if (genmode %in% c("rmd2html","stitch.rhtml","stitch.rmd")) {
                     browseURL(knit_out)
-                } else if (genmode=="stitch.rnw") {
+                } else if (genmode == "stitch.rnw") {
                     browseURL(knit_out_pdf)
                 }
             }
@@ -1089,16 +1089,16 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
                 } else {
                     tex1 <- system(paste("xelatex",filetopdf), intern=TRUE)
                 }
-                riteMsg(output = output, error = err_out, paste(tex1,collapse="\n"), error=TRUE)
+                riteMsg(output = output, errorout = err_out, paste(tex1,collapse="\n"), error=TRUE)
                 if (is.null(attributes(tex1)$status) && bibtex==TRUE) {
                     tex2 <- system(paste("bibtex",filetopdf), intern=TRUE)
-                    riteMsg(output = output, error = err_out, paste(tex2,collapse="\n"), error=TRUE)
+                    riteMsg(output = output, errorout = err_out, paste(tex2,collapse="\n"), error=TRUE)
                     if (is.null(attributes(tex2)$status)) {
                         tex3 <- system(paste("pdflatex",filetopdf), intern=TRUE)
-                        riteMsg(output = output, error = err_out, paste(tex3,collapse="\n"), error=TRUE)
+                        riteMsg(output = output, errorout = err_out, paste(tex3,collapse="\n"), error=TRUE)
                         if (is.null(attributes(tex3)$status)) {
                             tex4 <- system(paste("pdflatex",filetopdf), intern=TRUE)
-                            riteMsg(output = output, error = err_out, paste(tex4,collapse="\n"), error=TRUE)
+                            riteMsg(output = output, errorout = err_out, paste(tex4,collapse="\n"), error=TRUE)
                         }
                     }
                 }
@@ -1107,11 +1107,11 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             }
             if (fstem %in% list.files()) {
                 if (as.numeric(tclvalue(openreports))) {
-                    riteMsg(output = output, error = err_out, paste("\nOpening pdf ",fstem,"...\n",sep=''), error=TRUE)
+                    riteMsg(output = output, errorout = err_out, paste("\nOpening pdf ",fstem,"...\n",sep=''), error=TRUE)
                     system2(getOption("pdfviewer"),fstem)
                 }
             } else {
-                riteMsg(output = output, error = err_out, "PDF not created!\n", error=TRUE)
+                riteMsg(output = output, errorout = err_out, "PDF not created!\n", error=TRUE)
             }
         }
     }
@@ -2007,7 +2007,7 @@ rite <- function(filename=NULL, catchOutput=FALSE, evalenv=.GlobalEnv,
             invisible(FALSE)
         } else {
             if (isTRUE(verbose)) {
-                riteMsg(output = output, error = err_out, "No syntax errors found", error=TRUE)
+                riteMsg(output = output, errorout = err_out, "No syntax errors found", error=TRUE)
                 tkfocus(txt_edit)
             }
             invisible(TRUE)
