@@ -2,7 +2,11 @@ Package: rite
 Version: 0.3.7
 Date: 2016-08-18
 Title: The Right Editor to Write R
-Authors@R: person("Thomas J.", "Leeper", role = c("aut", "cre"), email = "thosjleeper@gmail.com")
+Authors@R: c(person("Thomas J.", "Leeper",
+                    role = c("aut", "cre"), 
+                    email = "thosjleeper@gmail.com",
+                    comment = c(ORCID = "0000-0003-4097-6326"))
+             )
 Imports:
     grDevices,
     tcltk,
